@@ -24,16 +24,16 @@ export const logoutAction = async () => {
     const data = await res.json();
 
     if (data.success) {
-      cookieStore.delete("accessToken");
-      cookieStore.delete("refreshToken");
-      cookieStore.delete("auth");
+      await cookieStore.delete("accessToken");
+      await cookieStore.delete("refreshToken");
+      await cookieStore.delete("auth");
     }
     return data;
   } catch (error) {
     console.error("Logout failed:", error);
-    cookieStore.delete("accessToken");
-    cookieStore.delete("refreshToken");
-    cookieStore.delete("auth");
+    await cookieStore.delete("accessToken");
+    await cookieStore.delete("refreshToken");
+    await cookieStore.delete("auth");
     return { success: true, message: "Logged out locally" };
   }
 };
@@ -57,7 +57,7 @@ export const loginAction = async (userData) => {
     const data = await res.json();
 
     if (data.success) {
-      cookieStore.set("accessToken", data.accessToken, {
+      await cookieStore.set("accessToken", data.accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
@@ -65,7 +65,7 @@ export const loginAction = async (userData) => {
         path: "/",
       });
 
-      cookieStore.set("refreshToken", data.refreshToken, {
+      await cookieStore.set("refreshToken", data.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
@@ -73,7 +73,7 @@ export const loginAction = async (userData) => {
         path: "/",
       });
 
-      cookieStore.set("auth", "true", {
+      await cookieStore.set("auth", "true", {
         httpOnly: false,
         secure: process.env.NODE_ENV === "production",
         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
@@ -98,7 +98,7 @@ export const setCookiesAction = async (tokens) => {
       return { success: false, message: "Invalid tokens provided" };
     }
 
-    cookieStore.set("accessToken", tokens.accessToken, {
+    await cookieStore.set("accessToken", tokens.accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
@@ -106,7 +106,7 @@ export const setCookiesAction = async (tokens) => {
       path: "/",
     });
 
-    cookieStore.set("refreshToken", tokens.refreshToken, {
+    await cookieStore.set("refreshToken", tokens.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
@@ -114,7 +114,7 @@ export const setCookiesAction = async (tokens) => {
       path: "/",
     });
 
-    cookieStore.set("auth", "true", {
+    await cookieStore.set("auth", "true", {
       httpOnly: false,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
@@ -154,7 +154,7 @@ export const refreshTokenAction = async () => {
     const data = await res.json();
 
     if (data.success) {
-      cookieStore.set("accessToken", data.accessToken, {
+      await cookieStore.set("accessToken", data.accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
@@ -163,7 +163,7 @@ export const refreshTokenAction = async () => {
       });
 
       if (data.refreshToken) {
-        cookieStore.set("refreshToken", data.refreshToken, {
+        await cookieStore.set("refreshToken", data.refreshToken, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production",
           sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
