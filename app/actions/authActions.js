@@ -4,7 +4,7 @@
 import { cookies } from "next/headers";
 
 export const logoutAction = async () => {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const accessToken = cookieStore.get("accessToken")?.value;
 
   try {
@@ -39,7 +39,7 @@ export const logoutAction = async () => {
 };
 
 export const loginAction = async (userData) => {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const apiBaseUrl =
     process.env.NEXT_PUBLIC_API_BASE_URL ||
     "https://ai-chat-bot-assistant-server.vercel.app/api/v1";
@@ -91,7 +91,7 @@ export const loginAction = async (userData) => {
 };
 
 export const setCookiesAction = async (tokens) => {
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
 
   try {
     if (!tokens?.accessToken || !tokens?.refreshToken) {
@@ -130,7 +130,7 @@ export const setCookiesAction = async (tokens) => {
 };
 
 export const refreshTokenAction = async () => {
-  const cookieStore = cookies();
+  const cookieStore =await cookies();
   const refreshToken = cookieStore.get("refreshToken")?.value;
 
   if (!refreshToken) {
