@@ -1,3 +1,4 @@
+// next.config.mjs
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
@@ -5,6 +6,12 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "cdn.iconscout.com",
+      },
+      {
+        protocol: "http",
+        hostname: "192.168.10.33",
+        port: "4000",
+        pathname: "/uploads/images/**",
       },
     ],
   },

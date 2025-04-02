@@ -23,13 +23,13 @@ export default function AdminTable({ mockData, columns }) {
         {mockData.map((user) => (
           <TableRow key={user.id} className="border-b">
             <TableCell className="font-medium pl-9 py-6 pr-4">
-              {user.name}
+              {user?.name}
             </TableCell>
             <TableCell className="hidden md:table-cell pr-4">
-              {user.email}
+              {user?.email}
             </TableCell>
             <TableCell className="hidden md:table-cell">
-              {user.emailDetails}
+              {user?.emailDetails}
             </TableCell>
             <TableCell className="text-center">{user.totalInbox}</TableCell>
             <TableCell className="text-center">
@@ -37,7 +37,7 @@ export default function AdminTable({ mockData, columns }) {
                 variant="ghost"
                 size="icon"
                 onClick={() => handleInfoClick(user)}
-                aria-label={`View details for ${user.name}`}
+                aria-label={`View details for ${user?.name}`}
               >
                 <Info className="h-4 w-4" />
               </Button>

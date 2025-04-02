@@ -58,17 +58,17 @@ export default function AdminSidebar({ children, user }) {
               prefetch={false}
             >
               <Avatar>
-                <AvatarImage src={user.profilePicture} alt={user.name} />
+                <AvatarImage src={user?.profilePicture} alt={user?.name} />
                 <AvatarFallback className="bg-gradient-to-r from-[#00ACDA] to-[#43D4FB] text-sm">
                   N/A
                 </AvatarFallback>
               </Avatar>
               <div>
                 <h4 className="font-semibold text-[20px]">
-                  {user.name || "N/A"}
+                  {user?.name || "N/A"}
                 </h4>
                 <span className="text-xs font-light text-[#101010]">
-                  {user.email || "N/A"}
+                  {user?.email || "N/A"}
                 </span>
               </div>
             </Link>

@@ -1,25 +1,35 @@
 // import Sidebar from "@/components/layout/Sidebar";
 import Sidebar from "@/components/layout/Sidebar";
-import { axiosInstance } from "@/lib/axios";
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
+import { getUserData } from "@/lib/server-api";
+import LoadingPing from "@/components/LoadingPing";
 
 export default async function RootLayout({ children }) {
+  // Await the cookies function
   const cookieStore = await cookies();
   const token = cookieStore.get("accessToken");
 
-  // console.log({ token: token.value });
+  let user = null;
+  if (token) {
+    try {
+      const response = await getUserData(token.value);
+      if (response && response.success) {
+        user = response.data;
+      }
+    } catch (error) {
+      console.error("Failed to fetch user:", error);
+    }
+  }
 
-  // const res = await axiosInstance.get("/users/me", {
-  //   headers: { Authorization: `Bearer ${token.value}` },
-  // });
-
-  // const user = res.data.data;
-  const user = {
-    name: "Josh",
-    email: "josh@gmail.com",
-    profilePicture:
-      "https://images.unsplash.com/photo-1522556189639-b150ed9c4330?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  };
+  // Render a fallback UI if user is not available
+  if (!user) {
+    return (
+      <section className="bg-white">
+        <LoadingPing />
+        {children}
+      </section>
+    );
+  }
 
   return (
     <section className="bg-white">

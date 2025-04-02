@@ -95,13 +95,13 @@ export default function UsersListTable() {
 
     switch (actionType) {
       case "block":
-        console.log(`Blocking user: ${selectedUser.name}`);
+        console.log(`Blocking user: ${selectedUser?.name}`);
         break;
       case "cancel":
-        console.log(`Cancelling subscription for: ${selectedUser.name}`);
+        console.log(`Cancelling subscription for: ${selectedUser?.name}`);
         break;
       case "delete":
-        console.log(`Deleting user: ${selectedUser.name}`);
+        console.log(`Deleting user: ${selectedUser?.name}`);
         break;
       default:
         break;
@@ -143,10 +143,10 @@ export default function UsersListTable() {
             {mockData.map((user) => (
               <TableRow key={user.id} className="border-b">
                 <TableCell className="font-medium pl-9 py-6 pr-4">
-                  {user.name}
+                  {user?.name}
                 </TableCell>
                 <TableCell className="hidden md:table-cell pr-4">
-                  {user.email}
+                  {user?.email}
                 </TableCell>
                 <TableCell className="text-center">
                   {user.authProvider}
@@ -161,7 +161,7 @@ export default function UsersListTable() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        aria-label={`Actions for ${user.name}`}
+                        aria-label={`Actions for ${user?.name}`}
                       >
                         <EllipsisVertical className="h-4 w-4" />
                       </Button>

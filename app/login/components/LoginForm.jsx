@@ -64,7 +64,8 @@ export default function LoginForm() {
   };
 
   const handleProviderClick = async (provider) => {
-    handleOAuthLogin(provider);
+    setSelectedProvider(provider);
+    setShowPermissionModal(true);
   };
 
   const handleEmailLogin = async (e) => {
@@ -78,7 +79,8 @@ export default function LoginForm() {
     try {
       const isApproved = await checkEmailApproval(email);
       if (isApproved) {
-        handleOAuthLogin("google", email);
+        setSelectedProvider("google");
+        setShowPermissionModal(true);
       }
     } catch (error) {
       toast.error(error.message || "Failed to check waiting list status");
@@ -91,7 +93,13 @@ export default function LoginForm() {
     setShowPermissionModal(false);
 
     if (!email || !validateEmail(email)) {
-      toast.error("Please enter a valid email address");
+      if (selectedProvider !== "google" && selectedProvider !== "microsoft") {
+        toast.error("Please enter a valid email address");
+        return;
+      }
+
+      // If it's a direct provider login without email, proceed
+      handleOAuthLogin(selectedProvider);
       return;
     }
 

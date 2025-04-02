@@ -1,3 +1,4 @@
+// app\(main)\dashboard\page.js
 import { RiSparkling2Line } from "react-icons/ri";
 import { EmailPagination } from "./components/EmailPagination";
 import { FaCheckCircle } from "react-icons/fa";

@@ -1,9 +1,3 @@
-/**
- * v0 by Vercel.
- * @see https://v0.dev/t/4p67afrMzU1
- * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
- */
-
 "use client";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -21,6 +15,7 @@ import { AiOutlineMenu } from "react-icons/ai";
 import { FaUserCircle } from "react-icons/fa";
 import logoImage from "@/public/Frame 2.svg";
 import Image from "next/image";
+import ProfileModal from "../modals/ProfileModal";
 
 const navLinks = [
   {
@@ -49,54 +44,59 @@ const publicRoutes = [
   "/login",
 ];
 
-export default function Sidebar({ children, user }) {
+const Sidebar = ({ children, user }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const pathName = usePathname();
-
   const router = useRouter();
+
+  // Ensure the image source is an absolute URL
+  const imageSrc = user?.image && user.image.length > 2
+    ? `http://192.168.10.33:4000/uploads/images/${user.image}`
+    : user?.profilePicture || "";
 
   const handleLogout = async () => {
     await logoutAction();
-
     router.push("/");
   };
 
+  const openProfileModal = () => {
+    setIsProfileModalOpen(true);
+    setIsOpen(false);
+  };
+
   if (publicRoutes.includes(pathName)) {
-    return;
+    return children;
   }
 
   return (
     <div className="flex h-screen w-full">
-      <div className="hidden lg:block lg:w-64 lg:shrink-0  lg:bg-[#F1F1F1] dark:lg:bg-gray-800">
-        {/* pc sidbar */}
-        <div className="flex h-full flex-col justify-between py-6 px-4 ">
+      {/* Desktop Sidebar */}
+      <div className="hidden lg:block lg:w-64 lg:shrink-0 lg:bg-[#F1F1F1] dark:lg:bg-gray-800">
+        <div className="flex h-full flex-col justify-between py-6 px-4">
           <div className="space-y-6">
-            {/* sidebar header */}
-            <Link
-              href="#"
-              className="flex items-center gap-3 font-bold"
-              prefetch={false}
+            <button
+              onClick={openProfileModal}
+              className="flex items-center gap-3 font-bold w-full text-left"
             >
               <Avatar>
-                <AvatarImage src={user.profilePicture} alt={user.name} />
+                {/* Log the src just before rendering */}
+                <AvatarImage src={imageSrc} alt={user?.name} />
                 <AvatarFallback className="bg-gradient-to-r from-[#00ACDA] to-[#43D4FB] text-sm">
-                  N/A
+                  {user?.name?.charAt(0) || "N/A"}
                 </AvatarFallback>
               </Avatar>
               <div>
                 <h4 className="font-semibold text-[20px]">
-                  {user.name || "N/A"}
+                  {user?.name || "N/A"}
                 </h4>
                 <span className="text-xs font-light text-[#101010]">
-                  {user.email || "N/A"}
+                  {user?.email || "N/A"}
                 </span>
               </div>
-            </Link>
-
-            {/* sidebar links */}
+            </button>
             <nav className="space-y-1">
-              {/* dashboard */}
-              {navLinks?.map((link) => (
+              {navLinks.map((link) => (
                 <Link
                   key={link.label}
                   href={link.path}
@@ -113,31 +113,16 @@ export default function Sidebar({ children, user }) {
               ))}
             </nav>
           </div>
-
-          {/* sidebar footer */}
           <div className="space-y-4">
-            {/* <Button
-              type="submit"
-              className="flex w-full justify-center items-center gap-2 text-sm cursor-pointer bg-[#01A846] hover:bg-[#01A846]/80 py-8 rounded text-white"
-              // variant="ghost"
-              // onClick={handleLogout}
-            >
-              <IoMdShareAlt className="size-6" />
-              <span>
-                Refer a Friend, <br /> get one month free!
-              </span>
-            </Button> */}
             <Button
-              type="submit"
               className="flex items-center gap-2 text-sm cursor-pointer"
               variant="ghost"
-              onClick={() => console.log("to profile page")}
+              onClick={openProfileModal}
             >
               <FaUserCircle className="size-6" />
               <span>Profile</span>
             </Button>
             <Button
-              type="submit"
               className="flex items-center gap-2 text-sm cursor-pointer"
               variant="ghost"
               onClick={handleLogout}
@@ -149,20 +134,12 @@ export default function Sidebar({ children, user }) {
         </div>
       </div>
 
+      {/* Mobile Sidebar */}
       <div className="flex-1">
-        {/* mobile sidebar */}
         <header className="sticky top-0 z-10 border-b bg-white px-2 md:px-4 py-3 dark:border-gray-800 dark:bg-gray-900 lg:hidden">
           <div className="flex items-center justify-between">
-            <Link
-              href="#"
-              className="flex items-center gap-2 font-bold"
-              prefetch={false}
-            >
-              <Image
-                src={logoImage}
-                alt="Index Ai Logo"
-                className="w-40 lg:w-fit"
-              />
+            <Link href="#" className="flex items-center gap-2 font-bold" prefetch={false}>
+              <Image src={logoImage} alt="Index Ai Logo" className="w-40 lg:w-fit" />
             </Link>
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild>
@@ -171,13 +148,31 @@ export default function Sidebar({ children, user }) {
                   <span className="sr-only">Toggle navigation</span>
                 </Button>
               </SheetTrigger>
-
-              {/* mobile navlinks */}
               <SheetContent side="left" className="w-64">
                 <div className="flex h-full flex-col justify-between py-6 px-4 mt-4">
                   <div className="space-y-6">
+                    <button
+                      onClick={openProfileModal}
+                      className="flex items-center gap-3 font-bold w-full text-left mb-4"
+                    >
+                      <Avatar>
+                        {/* Log the src just before rendering */}
+                        <AvatarImage src={imageSrc} alt={user?.name} />
+                        <AvatarFallback className="bg-gradient-to-r from-[#00ACDA] to-[#43D4FB] text-sm">
+                          {user?.name?.charAt(0) || "N/A"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <h4 className="font-semibold text-[18px]">
+                          {user?.name || "N/A"}
+                        </h4>
+                        <span className="text-xs font-light text-[#101010]">
+                          {user?.email || "N/A"}
+                        </span>
+                      </div>
+                    </button>
                     <nav className="space-y-1">
-                      {navLinks?.map((link) => (
+                      {navLinks.map((link) => (
                         <Link
                           key={link.label}
                           href={link.path}
@@ -190,44 +185,28 @@ export default function Sidebar({ children, user }) {
                           <span className="bg-white p-[6px] flex justify-center items-center rounded-full">
                             <link.icon size={16} color="#101010" />
                           </span>
-
                           {link.label}
                         </Link>
                       ))}
                     </nav>
                   </div>
-
-                  {/* sidebar footer */}
                   <div className="space-y-4">
-                    <div className="flex flex-col justify-start items-start gap-2 text-sm text-gray-500 dark:text-gray-400">
-                      {/* <Button
-                        type="submit"
-                        className="flex w-full justify-center items-center gap-2 text-sm cursor-pointer bg-[#01A846] hover:bg-[#01A846]/80 py-8 rounded text-white"
-                        // variant="ghost"
-                        // onClick={handleLogout}
-                      >
-                        <IoMdShareAlt className="size-6" />
-                        <span>
-                          Refer a Friend, <br /> get one month free!
-                        </span>
-                      </Button> */}
-                      <Button
-                        onClick={() => console.log("to profile page")}
-                        className="flex items-center gap-2 text-sm cursor-pointer"
-                        variant="ghost"
-                      >
-                        <FaUserCircle className="size-6" />
-                        <span>Profile</span>
-                      </Button>
-                      <Button
-                        onClick={handleLogout}
-                        className="flex items-center gap-2 text-sm cursor-pointer"
-                        variant="ghost"
-                      >
-                        <GrLogout className="size-6" />
-                        <span>Logout</span>
-                      </Button>
-                    </div>
+                    <Button
+                      onClick={openProfileModal}
+                      className="flex items-center gap-2 text-sm cursor-pointer"
+                      variant="ghost"
+                    >
+                      <FaUserCircle className="size-6" />
+                      <span>Profile</span>
+                    </Button>
+                    <Button
+                      onClick={handleLogout}
+                      className="flex items-center gap-2 text-sm cursor-pointer"
+                      variant="ghost"
+                    >
+                      <GrLogout className="size-6" />
+                      <span>Logout</span>
+                    </Button>
                   </div>
                 </div>
               </SheetContent>
@@ -239,6 +218,14 @@ export default function Sidebar({ children, user }) {
           {children}
         </section>
       </div>
+
+      <ProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        initialUser={user}
+      />
     </div>
   );
-}
+};
+
+export default Sidebar;
