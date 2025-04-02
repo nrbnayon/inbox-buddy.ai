@@ -1,3 +1,4 @@
+// app\pricing\page.js
 import PricingPlans from "./components/PricingPlans";
 
 export default function page() {

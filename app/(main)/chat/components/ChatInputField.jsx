@@ -1,18 +1,32 @@
-// app\(main)\chat\components\ChatInputField.jsx
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
+import { useChat } from "./ChatContext";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Paperclip, Send, X } from "lucide-react";
+import { Paperclip, Send, X, Trash2 } from "lucide-react";
 import { FaCheckCircle } from "react-icons/fa";
 import { IoDocumentOutline } from "react-icons/io5";
+import { sendChatMessage, clearChatContext } from "@/lib/api";
 
-export default function ChatInputField() {
+export default function ChatInputField({ onMessageSent }) {
   const [message, setMessage] = useState("");
   const [attachments, setAttachments] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef(null);
+  const {
+    messages,
+    addMessage,
+    clearMessages,
+    setIsTyping,
+    selectedModel,
+    setTokenCount,
+  } = useChat();
+
+  // Debug logging to inspect the selectedModel value
+  useEffect(() => {
+    console.log("Current selectedModel in ChatInputField:", selectedModel);
+  }, [selectedModel]);
 
   const handleAttachmentClick = () => {
     fileInputRef.current?.click();
@@ -22,47 +36,119 @@ export default function ChatInputField() {
     const files = Array.from(e.target.files);
     if (files.length > 0) {
       setIsUploading(true);
+      const newAttachments = files.map((file) => ({
+        id: Math.random().toString(36).substring(2, 9),
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        file,
+      }));
 
-      // Simulate upload delay
-      setTimeout(() => {
-        const newAttachments = files.map((file) => ({
-          id: Math.random().toString(36).substring(2, 9),
-          name: file.name,
-          type: file.type,
-          size: file.size,
-          file,
-        }));
-
-        setAttachments((prev) => [...prev, ...newAttachments]);
-        setIsUploading(false);
-
-        // Reset the file input value to allow re-selecting the same file
-        if (fileInputRef.current) {
-          fileInputRef.current.value = "";
-        }
-      }, 1000);
+      setAttachments((prev) => [...prev, ...newAttachments]);
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   };
 
   const removeAttachment = (id) => {
     setAttachments(attachments.filter((attachment) => attachment.id !== id));
-    // Reset the file input value after removal
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+  };
+
+  const handleClearChat = async () => {
+    try {
+      await clearChatContext();
+      clearMessages();
+      setTokenCount(0);
+    } catch (error) {
+      console.error("Failed to clear chat:", error);
     }
   };
 
-  const handleSendMessage = () => {
-    if (message.trim() || attachments.length > 0) {
-      console.log("Sending message:", message);
-      console.log("With attachments:", attachments);
+  // Get conversation history in the format expected by the API
+  const getConversationHistory = () => {
+    const history = [];
+    // Group messages in pairs of user and assistant
+    for (let i = 0; i < messages.length; i += 2) {
+      if (messages[i] && messages[i].role === "user") {
+        history.push({
+          role: "user",
+          content: messages[i].message,
+        });
 
-      // Reset form after sending
+        if (messages[i + 1] && messages[i + 1].role === "assistant") {
+          history.push({
+            role: "assistant",
+            content: messages[i + 1].message,
+          });
+        }
+      }
+    }
+    return history;
+  };
+
+  const handleSendMessage = async () => {
+    if (!message.trim() && attachments.length === 0) return;
+
+    // Get file if there are attachments
+    const file = attachments.length > 0 ? attachments[0].file : null;
+
+    // Create user message object
+    const userMessage = {
+      role: "user",
+      userName: "You",
+      userRole: "User",
+      date: new Date().toLocaleString(),
+      message: message,
+      attachments: attachments.length > 0 ? [...attachments] : [],
+    };
+
+    // Add user message to chat
+    addMessage(userMessage);
+    setIsTyping(true);
+
+    try {
+      // Prepare conversation history
+      const history = getConversationHistory();
+
+      // Extract the model ID using the correct property
+      const modelId = selectedModel?.id || selectedModel?.value || null;
+
+      console.log("Sending message with model ID:", modelId);
+
+      // Send message with file and selected model ID
+      const response = await sendChatMessage(message, file, modelId);
+
+      setIsTyping(false);
+
+      // Create assistant message object
+      const assistantMessage = {
+        role: "assistant",
+        userName: "AI Assistant",
+        userRole: "Assistant",
+        date: new Date().toLocaleString(),
+        message: response.message,
+      };
+
+      // Add assistant response to chat
+      addMessage(assistantMessage);
+
+      // Update token count
+      setTokenCount((prev) => prev + (response.tokenCount || 0));
+
+      // Clear message and attachments
       setMessage("");
       setAttachments([]);
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
+
+      // Call callback if provided
+      onMessageSent?.();
+    } catch (error) {
+      console.error("Failed to send message:", error);
+      setIsTyping(false);
     }
   };
 
@@ -75,7 +161,6 @@ export default function ChatInputField() {
 
   return (
     <div className="w-full mx-auto flex flex-col mt-6">
-      {/* Attachments section */}
       {(attachments.length > 0 || isUploading) && (
         <div className="order-1 md:order-2 mb-3 md:mt-3 md:mb-0 flex items-center gap-1 md:gap-3">
           <p className="text-sm font-medium mb-2 md:mb-0 hidden md:inline-flex">
@@ -112,7 +197,6 @@ export default function ChatInputField() {
         </div>
       )}
 
-      {/* Message input area */}
       <div className="order-2 md:order-1 relative flex items-start gap-2">
         <div className="flex-1 relative">
           <Textarea
@@ -124,7 +208,6 @@ export default function ChatInputField() {
           />
         </div>
 
-        {/* Action buttons */}
         <div className="flex flex-col gap-2">
           <Button
             variant="outline"
@@ -133,7 +216,15 @@ export default function ChatInputField() {
             onClick={handleAttachmentClick}
           >
             <Paperclip className="h-5 w-5" />
-            <span className="sr-only">Attach file</span>
+          </Button>
+
+          <Button
+            variant="outline"
+            size="icon"
+            className="rounded-xl h-12 w-12 border-muted"
+            onClick={handleClearChat}
+          >
+            <Trash2 className="h-5 w-5" />
           </Button>
 
           <Button
@@ -142,11 +233,9 @@ export default function ChatInputField() {
             onClick={handleSendMessage}
           >
             <Send className="h-5 w-5" />
-            <span className="sr-only">Send message</span>
           </Button>
         </div>
 
-        {/* Hidden file input */}
         <input
           type="file"
           ref={fileInputRef}

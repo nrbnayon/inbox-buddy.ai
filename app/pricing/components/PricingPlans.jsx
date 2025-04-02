@@ -1,3 +1,4 @@
+// app\pricing\components\PricingPlans.jsx
 import { Button } from "@/components/ui/button";
 import {
   Card,

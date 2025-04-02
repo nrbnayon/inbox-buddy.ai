@@ -1,14 +1,12 @@
-// app\(main)\chat\components\ChatCard.jsx
-"use client";
+'use client';
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { CheckCircle, FileText } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { FaCheckCircle } from "react-icons/fa";
 import { IoDocumentOutline } from "react-icons/io5";
+import { cn } from "@/lib/utils";
 
 export default function ChatCard({
   userName = "Hamid R Mousazade",
@@ -24,7 +22,7 @@ export default function ChatCard({
 }) {
   return (
     <Card className={cn("w-full gap-2 py-5 shadow-none", className)}>
-      <CardContent className="">
+      <CardContent>
         <div className="flex flex-col space-y-4">
           {/* Header with user info and date */}
           <div className="flex items-start justify-between">
@@ -37,7 +35,7 @@ export default function ChatCard({
                 <h3 className="font-medium text-sm sm:text-base">{userName}</h3>
                 <Badge
                   variant="outline"
-                  className="text-xs font-normal  px-2 py-0 bg-[#D1E9FF] text-[#175CD3]"
+                  className="text-xs font-normal px-2 py-0 bg-[#D1E9FF] text-[#175CD3]"
                 >
                   {userRole}
                 </Badge>
@@ -50,7 +48,7 @@ export default function ChatCard({
 
           {/* Message content */}
           <div className="py-2">
-            <p className="text-sm sm:text-base">{message}</p>
+            <span className="text-sm sm:text-base block">{message}</span>
           </div>
         </div>
       </CardContent>
@@ -58,9 +56,9 @@ export default function ChatCard({
       {senderUser && attachments && attachments.length > 0 && (
         <>
           <Separator />
-          <CardFooter className="">
+          <CardFooter>
             <div className="w-full flex items-center gap-4">
-              <p className="text-sm font-medium mb-2">Attachments:</p>
+              <span className="text-sm font-medium">Attachments:</span>
               <div className="flex flex-wrap gap-2">
                 {attachments.map((attachment, index) => (
                   <div
@@ -68,9 +66,8 @@ export default function ChatCard({
                     className="flex items-center gap-2 border border-[#2E90FA] rounded-md px-3 py-2 bg-background text-sm"
                   >
                     <span className="bg-[#D1E9FF] rounded-full p-1">
-                      <IoDocumentOutline className="h-4 w-4  text-blue-500" />
+                      <IoDocumentOutline className="h-4 w-4 text-blue-500" />
                     </span>
-
                     <span>{attachment.name}</span>
                     {attachment.isSelected && (
                       <FaCheckCircle className="h-4 w-4 text-blue-500 ml-1" />

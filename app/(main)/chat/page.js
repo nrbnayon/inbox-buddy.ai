@@ -1,6 +1,10 @@
-import React from "react";
-import ChatSection from "./components/ChatSection";
+import { ChatProvider } from './components/ChatContext';
+import ChatSection from './components/ChatSection';
 
-export default async function chatPage() {
-  return <ChatSection />;
+export default function ChatPage() {
+  return (
+    <ChatProvider>
+      <ChatSection />
+    </ChatProvider>
+  );
 }
