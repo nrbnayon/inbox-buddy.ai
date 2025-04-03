@@ -15,6 +15,14 @@ const nextConfig = {
       },
     ],
   },
+  env: {
+    NEXT_PUBLIC_API_BASE_URL: process.env.NODE_ENV === 'production' 
+      ? "https://ai-chat-bot-assistant-server.vercel.app/api/v1" 
+      : "http://192.168.10.33:4000/api/v1",
+    API_BASE_URL: process.env.NODE_ENV === 'production' 
+      ? "https://ai-chat-bot-assistant-server.vercel.app/api/v1" 
+      : "http://192.168.10.33:4000/api/v1",
+  },
   devIndicators: false,
 };
 
