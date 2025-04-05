@@ -1,60 +1,81 @@
-// app\(main)\chat\components\ChatSection.jsx
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useChat } from "./ChatContext";
-import ChatHeader from "./ChatHeader";
+import { getUserProfile } from "@/lib/api/user";
 import ChatMessages from "./ChatMessages";
 import ChatInputField from "./ChatInputField";
+import LoadingPing from "@/components/LoadingPing";
+import ChatHeader from "./ChatHeader";
 
 export default function ChatSection() {
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
   const { messages } = useChat();
-  const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    const fetchProfile = async () => {
+      try {
+        const data = await getUserProfile();
+        setUserData(data);
+      } catch (error) {
+        console.error("Error fetching user profile:", error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  if (loading) return <LoadingPing />;
 
   return (
-    <div className='h-screen flex flex-col'>
-      {/* Header */}
+    <section className='w-full'>
       <ChatHeader />
-
-      {/* Messages Area */}
-      <div className='flex-1 overflow-y-auto px-4 py-6'>
-        {messages.length === 0 ? (
-          <div className='flex flex-col items-center justify-center h-full text-center'>
-            <h1 className='text-4xl font-bold mb-2'>Inbox-Buddy.AI</h1>
-            <p className='text-gray-600 mb-8'>Your email assistant</p>
-            <h2 className='text-xl font-semibold mb-4'>
-              Welcome to your AI Assistant!
-            </h2>
-            <div className='max-w-md space-y-4'>
-              <p className='text-gray-500'>
-                I can help you manage your emails, draft responses, find
-                specific messages, and more. Just ask me anything!
-              </p>
-              <div className='text-sm text-gray-500'>
-                Try asking:
-                <ul className='mt-2 space-y-2'>
-                  <li>"Show my unread emails"</li>
-                  <li>"Find emails from [sender]"</li>
-                  <li>"Draft a response to [subject]"</li>
-                  <li>"Summarize my recent emails"</li>
-                </ul>
+      <div className='mx-auto h-full flex flex-col'>
+        <div className='flex-1 overflow-auto'>
+          {messages.length === 0 ? (
+            <div className='text-center mb-8 mt-24'>
+              <h1 className='text-4xl font-bold mb-1 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent'>
+                Inbox-Buddy.AI
+              </h1>
+              <p className='text-gray-500'>Your email assistant</p>
+              <h2 className='text-xl font-semibold mt-4'>
+                Welcome {userData?.data?.name || "Nayon Kanti Halder"}!
+              </h2>
+              <div className='max-w-md text-center mx-auto space-y-4'>
+                <p className='text-muted-foreground'>
+                  I can help you manage your emails, draft responses, find
+                  specific messages, and more. Just ask me anything!
+                </p>
+                <div className='text-sm text-muted-foreground'>
+                  Try asking:
+                  <ul className='mt-1 space-y-2'>
+                    <li className='group cursor-pointer transition-all duration-200 hover:bg-blue-100 hover:text-blue-800  rounded-lg hover:shadow-md'>
+                      "Show my unread emails"
+                    </li>
+                    <li className='group cursor-pointer transition-all duration-200 hover:bg-blue-100 hover:text-blue-800  rounded-lg hover:shadow-md'>
+                      "Find emails from [sender]"
+                    </li>
+                    <li className='group cursor-pointer transition-all duration-200 hover:bg-blue-100 hover:text-blue-800  rounded-lg hover:shadow-md'>
+                      "Draft a response to [subject]"
+                    </li>
+                    <li className='group cursor-pointer transition-all duration-200 hover:bg-blue-100 hover:text-blue-800  rounded-lg hover:shadow-md'>
+                      "Summarize my recent emails"
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
-          </div>
-        ) : (
-          <ChatMessages />
-        )}
-        <div ref={messagesEndRef} />
+          ) : (
+            <ChatMessages />
+          )}
+        </div>
+        <div className='mt-auto'>
+          <ChatInputField />
+        </div>
       </div>
-
-      {/* Input Area */}
-      <div className='border-t bg-white p-4'>
-        <ChatInputField />
-      </div>
-    </div>
+    </section>
   );
 }

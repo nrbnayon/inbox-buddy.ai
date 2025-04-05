@@ -21,8 +21,6 @@ export function AiModelSelect({
   className,
 }) {
   return (
-    // console.log("Selected model:::", ???); console not work
-
     <Select>
       <SelectTrigger
         className={cn(

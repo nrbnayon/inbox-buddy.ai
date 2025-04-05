@@ -3,6 +3,7 @@
 import React, { useEffect } from "react";
 import { useChat } from "./ChatContext";
 import { getAvailableModels } from "@/lib/api/chat";
+import Link from "next/link";
 
 export default function ChatHeader() {
   const { selectedModel, setSelectedModel, models, setModels } = useChat();
@@ -12,11 +13,10 @@ export default function ChatHeader() {
       try {
         const modelData = await getAvailableModels();
         const formattedModels = modelData.map((model) => {
-          console.log("Model data:", model);
           return {
             label: model.name,
             value: model.id,
-            id: model.id, // Ensure we store the ID
+            id: model.id, 
             description: model.description,
           };
         });
@@ -45,22 +45,16 @@ export default function ChatHeader() {
     if (selectedModelData) {
       setSelectedModel({
         ...selectedModelData,
-        id: modelId, // Ensure ID is set
-        value: modelId, // Ensure value is set
+        id: modelId, 
+        value: modelId, 
       });
     }
   };
 
-  console.log(" Models :::", {
-    selectedModel,
-    setSelectedModel,
-    models,
-    setModels,
-  });
 
   return (
-    <div className='sticky top-0 z-10 bg-white border-b p-4'>
-      <div className='flex items-center justify-between max-w-6xl mx-auto'>
+    <div className='bg-[#F1F1F1]  p-3 lg:p-6 rounded-lg mb-3 lg:mb-6 sticky top-0 gap-3'>
+      <div className='w-full flex items-center justify-between gap-4 sm:w-auto'>
         <select
           value={selectedModel?.value || selectedModel?.id || ""}
           onChange={handleModelChange}
@@ -73,10 +67,12 @@ export default function ChatHeader() {
             </option>
           ))}
         </select>
-
-        <button className='bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-2 rounded-lg hover:opacity-90 transition-opacity'>
+        <Link
+          href='/pricing'
+          className='text-white px-6 lg:px-10 py-3 lg:py-3 rounded-lg lg:rounded-xl link-btn w-full sm:w-auto text-center'
+        >
           Upgrade Plan
-        </button>
+        </Link>
       </div>
     </div>
   );

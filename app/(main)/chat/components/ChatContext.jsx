@@ -1,4 +1,5 @@
-'use client'
+"use client";
+
 import React, { createContext, useContext, useState } from "react";
 
 const ChatContext = createContext();
@@ -7,6 +8,7 @@ export function ChatProvider({ children }) {
   const [messages, setMessages] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
   const [selectedModel, setSelectedModel] = useState(null);
+  const [tokenCount, setTokenCount] = useState(0);
   const [models, setModels] = useState([]);
 
   const addMessage = (message) => {
@@ -27,6 +29,8 @@ export function ChatProvider({ children }) {
         setIsTyping,
         selectedModel,
         setSelectedModel,
+        tokenCount,
+        setTokenCount,
         models,
         setModels,
       }}
