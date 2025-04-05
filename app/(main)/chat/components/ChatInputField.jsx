@@ -1,13 +1,14 @@
+// app\(main)\chat\components\ChatInputField.jsx
 "use client";
 
 import { useRef, useState, useEffect } from "react";
 import { useChat } from "./ChatContext";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Paperclip, Send, X, Trash2 } from "lucide-react";
+import { Paperclip, Send, X } from "lucide-react";
 import { FaCheckCircle } from "react-icons/fa";
 import { IoDocumentOutline } from "react-icons/io5";
-import { sendChatMessage, clearChatContext } from "@/lib/api";
+import { sendChatMessage, clearChatContext } from "@/lib/api/chat";
 
 export default function ChatInputField({ onMessageSent }) {
   const [message, setMessage] = useState("");
@@ -56,15 +57,7 @@ export default function ChatInputField({ onMessageSent }) {
     setAttachments(attachments.filter((attachment) => attachment.id !== id));
   };
 
-  const handleClearChat = async () => {
-    try {
-      await clearChatContext();
-      clearMessages();
-      setTokenCount(0);
-    } catch (error) {
-      console.error("Failed to clear chat:", error);
-    }
-  };
+
 
   // Get conversation history in the format expected by the API
   const getConversationHistory = () => {
@@ -216,15 +209,6 @@ export default function ChatInputField({ onMessageSent }) {
             onClick={handleAttachmentClick}
           >
             <Paperclip className="h-5 w-5" />
-          </Button>
-
-          <Button
-            variant="outline"
-            size="icon"
-            className="rounded-xl h-12 w-12 border-muted"
-            onClick={handleClearChat}
-          >
-            <Trash2 className="h-5 w-5" />
           </Button>
 
           <Button

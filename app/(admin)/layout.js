@@ -1,5 +1,3 @@
-import Sidebar from "@/components/layout/Sidebar";
-import { axiosInstance } from "@/lib/axios";
 import { cookies, headers } from "next/headers";
 import AdminSidebar from "./components/AdminSidebar";
 

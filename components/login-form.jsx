@@ -13,7 +13,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { axiosInstance } from "@/lib/axios";
 import { logInAction } from "@/app/actions/authActions";
 import { useRouter } from "next/navigation";
 
@@ -23,17 +22,10 @@ export function LoginForm({ className, ...props }) {
   const router = useRouter();
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Prevent default form submission
+    e.preventDefault(); 
 
     setLoading(true);
     setError(null);
-
-    // Get form data
-    // const formData = new FormData(e.target);
-    // const rawFormData = {
-    //   email: formData.get("email"),
-    //   password: formData.get("password"),
-    // };
 
     const userData = {
       email: e.target.email.value,

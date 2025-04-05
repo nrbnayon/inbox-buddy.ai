@@ -1,3 +1,4 @@
+// app\(main)\chat\components\ChatCard.jsx
 'use client';
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";

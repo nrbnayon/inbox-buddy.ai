@@ -51,9 +51,10 @@ const Sidebar = ({ children, user }) => {
   const router = useRouter();
 
   // Ensure the image source is an absolute URL
-  const imageSrc = user?.image && user.image.length > 2
-    ? `http://192.168.10.33:4000/uploads/images/${user.image}`
-    : user?.profilePicture || "";
+  const imageSrc =
+    user?.image && user.image.length > 2
+      ? `http://localhost:4000/uploads/images/${user.image}`
+      : user?.profilePicture || "";
 
   const handleLogout = async () => {
     await logoutAction();

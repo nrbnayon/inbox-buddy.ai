@@ -9,7 +9,7 @@ import PermissionModal from "@/components/modals/PermissionModal";
 import { toast } from "sonner";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { checkWaitingListStatus, handleOAuthLogin } from "@/lib/axios";
+import { checkWaitingListStatus, handleOAuthLogin } from "@/lib/api/user";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");

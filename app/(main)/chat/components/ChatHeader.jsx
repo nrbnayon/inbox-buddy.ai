@@ -3,24 +3,26 @@
 
 import { useEffect } from "react";
 import { useChat } from "./ChatContext";
-import { SelectComponent } from "@/components/SelectComponent";
 import Link from "next/link";
-import { getAiModels, getDefaultModel } from "@/lib/api";
+import { getAvailableModels, getDefaultModel } from "@/lib/api/chat";
+import { AiModelSelect } from "./AiModelSelect";
 
 export default function ChatHeader() {
-  const { selectedModel, setSelectedModel, tokenCount, models, setModels } =
+  const { selectedModel, setSelectedModel,  models, setModels } =
     useChat();
 
   useEffect(() => {
     const loadModels = async () => {
       try {
         // Fetch available models
-        const modelData = await getAiModels();
+        const modelData = await getAvailableModels();
+
+        console.log("Available models in header:::", modelData);
 
         // Format models for dropdown
         const formattedModels = modelData.map((model) => ({
           label: model.name,
-          value: model.id,
+          value: model?.modelId || model.id,
           description: model.description,
           id: model.id,
         }));
@@ -79,12 +81,12 @@ export default function ChatHeader() {
   };
 
   return (
-    <div className="bg-[#F1F1F1] flex flex-col sm:flex-row justify-between items-center p-3 lg:p-6 rounded-lg mb-3 lg:mb-6 sticky top-0 gap-3">
-      <div className="flex items-center gap-4 w-full sm:w-auto">
-        <SelectComponent
-          title="Select a Model"
-          label="Models"
-          className="border-none w-[180px]"
+    <div className='bg-[#F1F1F1] flex flex-col sm:flex-row justify-between items-center p-3 lg:p-6 rounded-lg mb-3 lg:mb-6 sticky top-0 gap-3'>
+      <div className='flex items-center gap-4 w-full sm:w-auto'>
+        <AiModelSelect
+          title='Select a Model'
+          label='Models'
+          className='border-none w-[180px]'
           seperator={true}
           value={selectedModel?.value || selectedModel?.id || ""}
           onChange={handleModelChange}
@@ -94,11 +96,10 @@ export default function ChatHeader() {
             description: model.description,
           }))}
         />
-        <div className="text-sm text-gray-600">Tokens: {tokenCount}</div>
       </div>
       <Link
-        href="/pricing"
-        className="text-white px-6 lg:px-10 py-3 lg:py-3 rounded-lg lg:rounded-xl link-btn w-full sm:w-auto text-center"
+        href='/pricing'
+        className='text-white px-6 lg:px-10 py-3 lg:py-3 rounded-lg lg:rounded-xl link-btn w-full sm:w-auto text-center'
       >
         Upgrade Plan
       </Link>

@@ -1,3 +1,4 @@
+// app\(main)\chat\components\TypewriterEffect.jsx
 'use client';
 
 import { useState, useEffect } from 'react';

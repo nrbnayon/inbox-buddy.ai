@@ -9,19 +9,21 @@ const nextConfig = {
       },
       {
         protocol: "http",
-        hostname: "192.168.10.33",
+        hostname: "localhost",
         port: "4000",
         pathname: "/uploads/images/**",
       },
     ],
   },
   env: {
-    NEXT_PUBLIC_API_BASE_URL: process.env.NODE_ENV === 'production' 
-      ? "https://ai-chat-bot-assistant-server.vercel.app/api/v1" 
-      : "http://192.168.10.33:4000/api/v1",
-    API_BASE_URL: process.env.NODE_ENV === 'production' 
-      ? "https://ai-chat-bot-assistant-server.vercel.app/api/v1" 
-      : "http://192.168.10.33:4000/api/v1",
+    NEXT_PUBLIC_API_BASE_URL:
+      process.env.NODE_ENV === "production"
+        ? "https://ai-chat-bot-assistant-server.vercel.app/api/v1"
+        : "http://localhost:4000/api/v1",
+    API_BASE_URL:
+      process.env.NODE_ENV === "production"
+        ? "https://ai-chat-bot-assistant-server.vercel.app/api/v1"
+        : "http://localhost:4000/api/v1",
   },
   devIndicators: false,
 };

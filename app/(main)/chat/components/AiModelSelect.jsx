@@ -1,4 +1,4 @@
-// components\SelectComponent.jsx
+// app\(main) \chat\components\AiModelSelect.js
 "use client";
 
 import {
@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 
-export function SelectComponent({
+export function AiModelSelect({
   title,
   label,
   options,
@@ -41,7 +41,7 @@ export function SelectComponent({
           ))}
 
           {/* this is dummy SelectItem data */}
-          <SelectItem value='blueberry'>Blueberry</SelectItem>
+          {/* <SelectItem value='blueberry'>Blueberry</SelectItem> */}
         </SelectGroup>
       </SelectContent>
     </Select>

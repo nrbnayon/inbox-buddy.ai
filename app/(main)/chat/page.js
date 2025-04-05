@@ -1,3 +1,4 @@
+// app\(main)\chat\page.js
 import { ChatProvider } from './components/ChatContext';
 import ChatSection from './components/ChatSection';
 
