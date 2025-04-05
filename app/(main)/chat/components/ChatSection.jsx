@@ -31,7 +31,7 @@ export default function ChatSection() {
   if (loading) return <LoadingPing />;
 
   return (
-    <section className='w-full'>
+    <section className='w-full max-h-screen'>
       <ChatHeader />
       <div className='mx-auto h-full flex flex-col'>
         <div className='flex-1 overflow-auto'>
