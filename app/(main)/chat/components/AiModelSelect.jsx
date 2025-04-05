@@ -21,6 +21,8 @@ export function AiModelSelect({
   className,
 }) {
   return (
+    // console.log("Selected model:::", ???); console not work
+
     <Select>
       <SelectTrigger
         className={cn(
@@ -40,8 +42,6 @@ export function AiModelSelect({
             </SelectItem>
           ))}
 
-          {/* this is dummy SelectItem data */}
-          {/* <SelectItem value='blueberry'>Blueberry</SelectItem> */}
         </SelectGroup>
       </SelectContent>
     </Select>

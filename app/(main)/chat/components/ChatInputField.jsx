@@ -1,230 +1,137 @@
-// app\(main)\chat\components\ChatInputField.jsx
 "use client";
-
-import { useRef, useState, useEffect } from "react";
+import React, { useRef, useState } from "react";
 import { useChat } from "./ChatContext";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Paperclip, Send, X } from "lucide-react";
-import { FaCheckCircle } from "react-icons/fa";
-import { IoDocumentOutline } from "react-icons/io5";
-import { sendChatMessage, clearChatContext } from "@/lib/api/chat";
+import { sendChatMessage } from "@/lib/api/chat";
 
-export default function ChatInputField({ onMessageSent }) {
+export default function ChatInputField() {
   const [message, setMessage] = useState("");
   const [attachments, setAttachments] = useState([]);
-  const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef(null);
-  const {
-    messages,
-    addMessage,
-    clearMessages,
-    setIsTyping,
-    selectedModel,
-    setTokenCount,
-  } = useChat();
-
-  // Debug logging to inspect the selectedModel value
-  useEffect(() => {
-    console.log("Current selectedModel in ChatInputField:", selectedModel);
-  }, [selectedModel]);
-
-  const handleAttachmentClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = (e) => {
-    const files = Array.from(e.target.files);
-    if (files.length > 0) {
-      setIsUploading(true);
-      const newAttachments = files.map((file) => ({
-        id: Math.random().toString(36).substring(2, 9),
-        name: file.name,
-        type: file.type,
-        size: file.size,
-        file,
-      }));
-
-      setAttachments((prev) => [...prev, ...newAttachments]);
-      setIsUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-    }
-  };
-
-  const removeAttachment = (id) => {
-    setAttachments(attachments.filter((attachment) => attachment.id !== id));
-  };
-
-
-
-  // Get conversation history in the format expected by the API
-  const getConversationHistory = () => {
-    const history = [];
-    // Group messages in pairs of user and assistant
-    for (let i = 0; i < messages.length; i += 2) {
-      if (messages[i] && messages[i].role === "user") {
-        history.push({
-          role: "user",
-          content: messages[i].message,
-        });
-
-        if (messages[i + 1] && messages[i + 1].role === "assistant") {
-          history.push({
-            role: "assistant",
-            content: messages[i + 1].message,
-          });
-        }
-      }
-    }
-    return history;
-  };
+  const { addMessage, setIsTyping, selectedModel, messages } = useChat();
 
   const handleSendMessage = async () => {
     if (!message.trim() && attachments.length === 0) return;
 
-    // Get file if there are attachments
-    const file = attachments.length > 0 ? attachments[0].file : null;
-
-    // Create user message object
     const userMessage = {
       role: "user",
-      userName: "You",
-      userRole: "User",
-      date: new Date().toLocaleString(),
-      message: message,
-      attachments: attachments.length > 0 ? [...attachments] : [],
+      message,
+      timestamp: new Date(),
+      attachments,
     };
 
-    // Add user message to chat
     addMessage(userMessage);
+    setMessage("");
+    setAttachments([]);
     setIsTyping(true);
 
     try {
-      // Prepare conversation history
-      const history = getConversationHistory();
+      // Get the model ID from selectedModel
+      const modelId = selectedModel?.id || selectedModel?.value;
+      console.log("Selected model for message:", selectedModel);
+      console.log("Using model ID:", modelId);
 
-      // Extract the model ID using the correct property
-      const modelId = selectedModel?.id || selectedModel?.value || null;
+      // We won't send chat history from the frontend
+      // Let the backend manage its own history
 
-      console.log("Sending message with model ID:", modelId);
+      // Send the message directly with all parameters
+      const response = await sendChatMessage(
+        message,
+        attachments.length > 0 ? attachments[0].file : null,
+        modelId
+      );
 
-      // Send message with file and selected model ID
-      const response = await sendChatMessage(message, file, modelId);
-
-      setIsTyping(false);
-
-      // Create assistant message object
       const assistantMessage = {
         role: "assistant",
-        userName: "AI Assistant",
-        userRole: "Assistant",
-        date: new Date().toLocaleString(),
         message: response.message,
+        timestamp: new Date(),
       };
 
-      // Add assistant response to chat
       addMessage(assistantMessage);
-
-      // Update token count
-      setTokenCount((prev) => prev + (response.tokenCount || 0));
-
-      // Clear message and attachments
-      setMessage("");
-      setAttachments([]);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-
-      // Call callback if provided
-      onMessageSent?.();
     } catch (error) {
       console.error("Failed to send message:", error);
+      addMessage({
+        role: "assistant",
+        message: "Sorry, there was an error processing your message.",
+        timestamp: new Date(),
+      });
+    } finally {
       setIsTyping(false);
     }
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    setAttachments(
+      files.map((file) => ({
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        file,
+      }))
+    );
+    fileInputRef.current.value = "";
   };
 
   return (
-    <div className="w-full mx-auto flex flex-col mt-6">
-      {(attachments.length > 0 || isUploading) && (
-        <div className="order-1 md:order-2 mb-3 md:mt-3 md:mb-0 flex items-center gap-1 md:gap-3">
-          <p className="text-sm font-medium mb-2 md:mb-0 hidden md:inline-flex">
-            Attachments:
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {isUploading && (
-              <div className="flex items-center gap-2 border rounded-md px-3 py-2 bg-background text-sm">
-                <p className="animate-pulse">Uploading...</p>
-              </div>
-            )}
-
-            {attachments.map((attachment) => (
-              <div
-                key={attachment.id}
-                className="flex items-center gap-2 border border-blue-500 rounded-md px-3 py-2 bg-background text-sm group"
+    <div className='flex flex-col gap-4'>
+      {attachments.length > 0 && (
+        <div className='flex flex-wrap gap-2'>
+          {attachments.map((file, index) => (
+            <div
+              key={index}
+              className='flex items-center gap-2 bg-gray-100 rounded px-3 py-1'
+            >
+              <span>📎 {file.name}</span>
+              <button
+                onClick={() =>
+                  setAttachments((prev) => prev.filter((_, i) => i !== index))
+                }
+                className='text-red-500 hover:text-red-700'
               >
-                <span className="bg-[#D1E9FF] rounded-full p-1">
-                  <IoDocumentOutline className="h-4 w-4 text-blue-500" />
-                </span>
-                <span className="max-w-[200px] truncate">
-                  {attachment.name}
-                </span>
-                <FaCheckCircle className="h-4 w-4 text-blue-500" />
-                <button
-                  onClick={() => removeAttachment(attachment.id)}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity ml-1"
-                >
-                  <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
-                </button>
-              </div>
-            ))}
-          </div>
+                ×
+              </button>
+            </div>
+          ))}
         </div>
       )}
 
-      <div className="order-2 md:order-1 relative flex items-start gap-2">
-        <div className="flex-1 relative">
-          <Textarea
-            placeholder="Write message here"
+      <div className='flex items-end gap-2'>
+        <div className='flex-1'>
+          <textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={handleKeyDown}
-            className="h-[128px] resize-none pr-4 py-3 rounded-xl border bg-background focus-visible:ring-0"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSendMessage();
+              }
+            }}
+            placeholder='Type your message...'
+            className='w-full rounded-lg border p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none'
+            rows={3}
           />
         </div>
 
-        <div className="flex flex-col gap-2">
-          <Button
-            variant="outline"
-            size="icon"
-            className="rounded-xl h-12 w-12 border-muted"
-            onClick={handleAttachmentClick}
+        <div className='flex gap-2'>
+          <button
+            onClick={() => fileInputRef.current.click()}
+            className='p-3 rounded-lg border hover:bg-gray-50'
           >
-            <Paperclip className="h-5 w-5" />
-          </Button>
-
-          <Button
-            size="icon"
-            className="rounded-xl h-12 w-12 link-btn cursor-pointer"
+            📎
+          </button>
+          <button
             onClick={handleSendMessage}
+            className='bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600'
           >
-            <Send className="h-5 w-5" />
-          </Button>
+            Send
+          </button>
         </div>
 
         <input
-          type="file"
+          type='file'
           ref={fileInputRef}
           onChange={handleFileChange}
-          className="hidden"
+          className='hidden'
           multiple
         />
       </div>

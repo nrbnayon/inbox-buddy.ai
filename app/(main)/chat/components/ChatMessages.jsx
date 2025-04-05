@@ -1,40 +1,29 @@
 // app\(main)\chat\components\ChatMessages.jsx
-'use client';
-
-import { useChat } from './ChatContext';
-import ChatCard from './ChatCard';
-import { useEffect, useRef } from 'react';
-import TypewriterEffect from './TypewriterEffect';
+"use client";
+import React from "react";
+import { useChat } from "./ChatContext";
+import ChatMessage from "./ChatMessage";
 
 export default function ChatMessages() {
   const { messages, isTyping } = useChat();
-  const messagesEndRef = useRef(null);
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isTyping]);
 
   return (
-    <div className="space-y-6">
+    <div className='space-y-6'>
       {messages.map((message, index) => (
-        <ChatCard
-          key={index}
-          {...message}
-          senderUser={message.role === 'user'}
-        />
+        <ChatMessage key={index} {...message} />
       ))}
-      
+
       {isTyping && (
-        <ChatCard
-          userName="AI Assistant"
-          userRole="Assistant"
-          avatarUrl="/ai-avatar.png"
-          date={new Date().toLocaleString()}
-          message={<TypewriterEffect />}
+        <ChatMessage
+          role='assistant'
+          message={
+            <div className='flex items-center gap-2'>
+              <span>Thinking</span>
+              <span className='animate-pulse'>...</span>
+            </div>
+          }
         />
       )}
-      
-      <div ref={messagesEndRef} />
     </div>
   );
 }

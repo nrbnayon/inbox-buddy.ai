@@ -5,7 +5,9 @@ import ChatSection from './components/ChatSection';
 export default function ChatPage() {
   return (
     <ChatProvider>
-      <ChatSection />
+      <div className="min-h-screen bg-gray-50">
+        <ChatSection />
+      </div>
     </ChatProvider>
   );
 }

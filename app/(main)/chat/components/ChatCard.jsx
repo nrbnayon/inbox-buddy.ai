@@ -1,5 +1,5 @@
 // app\(main)\chat\components\ChatCard.jsx
-'use client';
+"use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import { FaCheckCircle } from "react-icons/fa";
 import { IoDocumentOutline } from "react-icons/io5";
 import { cn } from "@/lib/utils";
+import ReactMarkdown from "react-markdown"; // For markdown rendering
 
 export default function ChatCard({
   userName = "Hamid R Mousazade",
@@ -21,36 +22,77 @@ export default function ChatCard({
   senderUser,
   className,
 }) {
+  // Detect message format
+  const renderMessage = () => {
+    // Check if message is a stringified JSON
+    if (
+      typeof message === "string" &&
+      message.trim().startsWith("{") &&
+      message.trim().endsWith("}")
+    ) {
+      try {
+        const json = JSON.parse(message);
+        return (
+          <pre className='text-sm sm:text-base'>
+            {JSON.stringify(json, null, 2)}
+          </pre>
+        );
+      } catch {
+        // Not valid JSON, treat as plain text
+      }
+    }
+    // Check if message contains HTML tags
+    if (typeof message === "string" && /<[^>]+>/.test(message)) {
+      return (
+        <div
+          className='text-sm sm:text-base'
+          dangerouslySetInnerHTML={{ __html: message }}
+        />
+      );
+    }
+    // Check if message looks like markdown (e.g., contains #, *, etc.)
+    if (
+      typeof message === "string" &&
+      (/^#+\s/.test(message) || /\*.*\*/.test(message) || /`.*`/.test(message))
+    ) {
+      return (
+        <ReactMarkdown className='text-sm sm:text-base'>
+          {message}
+        </ReactMarkdown>
+      );
+    }
+    // Default to plain text
+    return <span className='text-sm sm:text-base block'>{message}</span>;
+  };
+
   return (
     <Card className={cn("w-full gap-2 py-5 shadow-none", className)}>
       <CardContent>
-        <div className="flex flex-col space-y-4">
+        <div className='flex flex-col space-y-4'>
           {/* Header with user info and date */}
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-3">
-              <Avatar className="h-10 w-10 border">
+          <div className='flex items-start justify-between'>
+            <div className='flex items-center gap-3'>
+              <Avatar className='h-10 w-10 border'>
                 <AvatarImage src={avatarUrl} alt={userName} />
                 <AvatarFallback>{userName.slice(0, 2)}</AvatarFallback>
               </Avatar>
               <div>
-                <h3 className="font-medium text-sm sm:text-base">{userName}</h3>
+                <h3 className='font-medium text-sm sm:text-base'>{userName}</h3>
                 <Badge
-                  variant="outline"
-                  className="text-xs font-normal px-2 py-0 bg-[#D1E9FF] text-[#175CD3]"
+                  variant='outline'
+                  className='text-xs font-normal px-2 py-0 bg-[#D1E9FF] text-[#175CD3]'
                 >
                   {userRole}
                 </Badge>
               </div>
             </div>
-            <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">
+            <span className='text-xs text-muted-foreground whitespace-nowrap ml-2'>
               {date}
             </span>
           </div>
 
           {/* Message content */}
-          <div className="py-2">
-            <span className="text-sm sm:text-base block">{message}</span>
-          </div>
+          <div className='py-2'>{renderMessage()}</div>
         </div>
       </CardContent>
 
@@ -58,20 +100,20 @@ export default function ChatCard({
         <>
           <Separator />
           <CardFooter>
-            <div className="w-full flex items-center gap-4">
-              <span className="text-sm font-medium">Attachments:</span>
-              <div className="flex flex-wrap gap-2">
+            <div className='w-full flex items-center gap-4'>
+              <span className='text-sm font-medium'>Attachments:</span>
+              <div className='flex flex-wrap gap-2'>
                 {attachments.map((attachment, index) => (
                   <div
                     key={index}
-                    className="flex items-center gap-2 border border-[#2E90FA] rounded-md px-3 py-2 bg-background text-sm"
+                    className='flex items-center gap-2 border border-[#2E90FA] rounded-md px-3 py-2 bg-background text-sm'
                   >
-                    <span className="bg-[#D1E9FF] rounded-full p-1">
-                      <IoDocumentOutline className="h-4 w-4 text-blue-500" />
+                    <span className='bg-[#D1E9FF] rounded-full p-1'>
+                      <IoDocumentOutline className='h-4 w-4 text-blue-500' />
                     </span>
                     <span>{attachment.name}</span>
                     {attachment.isSelected && (
-                      <FaCheckCircle className="h-4 w-4 text-blue-500 ml-1" />
+                      <FaCheckCircle className='h-4 w-4 text-blue-500 ml-1' />
                     )}
                   </div>
                 ))}
