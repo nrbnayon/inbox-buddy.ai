@@ -3,7 +3,6 @@ import Sidebar from "@/components/layout/Sidebar";
 import { cookies } from "next/headers";
 import { getUserData } from "@/lib/server-api";
 import LoadingPing from "@/components/LoadingPing";
-import { ChatProvider } from "./chat/components/ChatContext";
 
 export default async function RootLayout({ children }) {
   // Await the cookies function
@@ -34,9 +33,7 @@ export default async function RootLayout({ children }) {
 
   return (
     <section className="bg-white">
-      <ChatProvider>
         <Sidebar user={user}>{children}</Sidebar>
-      </ChatProvider>
     </section>
   );
 }

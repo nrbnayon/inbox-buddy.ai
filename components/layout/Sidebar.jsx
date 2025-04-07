@@ -223,7 +223,8 @@ const Sidebar = ({ children, user }) => {
           </div>
         </header>
         <section className='w-full max-h-[calc(100vh-10px)] overflow-hidden p-2 md:px-10'>
-          {pathName === "/chat" && children}
+          {pathName === "/chat"}
+          {children}
         </section>
       </div>
 
