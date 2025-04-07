@@ -36,10 +36,8 @@ export default function ChatInputField({ onMessageSent }) {
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
     if (files.length > 0) {
-      // Limit to only one file to match the backend implementation
       const file = files[0];
 
-      // Check file type
       const supportedTypes = [
         "text/plain",
         "application/pdf",
@@ -59,7 +57,6 @@ export default function ChatInputField({ onMessageSent }) {
       setIsUploading(true);
       setError(null);
 
-      // Only add the first file as an attachment
       const newAttachment = {
         id: Math.random().toString(36).substring(2, 9),
         name: file.name,
@@ -68,7 +65,7 @@ export default function ChatInputField({ onMessageSent }) {
         file,
       };
 
-      setAttachments([newAttachment]); // Replace existing attachments
+      setAttachments([newAttachment]);
       setIsUploading(false);
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
@@ -82,7 +79,6 @@ export default function ChatInputField({ onMessageSent }) {
 
   const getConversationHistory = () => {
     try {
-      // Filter out valid messages with both 'role' and 'message' properties
       const validMessages = messages.filter(
         (msg) =>
           msg &&
@@ -91,20 +87,18 @@ export default function ChatInputField({ onMessageSent }) {
           msg.message !== undefined
       );
 
-      // Create a properly formatted history array
       const history = validMessages.map((msg) => ({
         role: msg.role,
         content: msg.message,
       }));
 
-      // Debug log
       console.log("Processing messages:", JSON.stringify(messages));
       console.log("Created history:", JSON.stringify(history));
 
       return history;
     } catch (error) {
       console.error("Error formatting conversation history:", error);
-      return []; // Return empty history on error
+      return [];
     }
   };
 
@@ -115,7 +109,6 @@ export default function ChatInputField({ onMessageSent }) {
     setError(null);
 
     try {
-      // Get only the first file (if any)
       const file = attachments.length > 0 ? attachments[0].file : null;
 
       const userMessage = {
@@ -124,22 +117,23 @@ export default function ChatInputField({ onMessageSent }) {
         userRole: "User",
         date: new Date().toLocaleString(),
         message: message,
-        attachments: attachments.length > 0 ? [...attachments] : [],
+        attachments: [...attachments], // Include attachments in the message
       };
+
+      // Immediately clear attachments from UI
+      setAttachments([]);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
 
       addMessage(userMessage);
       setIsTyping(true);
 
-      // Get model ID
       let modelId = selectedModel?.id || selectedModel?.value || null;
-      console.log("Selected model for message:", selectedModel);
-      console.log("Using model ID:", modelId);
 
-      // Get history if needed
       const history = getConversationHistory();
 
       try {
-        // Try sending the message
         const response = await sendChatMessage(message, file, modelId, history);
 
         setIsTyping(false);
@@ -158,17 +152,13 @@ export default function ChatInputField({ onMessageSent }) {
         }
 
         setMessage("");
-        setAttachments([]);
-        if (fileInputRef.current) {
-          fileInputRef.current.value = "";
-        }
+        // Attachments already cleared above
 
         onMessageSent?.();
       } catch (error) {
         console.error("Failed to send message:", error);
         setIsTyping(false);
 
-        // Show error to user
         const errorMessage = {
           role: "assistant",
           userName: "AI Assistant",
@@ -199,42 +189,42 @@ export default function ChatInputField({ onMessageSent }) {
   };
 
   return (
-    <div className='w-full mx-auto flex flex-col mt-6'>
+    <div className="w-full mx-auto flex flex-col">
       {error && (
-        <div className='order-0 p-2 mb-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm'>
+        <div className="order-0 p-2 mb-3 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm">
           {error}
         </div>
       )}
 
       {(attachments.length > 0 || isUploading) && (
-        <div className='order-1 md:order-2 mb-3 md:mt-3 md:mb-0 flex items-center gap-1 md:gap-3'>
-          <p className='text-sm font-medium mb-2 md:mb-0 hidden md:inline-flex'>
+        <div className="order-1 md:order-2 mb-3 md:mt-3 md:mb-0 flex items-center gap-1 md:gap-3">
+          <p className="text-sm font-medium mb-2 md:mb-0 hidden md:inline-flex">
             Attachments:
           </p>
-          <div className='flex flex-wrap gap-2'>
+          <div className="flex flex-wrap gap-2">
             {isUploading && (
-              <div className='flex items-center gap-2 border rounded-md px-3 py-2 bg-background text-sm'>
-                <p className='animate-pulse'>Uploading...</p>
+              <div className="flex items-center gap-2 border rounded-md px-3 py-2 bg-background text-sm">
+                <p className="animate-pulse">Uploading...</p>
               </div>
             )}
 
             {attachments.map((attachment) => (
               <div
                 key={attachment.id}
-                className='flex items-center gap-2 border border-blue-500 rounded-md px-3 py-2 bg-background text-sm group'
+                className="flex items-center gap-2 border border-blue-500 rounded-md px-3 py-2 bg-background text-sm group"
               >
-                <span className='bg-[#D1E9FF] rounded-full p-1'>
-                  <IoDocumentOutline className='h-4 w-4 text-blue-500' />
+                <span className="bg-[#D1E9FF] rounded-full p-1">
+                  <IoDocumentOutline className="h-4 w-4 text-blue-500" />
                 </span>
-                <span className='max-w-[200px] truncate'>
+                <span className="max-w-[200px] truncate">
                   {attachment.name}
                 </span>
-                <FaCheckCircle className='h-4 w-4 text-blue-500' />
+                <FaCheckCircle className="h-4 w-4 text-blue-500" />
                 <button
                   onClick={() => removeAttachment(attachment.id)}
-                  className='opacity-0 group-hover:opacity-100 transition-opacity ml-1'
+                  className="opacity-0 group-hover:opacity-100 transition-opacity ml-1"
                 >
-                  <X className='h-4 w-4 text-muted-foreground hover:text-foreground' />
+                  <X className="h-4 w-4 text-muted-foreground hover:text-foreground" />
                 </button>
               </div>
             ))}
@@ -242,45 +232,45 @@ export default function ChatInputField({ onMessageSent }) {
         </div>
       )}
 
-      <div className='order-2 md:order-1 relative flex items-start gap-2'>
-        <div className='flex-1 relative'>
+      <div className="order-2 md:order-1 relative flex items-start gap-2">
+        <div className="flex-1 relative">
           <Textarea
-            placeholder='Write message here'
+            placeholder="Write message here"
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyDown={handleKeyDown}
-            className='h-[128px] resize-none pr-4 py-3 rounded-xl border bg-background focus-visible:ring-0'
+            className="h-[128px] resize-none pr-4 py-3 rounded-xl border bg-background focus-visible:ring-0"
             disabled={isSending}
           />
         </div>
 
-        <div className='flex flex-col gap-2'>
+        <div className="flex flex-col gap-2">
           <Button
-            variant='outline'
-            size='icon'
-            className='rounded-xl h-12 w-12 border-muted'
+            variant="outline"
+            size="icon"
+            className="rounded-xl h-12 w-12 border-muted"
             onClick={handleAttachmentClick}
             disabled={isSending}
           >
-            <Paperclip className='h-5 w-5' />
+            <Paperclip className="h-5 w-5" />
           </Button>
 
           <Button
-            size='icon'
-            className='rounded-xl h-12 w-12 link-btn cursor-pointer'
+            size="icon"
+            className="rounded-xl h-12 w-12 link-btn cursor-pointer"
             onClick={handleSendMessage}
             disabled={isSending}
           >
-            <Send className='h-5 w-5' />
+            <Send className="h-5 w-5" />
           </Button>
         </div>
 
         <input
-          type='file'
+          type="file"
           ref={fileInputRef}
           onChange={handleFileChange}
-          className='hidden'
-          accept='.txt,.pdf,.docx,text/plain,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+          className="hidden"
+          accept=".txt,.pdf,.docx,text/plain,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
         />
       </div>
     </div>

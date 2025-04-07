@@ -130,7 +130,7 @@ export const setCookiesAction = async (tokens) => {
 };
 
 export const refreshTokenAction = async () => {
-  const cookieStore =await cookies();
+  const cookieStore = await cookies();
   const refreshToken = cookieStore.get("refreshToken")?.value;
 
   if (!refreshToken) {
@@ -180,4 +180,13 @@ export const refreshTokenAction = async () => {
     console.error("Token refresh failed:", error);
     return { success: false, message: error.message };
   }
+};
+
+export const getTokensFromCookies = async () => {
+  const cookieStore = await cookies();
+
+  const accessToken = cookieStore.get("accessToken")?.value;
+  const refreshToken = cookieStore.get("refreshToken")?.value;
+
+  return { accessToken, refreshToken };
 };

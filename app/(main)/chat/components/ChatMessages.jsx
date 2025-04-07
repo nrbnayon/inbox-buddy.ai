@@ -17,36 +17,39 @@ export default function ChatMessages() {
   }, [messages, isTyping]);
 
   return (
-    <div className='space-y-6'>
-      {messages.map((message, index) => (
-        <ChatCard
-          key={index}
-          userName={message.userName}
-          userRole={message.userRole}
-          avatarUrl={message.avatarUrl}
-          date={message.date}
-          message={
-            message.userRole === "Assistant" ? (
-              <ReactMarkdown>{message.message}</ReactMarkdown>
-            ) : (
-              message.message
-            )
-          }
-          senderUser={message.userRole === "user"}
-        />
-      ))}
+    <div className="flex flex-col justify-between h-full">
+      <div className="space-y-6 overflow-y-scroll messages scroll-smooth flex flex-col">
+        {messages.map((message, index) => (
+          <ChatCard
+            key={index}
+            userName={message.userName}
+            userRole={message.userRole}
+            avatarUrl={message.avatarUrl}
+            date={message.date}
+            message={
+              message.userRole === "Assistant" ? (
+                <ReactMarkdown>{message.message}</ReactMarkdown>
+              ) : (
+                message.message
+              )
+            }
+            attachments={message.attachments}
+            senderUser={message.userRole === "User"}
+          />
+        ))}
 
-      {isTyping && (
-        <ChatCard
-          userName='AI Assistant'
-          userRole='Assistant'
-          avatarUrl='🤖'
-          date={new Date().toLocaleString()}
-          message={<TypewriterEffect />}
-        />
-      )}
+        {isTyping && (
+          <ChatCard
+            userName="AI Assistant"
+            userRole="Assistant"
+            avatarUrl="🤖"
+            date={new Date().toLocaleString()}
+            message={<TypewriterEffect />}
+          />
+        )}
 
-      <div ref={messagesEndRef} />
+        <div ref={messagesEndRef} />
+      </div>
     </div>
   );
 }
