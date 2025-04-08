@@ -7,13 +7,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { InboxIcon, Mail, MessageCircleQuestion, User } from "lucide-react";
 import Link from "next/link";
 import InputField from "./InputField";
+import { joinWaitingListAction } from "@/app/actions/authActions";
 
 export default function SignUpForm() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    inboxCount: "",
-    painPoint: "",
+    inbox: "",
+    description: "",
   });
 
   const handleChange = (e) => {
@@ -24,10 +25,11 @@ export default function SignUpForm() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
-    // Add your form submission logic here
+    const res = await joinWaitingListAction(formData);
+
+    console.log(res);
   };
 
   return (
@@ -63,7 +65,7 @@ export default function SignUpForm() {
         {/* inbox count */}
         <InputField
           icon={InboxIcon}
-          name={"inboxCount"}
+          name={"inbox"}
           type={"text"}
           placeHolder={"How many inboxes / apps would you like to connect?"}
           value={formData.inboxCount}
@@ -74,7 +76,7 @@ export default function SignUpForm() {
         <div className="relative">
           <MessageCircleQuestion className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
           <Textarea
-            name="painPoint"
+            name="description"
             placeholder="If we could fix one of your pain points, what would it be?"
             value={formData.painPoint}
             onChange={handleChange}
@@ -93,7 +95,7 @@ export default function SignUpForm() {
       </form>
 
       <div className="text-center mt-4 text-sm">
-        Already have an account?
+        Already a member?
         <Link
           href="/login"
           className="text-[#00ACDA] hover:text-[#43D4FB] ml-1"

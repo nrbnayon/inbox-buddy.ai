@@ -1,12 +1,21 @@
 import React from "react";
+import microsoftLogo from "@/public/microsoft.png";
+import Image from "next/image";
 
 export default function MicrosoftPermissions() {
   return (
     <div className="border rounded-lg p-4 bg-white shadow-sm">
       <div className="flex items-center gap-2 mb-4">
-        <div className="w-8 h-8 rounded-full bg-[#00a4ef] flex items-center justify-center text-white font-bold">
+        {/* <div className="w-8 h-8 rounded-full bg-[#00a4ef] flex items-center justify-center text-white font-bold">
           M
-        </div>
+        </div> */}
+        <Image
+          src={microsoftLogo}
+          alt="google logo"
+          width={100}
+          height={100}
+          className="size-6"
+        />
         <span className="text-gray-700">Permissions requested</span>
       </div>
 

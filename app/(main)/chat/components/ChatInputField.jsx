@@ -113,6 +113,8 @@ export default function ChatInputField({ onMessageSent }) {
         attachments: [...attachments], // Include attachments in the message
       };
 
+      setMessage("");
+
       // Immediately clear attachments from UI
       setAttachments([]);
       if (fileInputRef.current) {
@@ -129,8 +131,6 @@ export default function ChatInputField({ onMessageSent }) {
       try {
         const response = await sendChatMessage(message, file, modelId, history);
 
-        console.log(response);
-
         setIsTyping(false);
 
         const assistantMessage = {
@@ -146,7 +146,7 @@ export default function ChatInputField({ onMessageSent }) {
           setTokenCount((prev) => prev + response.tokenCount);
         }
 
-        setMessage("");
+        // setMessage("");
         // Attachments already cleared above
 
         onMessageSent?.();

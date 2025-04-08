@@ -1,7 +1,14 @@
 // app\actions\authActions.js
 "use server";
 
+import { serverAxios } from "@/lib/server-api";
 import { cookies } from "next/headers";
+
+export const joinWaitingListAction = async (formData) => {
+  const res = await serverAxios.post("/users/add-to-waiting-list", formData);
+
+  return res?.data;
+};
 
 export const logoutAction = async () => {
   const cookieStore = await cookies();

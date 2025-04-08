@@ -1,12 +1,21 @@
+import Image from "next/image";
 import React from "react";
+import googleLogo from "@/public/googleg.png";
 
 export default function GooglePermissions() {
   return (
     <div className="border rounded-lg p-4 bg-white shadow-sm">
       <div className="flex items-center gap-2 mb-4">
-        <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
+        {/* <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
           G
-        </div>
+        </div> */}
+        <Image
+          src={googleLogo}
+          alt="google logo"
+          width={100}
+          height={100}
+          className="size-6"
+        />
         <span className="text-gray-700">Select what Google can access</span>
       </div>
 

@@ -79,10 +79,10 @@ export default function ChatSection({ accessToken }) {
         </div>
 
         {/* Chat Input Field - Fixed at the bottom */}
-        <div className="mt-auto p-4 mb-6 bg-white relative">
+        <div className="mt-auto p-4 mb-6 bg-white">
           <ChatInputField />
           {messages?.length > 0 && (
-            <div className="flex justify-end mb-2 absolute top-0 left-[40%]">
+            <div className="flex justify-end mb-2 absolute top-50 -right-10 rotate-90">
               <Button
                 variant="delete"
                 disabled={isTyping}
