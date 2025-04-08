@@ -17,8 +17,8 @@ export default function ChatSection({ accessToken }) {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const data = await getUserProfile(accessToken);
-        setUserData(data);
+        const res = await getUserProfile(accessToken);
+        setUserData(res?.data);
       } catch (error) {
         console.error("Error fetching user profile:", error.message);
       } finally {
@@ -32,7 +32,7 @@ export default function ChatSection({ accessToken }) {
   if (loading) return <LoadingPing />;
 
   return (
-    <section className="w-full min-h-screen max-h-screen flex flex-col overflow-hidden">
+    <section className="w-full max-h-[100vh] h-full flex flex-col overflow-hidden">
       {/* Chat Header - Fixed at the top */}
       <ChatHeader />
 
@@ -47,7 +47,7 @@ export default function ChatSection({ accessToken }) {
               </h1>
               <p className="text-gray-500">Your email assistant</p>
               <h2 className="text-xl font-semibold mt-4">
-                Welcome {userData?.data?.name || "Nayon Kanti Halder"}!
+                Welcome {userData?.name || "Nayon Kanti Halder"}!
               </h2>
               <div className="max-w-md text-center mx-auto space-y-4">
                 <p className="text-muted-foreground">
@@ -74,7 +74,7 @@ export default function ChatSection({ accessToken }) {
               </div>
             </div>
           ) : (
-            <ChatMessages />
+            <ChatMessages userData={userData} />
           )}
         </div>
 

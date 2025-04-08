@@ -36,10 +36,9 @@ export default function TypewriterEffect() {
     <div className="flex flex-col">
       <div className="flex items-center gap-2 text-blue-600 font-medium">
         <span>
-          {currentPhrase || thinkingPhrases[0]}
-          {dots}
+          {currentPhrase || thinkingPhrases[0]} {dots}
         </span>
-        <span className="animate-pulse">▋</span>
+        {/* <span className="animate-pulse">▋</span> */}
       </div>
       <div className="mt-2">
         <div className="w-full bg-gray-100 rounded-full h-1.5 mt-1">

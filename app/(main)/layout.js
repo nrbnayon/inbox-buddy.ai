@@ -33,7 +33,7 @@ export default async function RootLayout({ children }) {
 
   return (
     <section className="bg-white">
-        <Sidebar user={user}>{children}</Sidebar>
+      <Sidebar accessToken={token}>{children}</Sidebar>
     </section>
   );
 }

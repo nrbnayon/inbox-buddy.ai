@@ -79,7 +79,7 @@ export default function Hero() {
           <div className="mt-8 flex flex-col md:flex-row w-full justify-center gap-4">
             <Link
               className="relative block w-full rounded-full px-15 py-5 text-sm font-medium text-white shadow-sm hover:bg-[#00ACDA]/90 "
-              href="/dashboard"
+              href="/connect"
             >
               <span className="absolute inset-0 rounded-full p-[2px] bg-gradient-to-r from-[#00ACDA] to-[#43D4FB]">
                 {/* <span className="flex h-full w-full items-center justify-center rounded-full bg-[#E9E9E9] text-[#252525] hover:text-[#00ACDA]"> */}

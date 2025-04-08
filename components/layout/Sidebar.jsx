@@ -16,6 +16,7 @@ import { FaUserCircle } from "react-icons/fa";
 import logoImage from "@/public/Frame 2.svg";
 import Image from "next/image";
 import ProfileModal from "../modals/ProfileModal";
+import useGetUser from "@/hooks/useGetUser";
 // import ChatHeader from "@/app/(main)/chat/components/ChatHeader";
 
 const navLinks = [
@@ -45,17 +46,20 @@ const publicRoutes = [
   "/login",
 ];
 
-const Sidebar = ({ children, user }) => {
+const Sidebar = ({ children, accessToken }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const { user } = useGetUser(accessToken);
   const pathName = usePathname();
   const router = useRouter();
 
   // Ensure the image source is an absolute URL
-  const imageSrc =
-    user?.image && user.image.length > 2
-      ? `http://localhost:4000/uploads/images/${user.image}`
-      : user?.profilePicture || "";
+  // const imageSrc =
+  //   user?.image && user.image.length > 2
+  //     ? `http://192.168.10.33:4000/uploads/images/${user.image}`
+  //     : user?.profilePicture || "";
+
+  const imageSrc = user?.profilePicture;
 
   const handleLogout = async () => {
     await logoutAction();
@@ -81,13 +85,19 @@ const Sidebar = ({ children, user }) => {
               onClick={openProfileModal}
               className="flex items-center gap-3 font-bold w-full text-left"
             >
+              {/* Log the src just before rendering */}
               <Avatar>
-                {/* Log the src just before rendering */}
                 <AvatarImage src={imageSrc} alt={user?.name} />
                 <AvatarFallback className="bg-gradient-to-r from-[#00ACDA] to-[#43D4FB] text-sm">
                   {user?.name?.charAt(0) || "N/A"}
                 </AvatarFallback>
               </Avatar>
+              {/* <Image
+                src={imageSrc}
+                alt="profile picture"
+                width={100}
+                height={100}
+              /> */}
               <div>
                 <h4 className="font-semibold text-[20px]">
                   {user?.name || "N/A"}
@@ -165,13 +175,19 @@ const Sidebar = ({ children, user }) => {
                       onClick={openProfileModal}
                       className="flex items-center gap-3 font-bold w-full text-left mb-4"
                     >
-                      <Avatar>
-                        {/* Log the src just before rendering */}
+                      {/* Log the src just before rendering */}
+                      {/* <Avatar>
                         <AvatarImage src={imageSrc} alt={user?.name} />
                         <AvatarFallback className="bg-gradient-to-r from-[#00ACDA] to-[#43D4FB] text-sm">
                           {user?.name?.charAt(0) || "N/A"}
                         </AvatarFallback>
-                      </Avatar>
+                      </Avatar> */}
+                      <Image
+                        src={imageSrc}
+                        alt="profile picture"
+                        width={100}
+                        height={100}
+                      />
                       <div>
                         <h4 className="font-semibold text-[18px]">
                           {user?.name || "N/A"}
@@ -223,7 +239,7 @@ const Sidebar = ({ children, user }) => {
             </Sheet>
           </div>
         </header>
-        <section className="w-full max-h-[calc(100vh-10px)] overflow-hidden p-2 md:px-10">
+        <section className="w-full h-screen overflow-hidden p-2 md:px-10">
           {/* {pathName === "/chat" && <ChatHeader />} */}
           {children}
         </section>

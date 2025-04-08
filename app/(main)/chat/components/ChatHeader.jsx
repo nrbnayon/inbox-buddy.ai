@@ -26,7 +26,7 @@ export default function ChatHeader() {
         if (!selectedModel && formattedModels.length > 0) {
           const defaultModel =
             // formattedModels.find((m) => m.value === "gpt-4o-mini") ||
-            formattedModels[3];
+            formattedModels[1];
           setSelectedModel(defaultModel);
         }
       } catch (error) {
@@ -40,7 +40,7 @@ export default function ChatHeader() {
   const handleModelChange = (e) => {
     const modelId = e.target.value;
     const selectedModelData = models.find((m) => m.value === modelId);
-    console.log("selected Model value:", selectedModelData);
+    // console.log("selected Model value:", selectedModelData);
 
     if (selectedModelData) {
       setSelectedModel({
@@ -52,7 +52,7 @@ export default function ChatHeader() {
   };
 
   return (
-    <div className="bg-[#F1F1F1] mt-3 p-3 lg:p-6 rounded-lg mb-3 lg:mb-6 gap-3">
+    <div className="bg-[#F1F1F1] mt-3 p-3 lg:p-6 rounded-lg mb-3 lg:mb-4 gap-3">
       <div className="w-full flex items-center justify-between gap-4 sm:w-auto">
         <select
           value={selectedModel?.value || selectedModel?.id || ""}

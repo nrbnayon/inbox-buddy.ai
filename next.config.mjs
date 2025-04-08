@@ -8,6 +8,18 @@ const nextConfig = {
         hostname: "cdn.iconscout.com",
       },
       {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+      },
+      {
+        protocol: "https",
+        hostname: "images.pexels.com",
+      },
+      {
+        protocol: "http",
+        hostname: "192.168.10.33",
+      },
+      {
         protocol: "http",
         hostname: "localhost",
         port: "4000",

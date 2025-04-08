@@ -16,18 +16,12 @@ export default function ChatInputField({ onMessageSent }) {
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState(null);
   const fileInputRef = useRef(null);
-  const {
-    messages,
-    addMessage,
-    clearMessages,
-    setIsTyping,
-    selectedModel,
-    setTokenCount,
-  } = useChat();
+  const { messages, addMessage, setIsTyping, selectedModel, setTokenCount } =
+    useChat();
 
-  useEffect(() => {
-    console.log("Current selectedModel in ChatInputField:", selectedModel);
-  }, [selectedModel]);
+  // useEffect(() => {
+  //   console.log("Current selectedModel in ChatInputField:", selectedModel);
+  // }, [selectedModel]);
 
   const handleAttachmentClick = () => {
     fileInputRef.current?.click();
@@ -112,9 +106,8 @@ export default function ChatInputField({ onMessageSent }) {
       const file = attachments.length > 0 ? attachments[0].file : null;
 
       const userMessage = {
-        role: "user",
         userName: "You",
-        userRole: "User",
+        userRole: "user",
         date: new Date().toLocaleString(),
         message: message,
         attachments: [...attachments], // Include attachments in the message
@@ -136,12 +129,14 @@ export default function ChatInputField({ onMessageSent }) {
       try {
         const response = await sendChatMessage(message, file, modelId, history);
 
+        console.log(response);
+
         setIsTyping(false);
 
         const assistantMessage = {
           role: "assistant",
-          userName: "AI Assistant",
-          userRole: "Assistant",
+          userName: "Inbox Buddy",
+          userRole: response?.modelUsed || "assistant",
           date: new Date().toLocaleString(),
           message: response.message,
         };

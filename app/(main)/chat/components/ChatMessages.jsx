@@ -7,7 +7,7 @@ import { useEffect, useRef } from "react";
 import TypewriterEffect from "./TypewriterEffect"; // Placeholder for typing animation
 import ReactMarkdown from "react-markdown";
 
-export default function ChatMessages() {
+export default function ChatMessages({ userData }) {
   const { messages, isTyping } = useChat(); // Fetch messages and typing state from context
   const messagesEndRef = useRef(null);
 
@@ -15,6 +15,8 @@ export default function ChatMessages() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
+
+  // console.log(messages);
 
   return (
     <div className="flex flex-col justify-between h-full">
@@ -24,23 +26,23 @@ export default function ChatMessages() {
             key={index}
             userName={message.userName}
             userRole={message.userRole}
-            avatarUrl={message.avatarUrl}
+            avatarUrl={userData.profilePicture}
             date={message.date}
             message={
-              message.userRole === "Assistant" ? (
+              message.userRole !== "user" ? (
                 <ReactMarkdown>{message.message}</ReactMarkdown>
               ) : (
                 message.message
               )
             }
             attachments={message.attachments}
-            senderUser={message.userRole === "User"}
+            senderUser={message.userRole === "user"}
           />
         ))}
 
         {isTyping && (
           <ChatCard
-            userName="AI Assistant"
+            userName="Inbox Buddy"
             userRole="Assistant"
             avatarUrl="🤖"
             date={new Date().toLocaleString()}

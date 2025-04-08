@@ -8,6 +8,8 @@ import { Separator } from "@/components/ui/separator";
 import { FaCheckCircle } from "react-icons/fa";
 import { IoDocumentOutline } from "react-icons/io5";
 import { cn } from "@/lib/utils"; // Utility for combining class names
+import Image from "next/image";
+import chatAvatar from "@/public/bot.png";
 
 export default function ChatCard({
   userName = "Hamid R Mousazade",
@@ -19,7 +21,6 @@ export default function ChatCard({
   senderUser = false,
   className,
 }) {
-  console.log(attachments[0]);
   return (
     <Card className={cn("w-full gap-2 py-5 shadow-none", className)}>
       <CardContent>
@@ -27,10 +28,20 @@ export default function ChatCard({
           {/* Header with user info and date */}
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
-              <Avatar className="h-10 w-10 border">
-                <AvatarImage src={avatarUrl} alt={userName} />
+              {/* <Avatar className="h-10 w-10 border">
+                <AvatarImage
+                  src={senderUser ? avatarUrl : chatAvatar}
+                  alt={userName}
+                />
                 <AvatarFallback>{userName.slice(0, 2)}</AvatarFallback>
-              </Avatar>
+              </Avatar> */}
+              <Image
+                src={senderUser ? avatarUrl : chatAvatar}
+                alt="profile pic"
+                width={100}
+                height={100}
+                className="size-9 rounded-full"
+              />
               <div>
                 <h3 className="font-medium text-sm sm:text-base">{userName}</h3>
                 <Badge
@@ -52,7 +63,6 @@ export default function ChatCard({
           </div>
         </div>
       </CardContent>
-      {console.log(senderUser && attachments.length > 0)}
       {/* Attachments (for user messages only) */}
       {senderUser && attachments.length > 0 && (
         <>
