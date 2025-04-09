@@ -1,13 +1,27 @@
-// app\connect\components\SignupForm.jsx
 "use client";
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { InboxIcon, Mail, MessageCircleQuestion, User } from "lucide-react";
+import {
+  InboxIcon,
+  Loader2,
+  Mail,
+  MessageCircleQuestion,
+  User,
+} from "lucide-react";
 import Link from "next/link";
 import InputField from "./InputField";
 import { joinWaitingListAction } from "@/app/actions/authActions";
+import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog"; // Assuming you’re using shadcn/ui for modals
 
 export default function SignUpForm() {
   const [formData, setFormData] = useState({
@@ -16,6 +30,9 @@ export default function SignUpForm() {
     inbox: "",
     description: "",
   });
+
+  const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false); // State to control modal visibility
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -27,9 +44,32 @@ export default function SignUpForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const res = await joinWaitingListAction(formData);
+    setLoading(true);
+    try {
+      const res = await joinWaitingListAction(formData);
 
-    console.log(res);
+      if (res?.entry?._id) {
+        setLoading(false);
+        toast.success(res?.message + " wait for approval");
+        setFormData({
+          name: "",
+          email: "",
+          inbox: "",
+          description: "",
+        }); // Reset the form
+        setShowModal(true); // Show the modal
+      } else {
+        setLoading(false);
+        toast.info(res.message + " Wait for approval.");
+      }
+    } catch (error) {
+      setLoading(false);
+      toast.error("Something went wrong!");
+    }
+  };
+
+  const handleModalClose = () => {
+    setShowModal(false); // Close the modal when OK is clicked
   };
 
   return (
@@ -68,7 +108,7 @@ export default function SignUpForm() {
           name={"inbox"}
           type={"text"}
           placeHolder={"How many inboxes / apps would you like to connect?"}
-          value={formData.inboxCount}
+          value={formData.inbox}
           handleChange={handleChange}
         />
 
@@ -78,7 +118,7 @@ export default function SignUpForm() {
           <Textarea
             name="description"
             placeholder="If we could fix one of your pain points, what would it be?"
-            value={formData.painPoint}
+            value={formData.description}
             onChange={handleChange}
             className="pl-10 min-h-[100px] resize-none bg-[#F2F4F7] focus-visible:ring-0"
           />
@@ -86,10 +126,17 @@ export default function SignUpForm() {
 
         <div className="flex justify-center">
           <Button
+            disabled={loading}
             type="submit"
             className="py-6 mt-6 px-24 w-[80%] rounded-full bg-gradient-to-r from-[#00ACDA] via-blue-400 to-[#43D4FB] hover:opacity-90 text-white"
           >
-            Join
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Joining...
+              </>
+            ) : (
+              "Join"
+            )}
           </Button>
         </div>
       </form>
@@ -103,6 +150,26 @@ export default function SignUpForm() {
           Login to your account
         </Link>
       </div>
+
+      {/* Modal for success notification */}
+      <Dialog open={showModal} onOpenChange={setShowModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Request Submitted</DialogTitle>
+          </DialogHeader>
+          <DialogDescription>
+            You will be notified when your request is approved.
+          </DialogDescription>
+          <DialogFooter>
+            <Button
+              onClick={handleModalClose}
+              className="bg-[#00ACDA] hover:bg-[#00ACDA]/90 text-white"
+            >
+              OK
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
