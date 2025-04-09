@@ -1,4 +1,3 @@
-// app\connect\components\InputField.jsx
 "use client";
 import { Input } from "@/components/ui/input";
 import { createElement } from "react";
@@ -10,6 +9,7 @@ export default function InputField({
   value,
   handleChange,
   placeHolder,
+  required, // Add required as a prop
 }) {
   return (
     <div className="relative">
@@ -22,6 +22,7 @@ export default function InputField({
         placeholder={placeHolder}
         value={value}
         onChange={handleChange}
+        required={required} // Pass the required prop to the Input component
         className="pl-10 focus-visible:ring-0 h-14 bg-[#F2F4F7]"
       />
     </div>

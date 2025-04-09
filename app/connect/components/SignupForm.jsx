@@ -33,6 +33,10 @@ export default function SignUpForm() {
 
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false); // State to control modal visibility
+  const [modalMessage, setModalMessage] = useState({
+    title: "",
+    description: "",
+  });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -57,10 +61,19 @@ export default function SignUpForm() {
           inbox: "",
           description: "",
         }); // Reset the form
+        setModalMessage({
+          title: "Request Submitted",
+          description: "You will be notified when your request is approved.",
+        });
         setShowModal(true); // Show the modal
       } else {
         setLoading(false);
-        toast.info(res.message + " Wait for approval.");
+        setModalMessage({
+          title: "Info",
+          description: res.message + " Wait for approval.",
+        });
+        setShowModal(true);
+        // toast.info(res.message + " Wait for approval.");
       }
     } catch (error) {
       setLoading(false);
@@ -82,7 +95,7 @@ export default function SignUpForm() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* name */}
+        {/* name - Made required */}
         <InputField
           icon={User}
           name={"name"}
@@ -90,9 +103,10 @@ export default function SignUpForm() {
           placeHolder={"Name"}
           value={formData.name}
           handleChange={handleChange}
+          required // Added required attribute
         />
 
-        {/* mail */}
+        {/* mail - Made required */}
         <InputField
           icon={Mail}
           name={"email"}
@@ -100,17 +114,18 @@ export default function SignUpForm() {
           placeHolder={"E-mail"}
           value={formData.email}
           handleChange={handleChange}
+          required // Added required attribute
         />
 
         {/* inbox count */}
-        <InputField
+        {/* <InputField
           icon={InboxIcon}
           name={"inbox"}
           type={"text"}
           placeHolder={"How many inboxes / apps would you like to connect?"}
           value={formData.inbox}
           handleChange={handleChange}
-        />
+        /> */}
 
         {/* feedback */}
         <div className="relative">
@@ -155,10 +170,10 @@ export default function SignUpForm() {
       <Dialog open={showModal} onOpenChange={setShowModal}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Request Submitted</DialogTitle>
+            <DialogTitle className="text-xl">{modalMessage?.title}</DialogTitle>
           </DialogHeader>
-          <DialogDescription>
-            You will be notified when your request is approved.
+          <DialogDescription className="text-md text-gray-600">
+            {modalMessage?.description}
           </DialogDescription>
           <DialogFooter>
             <Button
