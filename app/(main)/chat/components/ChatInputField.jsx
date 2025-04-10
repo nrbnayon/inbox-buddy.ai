@@ -86,8 +86,8 @@ export default function ChatInputField({ onMessageSent }) {
         content: msg.message,
       }));
 
-      console.log("Processing messages:", JSON.stringify(messages));
-      console.log("Created history:", JSON.stringify(history));
+      // console.log("Processing messages:", JSON.stringify(messages));
+      // console.log("Created history:", JSON.stringify(history));
 
       return history;
     } catch (error) {

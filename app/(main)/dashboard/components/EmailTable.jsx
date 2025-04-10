@@ -48,11 +48,11 @@ export default function EmailTable({ emails }) {
     setLoading(true);
     try {
       // Simulated API call - replace with your actual endpoint
-      console.log(`Performing ${action} on email ID: ${selectedEmail.id}`);
+      // console.log(`Performing ${action} on email ID: ${selectedEmail.id}`);
 
       // Simulate success
       setTimeout(() => {
-        console.log(`Email ${action}ed successfully`);
+        // console.log(`Email ${action}ed successfully`);
         handleClose();
         setLoading(false);
       }, 1000);
