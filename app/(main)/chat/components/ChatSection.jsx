@@ -124,7 +124,7 @@ export default function ChatSection({ accessToken, chatId, msgFromDb }) {
         {/* Chat Input Field - Fixed at the bottom */}
         <div className="mt-auto p-4 mb-6 bg-white">
           <ChatInputField chatId={chatId} />
-          {messages?.length > 0 && (
+          {/* {messages?.length > 0 && (
             <div className="flex justify-end mb-2 absolute top-50 -right-10 rotate-90">
               <Button
                 variant="delete"
@@ -135,7 +135,7 @@ export default function ChatSection({ accessToken, chatId, msgFromDb }) {
                 X clear chats
               </Button>
             </div>
-          )}
+          )} */}
         </div>
       </div>
     </section>
