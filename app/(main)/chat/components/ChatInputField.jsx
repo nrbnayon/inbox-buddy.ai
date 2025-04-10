@@ -132,7 +132,7 @@ export default function ChatInputField({ chatId }) {
 
       setIsTyping(false);
 
-      console.log("Ai Response: ", response);
+      // console.log("Ai Response: ", response);
 
       const assistantMessage = {
         role: "assistant",

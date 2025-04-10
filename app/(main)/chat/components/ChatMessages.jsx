@@ -20,7 +20,6 @@ export default function ChatMessages({ userData }) {
     <div className="flex flex-col justify-between h-full">
       <div className="space-y-6 overflow-y-scroll messages scroll-smooth flex flex-col">
         {messages.map((message, index) => {
-          console.log(message);
           return (
             <ChatCard
               key={index}
