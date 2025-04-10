@@ -1,0 +1,109 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { getUserProfile } from "@/lib/api/user";
+import ChatInputField from "../../components/ChatInputField";
+import LoadingPing from "@/components/LoadingPing";
+import ChatHeader from "../../components/ChatHeader";
+import { Button } from "@/components/ui/button";
+import { useChat } from "../../components/ChatContext";
+import ChatMessages from "../../components/ChatMessages";
+
+export default function SingleChatSection({ accessToken, chatId, msgFromDb }) {
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const { messages, setMessages, clearMessages, isTyping } = useChat();
+
+  console.log("chat id on chat section: ", chatId);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await getUserProfile(accessToken);
+        setUserData(res?.data);
+      } catch (error) {
+        console.error("Error fetching user profile:", error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, [accessToken]);
+
+  useEffect(() => {
+    if (msgFromDb) {
+      console.log("in chat secion: ", msgFromDb);
+      setMessages(msgFromDb);
+    }
+  }, [msgFromDb]);
+
+  if (loading) return <LoadingPing />;
+
+  return (
+    <section className="w-full max-h-[100vh] h-full flex flex-col overflow-hidden">
+      {/* Chat Header - Fixed at the top */}
+      <ChatHeader />
+
+      {/* Main chat area - Takes remaining height */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Chat Messages - Scrollable area with fixed height */}
+        <div className="flex-1 overflow-y-auto messages">
+          {messages.length === 0 ? (
+            <div className="text-center mt-24">
+              <h1 className="text-4xl font-bold mb-1 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Inbox-Buddy.AI
+              </h1>
+              <p className="text-gray-500">Your email assistant</p>
+              <h2 className="text-xl font-semibold mt-4">
+                Welcome {userData?.name || "Nayon Kanti Halder"}!
+              </h2>
+              <div className="max-w-md text-center mx-auto space-y-4">
+                <p className="text-muted-foreground">
+                  I can help you manage your emails, draft responses, find
+                  specific messages, and more. Just ask me anything!
+                </p>
+                <div className="text-sm text-muted-foreground">
+                  Try asking:
+                  <ul className="mt-1 space-y-2">
+                    <li className="group cursor-pointer transition-all duration-200 hover:bg-blue-100 hover:text-blue-800 rounded-lg hover:shadow-md">
+                      "Show my unread emails"
+                    </li>
+                    <li className="group cursor-pointer transition-all duration-200 hover:bg-blue-100 hover:text-blue-800 rounded-lg hover:shadow-md">
+                      "Find emails from [sender]"
+                    </li>
+                    <li className="group cursor-pointer transition-all duration-200 hover:bg-blue-100 hover:text-blue-800 rounded-lg hover:shadow-md">
+                      "Draft a response to [subject]"
+                    </li>
+                    <li className="group cursor-pointer transition-all duration-200 hover:bg-blue-100 hover:text-blue-800 rounded-lg hover:shadow-md">
+                      "Summarize my recent emails"
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <ChatMessages userData={userData} />
+          )}
+        </div>
+
+        {/* Chat Input Field - Fixed at the bottom */}
+        <div className="mt-auto p-4 mb-6 bg-white">
+          <ChatInputField chatId={chatId} />
+          {messages?.length > 0 && (
+            <div className="flex justify-end mb-2 absolute top-50 -right-10 rotate-90">
+              <Button
+                variant="delete"
+                disabled={isTyping}
+                className="w-fit disabled:cursor-not-allowed"
+                onClick={() => clearMessages()}
+              >
+                X clear chats
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}

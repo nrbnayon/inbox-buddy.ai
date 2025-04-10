@@ -10,6 +10,7 @@ import { IoDocumentOutline } from "react-icons/io5";
 import { cn } from "@/lib/utils"; // Utility for combining class names
 import Image from "next/image";
 import chatAvatar from "@/public/bot.png";
+import { formatDate } from "@/utils/timeutils";
 
 export default function ChatCard({
   userName = "Hamid R Mousazade",
@@ -17,10 +18,12 @@ export default function ChatCard({
   avatarUrl = "https://images.pexels.com/photos/2834009/pexels-photo-2834009.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
   date = "July 22, 2024 - 03:00pm",
   message = "Hi Inbox-Buddy! Can you summarise this doc for me and provide context to the discussion?",
-  attachments = ["abc.pdf"],
+  attachments = [],
   senderUser = false,
   className,
 }) {
+  const formattedDate = formatDate(date);
+
   return (
     <Card className={cn("w-full gap-2 py-5 shadow-none", className)}>
       <CardContent>
@@ -53,7 +56,7 @@ export default function ChatCard({
               </div>
             </div>
             <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">
-              {date}
+              {formattedDate}
             </span>
           </div>
 

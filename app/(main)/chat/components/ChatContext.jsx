@@ -23,6 +23,7 @@ export function ChatProvider({ children }) {
     <ChatContext.Provider
       value={{
         messages,
+        setMessages,
         addMessage,
         clearMessages,
         isTyping,

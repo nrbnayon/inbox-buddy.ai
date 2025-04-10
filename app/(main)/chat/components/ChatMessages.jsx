@@ -16,29 +16,37 @@ export default function ChatMessages({ userData }) {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
-  // console.log(messages);
-
   return (
     <div className="flex flex-col justify-between h-full">
       <div className="space-y-6 overflow-y-scroll messages scroll-smooth flex flex-col">
-        {messages.map((message, index) => (
-          <ChatCard
-            key={index}
-            userName={message.userName}
-            userRole={message.userRole}
-            avatarUrl={userData.profilePicture}
-            date={message.date}
-            message={
-              message.userRole !== "user" ? (
-                <ReactMarkdown>{message.message}</ReactMarkdown>
-              ) : (
-                message.message
-              )
-            }
-            attachments={message.attachments}
-            senderUser={message.userRole === "user"}
-          />
-        ))}
+        {messages.map((message, index) => {
+          console.log(message);
+          return (
+            <ChatCard
+              key={index}
+              userName={
+                message.userName ||
+                (message.userRole === "user" ? "You" : "Inbox Buddy")
+              }
+              userRole={
+                message.userRole === "user"
+                  ? "user"
+                  : message?.model || message.userRole
+              }
+              avatarUrl={userData.profilePicture}
+              date={message.date}
+              message={
+                message.userRole !== "user" ? (
+                  <ReactMarkdown>{message.message}</ReactMarkdown>
+                ) : (
+                  message.message
+                )
+              }
+              attachments={message?.attachments}
+              senderUser={message.userRole === "user"}
+            />
+          );
+        })}
 
         {isTyping && (
           <ChatCard

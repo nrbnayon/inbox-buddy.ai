@@ -8,8 +8,9 @@ import { Paperclip, Send, X } from "lucide-react";
 import { FaCheckCircle } from "react-icons/fa";
 import { IoDocumentOutline } from "react-icons/io5";
 import { sendChatMessage, clearChatContext } from "@/lib/api/chat";
+import { usePathname, useRouter } from "next/navigation";
 
-export default function ChatInputField({ onMessageSent }) {
+export default function ChatInputField({ chatId }) {
   const [message, setMessage] = useState("");
   const [attachments, setAttachments] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -18,6 +19,9 @@ export default function ChatInputField({ onMessageSent }) {
   const fileInputRef = useRef(null);
   const { messages, addMessage, setIsTyping, selectedModel, setTokenCount } =
     useChat();
+
+  const router = useRouter();
+  const pathName = usePathname();
 
   // useEffect(() => {
   //   console.log("Current selectedModel in ChatInputField:", selectedModel);
@@ -86,9 +90,6 @@ export default function ChatInputField({ onMessageSent }) {
         content: msg.message,
       }));
 
-      // console.log("Processing messages:", JSON.stringify(messages));
-      // console.log("Created history:", JSON.stringify(history));
-
       return history;
     } catch (error) {
       console.error("Error formatting conversation history:", error);
@@ -110,67 +111,64 @@ export default function ChatInputField({ onMessageSent }) {
         userRole: "user",
         date: new Date().toLocaleString(),
         message: message,
-        attachments: [...attachments], // Include attachments in the message
+        attachments: [...attachments],
       };
 
       setMessage("");
-
-      // Immediately clear attachments from UI
       setAttachments([]);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
+      if (fileInputRef.current) fileInputRef.current.value = "";
 
       addMessage(userMessage);
       setIsTyping(true);
 
-      let modelId = selectedModel?.id || selectedModel?.value || null;
-
+      const modelId = selectedModel?.id || selectedModel?.value || null;
       const history = getConversationHistory();
+      const urls = pathName.split("/"); // Assuming pathName is defined (e.g., from usePathname)
 
-      try {
-        const response = await sendChatMessage(message, file, modelId, history);
+      const response =
+        urls.length > 2
+          ? await sendChatMessage(message, file, modelId, history, urls[2])
+          : await sendChatMessage(message, file, modelId, history);
 
-        setIsTyping(false);
+      setIsTyping(false);
 
-        const assistantMessage = {
-          role: "assistant",
-          userName: "Inbox Buddy",
-          userRole: response?.modelUsed || "assistant",
-          date: new Date().toLocaleString(),
-          message: response.message,
-        };
+      console.log("Ai Response: ", response);
 
-        addMessage(assistantMessage);
-        if (response.tokenCount) {
-          setTokenCount((prev) => prev + response.tokenCount);
-        }
+      const assistantMessage = {
+        role: "assistant",
+        userName: "Inbox Buddy",
+        userRole: response?.model || "assistant",
+        date: new Date().toLocaleString(),
+        message: response.message,
+      };
 
-        // setMessage("");
-        // Attachments already cleared above
+      addMessage(assistantMessage);
+      if (response.tokenCount) {
+        setTokenCount((prev) => prev + response.tokenCount);
+      }
 
-        onMessageSent?.();
-      } catch (error) {
-        console.error("Failed to send message:", error);
-        setIsTyping(false);
+      if (response?.chatId && response.chatId !== chatId) {
+        router.replace(`/chat/${response.chatId}`, { scroll: false });
 
-        const errorMessage = {
-          role: "assistant",
-          userName: "AI Assistant",
-          userRole: "Assistant",
-          date: new Date().toLocaleString(),
-          message: `I'm having trouble responding right now. ${
-            error.message || "Please try again later."
-          }`,
-        };
-
-        addMessage(errorMessage);
-        setError(error.message);
+        // You can also try just updating the URL without any navigation
+        window.history.replaceState(null, "", `/chat/${response.chatId}`);
       }
     } catch (error) {
       console.error("Failed to send message:", error);
       setIsTyping(false);
       setError(error.message);
+
+      const errorMessage = {
+        role: "assistant",
+        userName: "AI Assistant",
+        userRole: "Assistant",
+        date: new Date().toLocaleString(),
+        message: `I'm having trouble responding right now. ${
+          error.message || "Please try again later."
+        }`,
+      };
+
+      addMessage(errorMessage);
     } finally {
       setIsSending(false);
     }
