@@ -31,11 +31,11 @@ const nextConfig = {
     NEXT_PUBLIC_API_BASE_URL:
       process.env.NODE_ENV === "production"
         ? "https://ai-chat-bot-assistant-server.vercel.app/api/v1"
-        : "https://2cad-115-127-156-9.ngrok-free.app/api/v1",
+        : "https://3afb-115-127-156-9.ngrok-free.app/api/v1",
     API_BASE_URL:
       process.env.NODE_ENV === "production"
         ? "https://ai-chat-bot-assistant-server.vercel.app/api/v1"
-        : "https://2cad-115-127-156-9.ngrok-free.app/api/v1",
+        : "https://3afb-115-127-156-9.ngrok-free.app/api/v1",
   },
   devIndicators: false,
 };
