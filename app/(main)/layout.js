@@ -1,5 +1,5 @@
 // import Sidebar from "@/components/layout/Sidebar";
-import Sidebar from "@/components/layout/Sidebar";
+import Sidebar from "@/components/layout/sidebar/Sidebar";
 import { cookies } from "next/headers";
 import { getUserData } from "@/lib/server-api";
 import LoadingPing from "@/components/LoadingPing";

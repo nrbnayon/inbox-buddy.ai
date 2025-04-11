@@ -36,6 +36,10 @@ export default function ChatSection({ accessToken, chatId, msgFromDb }) {
     if (msgFromDb) {
       setMessages(msgFromDb);
     }
+
+    return () => {
+      setMessages([]);
+    };
   }, [msgFromDb]);
 
   if (loading) return <LoadingPing />;

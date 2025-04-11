@@ -139,7 +139,6 @@ export default function ChatInputField({ chatId }) {
 
       if (urls?.length < 3) {
         if (response?.success) {
-          // console.log(response?.chatId);
           const res = await axiosInstance(`/chats/${response?.chatId}`);
 
           setChats((prev) => [...prev, res?.data?.data]);

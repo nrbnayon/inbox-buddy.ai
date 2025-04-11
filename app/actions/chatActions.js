@@ -17,10 +17,18 @@ export const getChatById = async (chatId) => {
   try {
     const res = await axiosInstance(`/chats/${chatId}`);
 
-    // console.log("Chat by id response: ", res?.data);
     return res;
   } catch (error) {
-    console.log("Error during get chats by id", error);
+    // console.log("Error during get chats by id", error);
+    return error;
+  }
+};
+
+export const updateChatById = async (chatId) => {
+  try {
+    console.log(chatId);
+  } catch (error) {
+    console.log("Error during update chat by id", error);
     return error;
   }
 };
