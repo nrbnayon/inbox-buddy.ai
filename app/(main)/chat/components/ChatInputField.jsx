@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
-import { useChat } from "./ChatContext";
+import { useChat } from "../../contexts/ChatContext";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Paperclip, Send, X } from "lucide-react";
@@ -9,6 +9,7 @@ import { FaCheckCircle } from "react-icons/fa";
 import { IoDocumentOutline } from "react-icons/io5";
 import { sendChatMessage, clearChatContext } from "@/lib/api/chat";
 import { usePathname, useRouter } from "next/navigation";
+import { axiosInstance } from "@/lib/axios";
 
 export default function ChatInputField({ chatId }) {
   const [message, setMessage] = useState("");
@@ -17,8 +18,14 @@ export default function ChatInputField({ chatId }) {
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState(null);
   const fileInputRef = useRef(null);
-  const { messages, addMessage, setIsTyping, selectedModel, setTokenCount } =
-    useChat();
+  const {
+    messages,
+    setChats,
+    addMessage,
+    setIsTyping,
+    selectedModel,
+    setTokenCount,
+  } = useChat();
 
   const router = useRouter();
   const pathName = usePathname();
@@ -130,9 +137,16 @@ export default function ChatInputField({ chatId }) {
           ? await sendChatMessage(message, file, modelId, history, urls[2])
           : await sendChatMessage(message, file, modelId, history);
 
-      setIsTyping(false);
+      if (urls?.length < 3) {
+        if (response?.success) {
+          // console.log(response?.chatId);
+          const res = await axiosInstance(`/chats/${response?.chatId}`);
 
-      // console.log("Ai Response: ", response);
+          setChats((prev) => [...prev, res?.data?.data]);
+        }
+      }
+
+      setIsTyping(false);
 
       const assistantMessage = {
         role: "assistant",

@@ -1,9 +1,10 @@
 // app\(main)\chat\page.js
 import { cookies } from "next/headers";
-import { ChatProvider } from "../components/ChatContext";
+import { ChatProvider } from "../../contexts/ChatContext";
 import ChatSection from "../components/ChatSection";
 import { axiosInstance } from "@/lib/axios";
 import SingleChatSection from "./components/SingleChatSection";
+import { getChatById } from "@/app/actions/chatActions";
 
 export default async function singleChatPage({ params }) {
   const cookieStore = await cookies();
@@ -13,7 +14,7 @@ export default async function singleChatPage({ params }) {
   let msgsFromDb;
 
   if (chatId) {
-    const res = await axiosInstance(`/chats/${chatId}`);
+    const res = await getChatById(chatId);
     msgsFromDb = res?.data?.data?.messages;
   }
 

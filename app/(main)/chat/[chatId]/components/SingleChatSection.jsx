@@ -6,7 +6,7 @@ import ChatInputField from "../../components/ChatInputField";
 import LoadingPing from "@/components/LoadingPing";
 import ChatHeader from "../../components/ChatHeader";
 import { Button } from "@/components/ui/button";
-import { useChat } from "../../components/ChatContext";
+import { useChat } from "../../../contexts/ChatContext";
 import ChatMessages from "../../components/ChatMessages";
 
 export default function SingleChatSection({ accessToken, chatId, msgFromDb }) {

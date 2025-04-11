@@ -5,18 +5,25 @@ import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
 import { GrLogout } from "react-icons/gr";
 import { MdOutlineDashboard } from "react-icons/md";
 import { MdOutlineChatBubbleOutline } from "react-icons/md";
-import { RiSettings2Line } from "react-icons/ri";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 // import ChatHeader from "@/app/(main)/chat/components/ChatHeader";
 import { usePathname, useRouter } from "next/navigation";
 import { logoutAction } from "@/app/actions/authActions";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AiOutlineMenu } from "react-icons/ai";
 import { FaUserCircle } from "react-icons/fa";
 import logoImage from "@/public/Frame 2.svg";
 import Image from "next/image";
 import ProfileModal from "../modals/ProfileModal";
 import useGetUser from "@/hooks/useGetUser";
+import { Plus, MoreHorizontal } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useChat } from "@/app/(main)/contexts/ChatContext";
 // import ChatHeader from "@/app/(main)/chat/components/ChatHeader";
 
 const navLinks = [
@@ -29,35 +36,44 @@ const navLinks = [
     path: "/chat",
     icon: MdOutlineChatBubbleOutline,
     label: "Chat",
+    isChat: true,
   },
-  {
-    path: "#",
-    icon: RiSettings2Line,
-    label: "Your Apps",
-  },
+  // {
+  //   path: "#",
+  //   icon: RiSettings2Line,
+  //   label: "Your Apps",
+  // },
 ];
 
-const publicRoutes = [
-  "/",
-  "/about",
-  "/connect",
-  "/security",
-  "/team",
-  "/login",
-];
+// Sample previous chats - in a real app, this would come from an API or state
+// const previousChats = [
+//   { id: "1", path: "/chat/previous-1", label: "Previous Chat 1" },
+//   { id: "2", path: "/chat/previous-2", label: "Previous Chat 2" },
+//   { id: "3", path: "/chat/previous-3", label: "Previous Chat 3" },
+// ];
 
-const Sidebar = ({ children, accessToken }) => {
+const publicRoutes = ["/", "/about", "/connect", "/pricing", "/team", "/login"];
+
+const Sidebar = ({ children, accessToken, previousChats }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const { user } = useGetUser(accessToken);
   const pathName = usePathname();
   const router = useRouter();
+  const [openDropdowns, setOpenDropdowns] = useState({});
+  const { chats, setChats } = useChat();
 
   // Ensure the image source is an absolute URL
   // const imageSrc =
   //   user?.image && user.image.length > 2
   //     ? `http://192.168.10.33:4000/uploads/images/${user.image}`
   //     : user?.profilePicture || "";
+
+  useEffect(() => {
+    if (previousChats) {
+      setChats(previousChats);
+    }
+  }, [previousChats]);
 
   const imageSrc = user?.profilePicture;
 
@@ -69,6 +85,20 @@ const Sidebar = ({ children, accessToken }) => {
   const openProfileModal = () => {
     setIsProfileModalOpen(true);
     setIsOpen(false);
+  };
+
+  const handleNewChat = () => {
+    router.push("/chat/new");
+  };
+
+  const handleEditChat = (id) => {
+    console.log("Edit chat:", id);
+    // Implement edit functionality
+  };
+
+  const handleDeleteChat = (id) => {
+    console.log("Delete chat:", id);
+    // Implement delete functionality
   };
 
   if (publicRoutes.includes(pathName)) {
@@ -93,7 +123,7 @@ const Sidebar = ({ children, accessToken }) => {
                 </AvatarFallback>
               </Avatar>
               {/* <Image
-                src={imageSrc}
+                src={imageSrc || "/placeholder.svg"}
                 alt="profile picture"
                 width={100}
                 height={100}
@@ -109,19 +139,105 @@ const Sidebar = ({ children, accessToken }) => {
             </button>
             <nav className="space-y-1">
               {navLinks.map((link) => (
-                <Link
-                  key={link.label}
-                  href={link.path}
-                  className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-50 ${
-                    pathName === link.path && "link-btn"
-                  }`}
-                  prefetch={false}
-                >
-                  <span className="bg-white p-[6px] flex justify-center items-center rounded-full">
-                    <link.icon size={16} color="#101010" />
-                  </span>
-                  {link.label}
-                </Link>
+                <div key={link.label}>
+                  {/* <div className="flex items-center justify-between"> */}
+                  <Link
+                    href={link.path}
+                    className={`flex justify-between items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-50 ${
+                      pathName === link.path && "link-btn"
+                    }`}
+                    prefetch={false}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="bg-white p-[6px] flex justify-center items-center rounded-full">
+                        <link.icon size={16} color="#101010" />
+                      </span>
+                      {link.label}
+                    </div>
+                    {link.isChat && (
+                      <button
+                        className="p-1 h-auto cursor-pointer"
+                        onClick={handleNewChat}
+                        title="New Chat"
+                      >
+                        <Plus size={16} />
+                        <span className="sr-only">New Chat</span>
+                      </button>
+                    )}
+                  </Link>
+
+                  {/* Show sub chats directly under Chat */}
+                  {link.isChat && (
+                    <div className="pl-8 space-y-1 mt-1">
+                      {chats.map((chat) => (
+                        <div
+                          key={chat._id}
+                          className="flex items-center justify-between group"
+                        >
+                          <Link
+                            href={`/chat/${chat?._id}`}
+                            className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-200 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-50 ${
+                              pathName === `/chat/${chat?._id}` && "link-btn"
+                            }`}
+                            prefetch={false}
+                          >
+                            <div className="flex items-center justify-between w-full">
+                              <span>{chat.name}</span>
+                              <DropdownMenu
+                                open={openDropdowns[chat._id]}
+                                onOpenChange={(open) => {
+                                  setOpenDropdowns((prev) => ({
+                                    ...prev,
+                                    [chat._id]: open,
+                                  }));
+                                }}
+                              >
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className={`p-1 h-auto hover:bg-transparent ${
+                                      openDropdowns[chat._id]
+                                        ? "opacity-100"
+                                        : "opacity-0 group-hover:opacity-100"
+                                    }`}
+                                    onClick={(e) => e.preventDefault()}
+                                  >
+                                    <MoreHorizontal size={14} />
+                                    <span className="sr-only">
+                                      More options
+                                    </span>
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent
+                                  align="end"
+                                  className="w-36"
+                                >
+                                  <DropdownMenuItem
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      handleEditChat(chat._id);
+                                    }}
+                                  >
+                                    Edit
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      handleDeleteChat(chat._id);
+                                    }}
+                                  >
+                                    Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          </Link>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               ))}
             </nav>
           </div>
@@ -156,7 +272,7 @@ const Sidebar = ({ children, accessToken }) => {
               prefetch={false}
             >
               <Image
-                src={logoImage}
+                src={logoImage || "/placeholder.svg"}
                 alt="Index Ai Logo"
                 className="w-40 lg:w-fit"
               />
@@ -176,18 +292,18 @@ const Sidebar = ({ children, accessToken }) => {
                       className="flex items-center gap-3 font-bold w-full text-left mb-4"
                     >
                       {/* Log the src just before rendering */}
-                      {/* <Avatar>
+                      <Avatar>
                         <AvatarImage src={imageSrc} alt={user?.name} />
                         <AvatarFallback className="bg-gradient-to-r from-[#00ACDA] to-[#43D4FB] text-sm">
                           {user?.name?.charAt(0) || "N/A"}
                         </AvatarFallback>
-                      </Avatar> */}
-                      <Image
-                        src={imageSrc}
+                      </Avatar>
+                      {/* <Image
+                        src={imageSrc || "/placeholder.svg"}
                         alt="profile picture"
                         width={100}
                         height={100}
-                      />
+                      /> */}
                       <div>
                         <h4 className="font-semibold text-[18px]">
                           {user?.name || "N/A"}
@@ -199,20 +315,118 @@ const Sidebar = ({ children, accessToken }) => {
                     </button>
                     <nav className="space-y-1">
                       {navLinks.map((link) => (
-                        <Link
-                          key={link.label}
-                          href={link.path}
-                          className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-50 ${
-                            pathName === link.path && "link-btn"
-                          }`}
-                          prefetch={false}
-                          onClick={() => setIsOpen(false)}
-                        >
-                          <span className="bg-white p-[6px] flex justify-center items-center rounded-full">
-                            <link.icon size={16} color="#101010" />
-                          </span>
-                          {link.label}
-                        </Link>
+                        <div key={link.label}>
+                          {/* <div className="flex items-center justify-between"> */}
+                          <Link
+                            href={link.path}
+                            className={`flex justify-between items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-50 ${
+                              pathName === link.path && "link-btn"
+                            }`}
+                            prefetch={false}
+                            onClick={() =>
+                              link.isChat ? null : setIsOpen(false)
+                            }
+                          >
+                            <div className="flex gap-2 items-center">
+                              <span className="bg-white p-[6px] flex justify-center items-center rounded-full">
+                                <link.icon size={16} color="#101010" />
+                              </span>
+                              {link.label}
+                            </div>
+                            {link.isChat && (
+                              <button
+                                className="p-1 h-auto cursor-pointer"
+                                onClick={() => {
+                                  handleNewChat();
+                                  setIsOpen(false);
+                                }}
+                                title="New Chat"
+                              >
+                                <Plus size={16} />
+                                <span className="sr-only">New Chat</span>
+                              </button>
+                            )}
+                          </Link>
+
+                          {/* Show sub chats directly under Chat for mobile */}
+                          {link.isChat && (
+                            <div className="pl-8 space-y-1 mt-1">
+                              {chats.map((chat) => (
+                                <div
+                                  key={chat._id}
+                                  className="flex items-center justify-between group"
+                                >
+                                  <Link
+                                    href={`/chat/${chat?._id}`}
+                                    className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-200 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-50 ${
+                                      pathName === chat.path && "link-btn"
+                                    }`}
+                                    prefetch={false}
+                                    onClick={() => setIsOpen(false)}
+                                  >
+                                    <div className="flex items-center justify-between w-full">
+                                      <span>{chat.name}</span>
+                                      <DropdownMenu
+                                        open={
+                                          openDropdowns[`mobile-${chat._id}`]
+                                        }
+                                        onOpenChange={(open) => {
+                                          setOpenDropdowns((prev) => ({
+                                            ...prev,
+                                            [`mobile-${chat._id}`]: open,
+                                          }));
+                                        }}
+                                      >
+                                        <DropdownMenuTrigger asChild>
+                                          <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className={`p-1 h-auto hover:bg-transparent ${
+                                              openDropdowns[
+                                                `mobile-${chat._id}`
+                                              ]
+                                                ? "opacity-100"
+                                                : ""
+                                            }`}
+                                            onClick={(e) => e.preventDefault()}
+                                          >
+                                            <MoreHorizontal size={14} />
+                                            <span className="sr-only">
+                                              More options
+                                            </span>
+                                          </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent
+                                          align="end"
+                                          className="w-36"
+                                        >
+                                          <DropdownMenuItem
+                                            onClick={(e) => {
+                                              e.preventDefault();
+                                              handleEditChat(chat._id);
+                                              setIsOpen(false);
+                                            }}
+                                          >
+                                            Edit
+                                          </DropdownMenuItem>
+                                          <DropdownMenuItem
+                                            onClick={(e) => {
+                                              e.preventDefault();
+                                              handleDeleteChat(chat._id);
+                                              setIsOpen(false);
+                                            }}
+                                          >
+                                            Delete
+                                          </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                      </DropdownMenu>
+                                    </div>
+                                  </Link>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
                       ))}
                     </nav>
                   </div>

@@ -10,6 +10,7 @@ export function ChatProvider({ children }) {
   const [selectedModel, setSelectedModel] = useState(null);
   const [tokenCount, setTokenCount] = useState(0);
   const [models, setModels] = useState([]);
+  const [chats, setChats] = useState([]);
 
   const addMessage = (message) => {
     setMessages((prevMessages) => [...prevMessages, message]);
@@ -34,6 +35,8 @@ export function ChatProvider({ children }) {
         setTokenCount,
         models,
         setModels,
+        chats,
+        setChats,
       }}
     >
       {children}

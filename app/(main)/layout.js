@@ -3,6 +3,8 @@ import Sidebar from "@/components/layout/Sidebar";
 import { cookies } from "next/headers";
 import { getUserData } from "@/lib/server-api";
 import LoadingPing from "@/components/LoadingPing";
+import { getAllChats } from "../actions/chatActions";
+import { ChatProvider } from "./contexts/ChatContext";
 
 export default async function RootLayout({ children }) {
   // Await the cookies function
@@ -21,6 +23,10 @@ export default async function RootLayout({ children }) {
     }
   }
 
+  const res = await getAllChats();
+
+  // console.log(res?.data);
+
   // Render a fallback UI if user is not available
   if (!user) {
     return (
@@ -32,8 +38,15 @@ export default async function RootLayout({ children }) {
   }
 
   return (
-    <section className="bg-white">
-      <Sidebar accessToken={token}>{children}</Sidebar>
-    </section>
+    <ChatProvider>
+      <section className="bg-white">
+        <Sidebar
+          accessToken={token}
+          previousChats={res?.data?.success ? res?.data?.data : []}
+        >
+          {children}
+        </Sidebar>
+      </section>
+    </ChatProvider>
   );
 }

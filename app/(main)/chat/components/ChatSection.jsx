@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useChat } from "./ChatContext";
+import { useChat } from "../../contexts/ChatContext";
 import { getUserProfile } from "@/lib/api/user";
 import ChatMessages from "./ChatMessages";
 import ChatInputField from "./ChatInputField";

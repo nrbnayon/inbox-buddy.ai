@@ -1,7 +1,7 @@
 // app/(main)/chat/components/ChatMessages.jsx
 "use client";
 
-import { useChat } from "./ChatContext"; // Assuming a context provides chat data
+import { useChat } from "../../contexts/ChatContext"; // Assuming a context provides chat data
 import ChatCard from "./ChatCard";
 import { useEffect, useRef } from "react";
 import TypewriterEffect from "./TypewriterEffect"; // Placeholder for typing animation
