@@ -22,6 +22,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog"; // Assuming you’re using shadcn/ui for modals
+import SmallLoader from "@/components/SmallLoader";
 
 export default function SignUpForm() {
   const [formData, setFormData] = useState({
@@ -147,7 +148,7 @@ export default function SignUpForm() {
           >
             {loading ? (
               <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Joining...
+                <SmallLoader /> Joining...
               </>
             ) : (
               "Join"

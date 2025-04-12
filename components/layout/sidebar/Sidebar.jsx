@@ -18,6 +18,7 @@ import MobileSidebarContent from "./MobileSidebar";
 // Constants
 import { publicRoutes } from "./SidebarConstants";
 import ProfileModal from "@/components/modals/ProfileModal";
+import { updateChatById } from "@/app/actions/chatActions";
 
 const Sidebar = ({ children, accessToken, previousChats }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -50,8 +51,10 @@ const Sidebar = ({ children, accessToken, previousChats }) => {
     router.push("/chat");
   };
 
-  const handleEditChat = (id) => {
-    console.log("Edit chat:", id);
+  const handleEditChat = async (id, newName) => {
+    const res = await updateChatById(id, newName);
+
+    console.log(res);
   };
 
   const handleDeleteChat = (id) => {

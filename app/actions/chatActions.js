@@ -24,9 +24,28 @@ export const getChatById = async (chatId) => {
   }
 };
 
-export const updateChatById = async (chatId) => {
+export const updateChatById = async (chatId, name) => {
   try {
-    console.log(chatId);
+    console.log({ chatId, name });
+    if (chatId) {
+      const res = await axiosInstance.put(`/chats/${chatId}`, { name });
+
+      return res.data;
+    }
+  } catch (error) {
+    console.log("Error during update chat by id", error);
+    return error;
+  }
+};
+
+export const deleteChatById = async (chatId) => {
+  try {
+    console.log({ chatId });
+    if (chatId) {
+      const res = await axiosInstance.delete(`/chats/${chatId}`);
+
+      return res.data;
+    }
   } catch (error) {
     console.log("Error during update chat by id", error);
     return error;
