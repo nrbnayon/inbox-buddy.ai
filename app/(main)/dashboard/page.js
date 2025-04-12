@@ -10,8 +10,9 @@ import meeting from "@/public/meeting.png";
 import FilterMails from "./components/FilterMails";
 import Link from "next/link";
 import EmailTable from "./components/EmailTable";
+import { axiosInstance } from "@/lib/axios";
 
-export default async function HomePage() {
+export default async function dashboardPage() {
   const emails = [
     {
       provider: "Gmail",
@@ -67,6 +68,10 @@ export default async function HomePage() {
       isRead: false,
     },
   ];
+
+  const res = await axiosInstance.get("/emails/important");
+
+  console.log(res?.data);
   return (
     <section className="flex flex-col w-full p-2 md:p-0">
       {/* welcome messages */}

@@ -120,7 +120,11 @@ const SidebarChatItem = ({
           onClick={() => isMobile && setIsOpen && setIsOpen(false)}
         >
           <div className="flex items-center justify-between w-full">
-            <span>{chat.name}</span>
+            <span>
+              {chat.name.length > 15
+                ? `${chat.name.slice(0, 15)}...`
+                : chat.name}
+            </span>
             <DropdownMenu
               open={openDropdowns[chatId]}
               onOpenChange={(open) => {
