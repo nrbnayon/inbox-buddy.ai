@@ -47,17 +47,15 @@ const Sidebar = ({ children, accessToken, previousChats }) => {
   };
 
   const handleNewChat = () => {
-    router.push("/chat/new");
+    router.push("/chat");
   };
 
   const handleEditChat = (id) => {
     console.log("Edit chat:", id);
-    // Implement edit functionality
   };
 
   const handleDeleteChat = (id) => {
     console.log("Delete chat:", id);
-    // Implement delete functionality
   };
 
   // Shared props for both desktop and mobile sidebars

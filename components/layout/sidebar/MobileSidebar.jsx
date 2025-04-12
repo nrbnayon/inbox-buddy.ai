@@ -6,7 +6,7 @@ import { GrLogout } from "react-icons/gr";
 import { FaUserCircle } from "react-icons/fa";
 import { Plus } from "lucide-react";
 import { navLinks } from "./SidebarConstants";
-import ChatItem from "./SidebarChatItems";
+import SidebarChatItem from "./SidebarChatItem";
 import UserProfile from "./SidebarUserProfile";
 
 const MobileSidebar = ({
@@ -68,9 +68,9 @@ const MobileSidebar = ({
 
               {/* Show sub chats directly under Chat for mobile */}
               {link.isChat && (
-                <div className="pl-8 space-y-1 mt-1">
+                <div className="pl-8 space-y-1 mt-1 max-h-[500px] overflow-y-auto chat-container">
                   {chats.map((chat) => (
-                    <ChatItem
+                    <SidebarChatItem
                       key={chat._id}
                       chat={chat}
                       pathName={pathName}

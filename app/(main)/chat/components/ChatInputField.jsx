@@ -141,7 +141,17 @@ export default function ChatInputField({ chatId }) {
         if (response?.success) {
           const res = await axiosInstance(`/chats/${response?.chatId}`);
 
-          setChats((prev) => [...prev, res?.data?.data]);
+          setChats((prev) => {
+            // Combine previous chats with the new chat
+            const updatedChats = [...prev, res?.data?.data];
+
+            // Sort chats so the most recent one is first (assuming 'createdAt' is the timestamp field)
+            const sortedChats = updatedChats.sort(
+              (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+            );
+
+            return sortedChats;
+          });
         }
       }
 

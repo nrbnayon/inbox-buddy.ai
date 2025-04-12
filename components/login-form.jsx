@@ -13,8 +13,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { logInAction } from "@/app/actions/authActions";
 import { useRouter } from "next/navigation";
+import { loginAction } from "@/app/actions/authActions";
 
 export function LoginForm({ className, ...props }) {
   const [loading, setLoading] = useState(false);
@@ -22,7 +22,7 @@ export function LoginForm({ className, ...props }) {
   const router = useRouter();
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); 
+    e.preventDefault();
 
     setLoading(true);
     setError(null);
@@ -35,7 +35,7 @@ export function LoginForm({ className, ...props }) {
     try {
       console.log(userData);
       // Make API call with form data
-      const res = await logInAction(userData);
+      const res = await loginAction(userData);
       if (res.success) {
         router.push("/admin");
       }
