@@ -9,7 +9,7 @@ import LoadingPing from "@/components/LoadingPing";
 import ChatHeader from "./ChatHeader";
 import { Button } from "@/components/ui/button";
 import { Bot } from "lucide-react";
-import logoImage from "@/public/Frame 2.svg";
+import logoImage from "@/public/bot.png";
 import Image from "next/image";
 
 export default function ChatSection({ accessToken, chatId, msgFromDb }) {
@@ -89,16 +89,17 @@ export default function ChatSection({ accessToken, chatId, msgFromDb }) {
             <div className="h-full flex items-center justify-center">
               <div className="text-center space-y-4 max-w-md p-8">
                 <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto">
-                  <Bot size={24} className="text-primary" />
+                  {/* <Bot size={24} className="text-primary" /> */}
+                  <Image
+                    src={logoImage}
+                    alt="Index Ai Logo"
+                    className="w-40 lg:w-fit mx-auto"
+                  />
                 </div>
                 <h3 className="text-xl font-semibold">
                   Your Email AI Assistant
                 </h3>
-                {/* <Image
-                  src={logoImage}
-                  alt="Index Ai Logo"
-                  className="w-40 lg:w-fit mx-auto"
-                /> */}
+
                 <p className="text-muted-foreground">
                   I can help you manage your emails, answer questions, and
                   provide insights about your inbox.
