@@ -12,20 +12,24 @@ export default async function RootLayout({ children }) {
   const token = cookieStore.get("accessToken");
 
   let user = null;
-  if (token) {
+  let previousChats = [];
+
+  if (token?.value) {
     try {
       const response = await getUserData(token.value);
       if (response && response.success) {
         user = response.data;
+
+        // Only fetch chats if user is successfully authenticated
+        const res = await getAllChats();
+        if (res?.data?.success) {
+          previousChats = res.data.data;
+        }
       }
     } catch (error) {
-      console.error("Failed to fetch user:", error);
+      console.error("Failed to fetch user or chats:", error);
     }
   }
-
-  const res = await getAllChats();
-
-  // console.log(res?.data);
 
   // Render a fallback UI if user is not available
   if (!user) {
@@ -40,10 +44,7 @@ export default async function RootLayout({ children }) {
   return (
     <ChatProvider>
       <section className="bg-white">
-        <Sidebar
-          accessToken={token}
-          previousChats={res?.data?.success ? res?.data?.data : []}
-        >
+        <Sidebar accessToken={token} previousChats={previousChats}>
           {children}
         </Sidebar>
       </section>

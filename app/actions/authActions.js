@@ -3,6 +3,7 @@
 
 import { serverAxios } from "@/lib/server-api";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 export const joinWaitingListAction = async (formData) => {
   const res = await serverAxios.post("/users/add-to-waiting-list", formData);
@@ -31,16 +32,16 @@ export const logoutAction = async () => {
     const data = await res.json();
 
     if (data.success) {
-      await cookieStore.delete("accessToken");
-      await cookieStore.delete("refreshToken");
-      await cookieStore.delete("auth");
+      cookieStore.delete("accessToken");
+      cookieStore.delete("refreshToken");
+      cookieStore.delete("auth");
     }
     return data;
   } catch (error) {
     console.error("Logout failed:", error);
-    await cookieStore.delete("accessToken");
-    await cookieStore.delete("refreshToken");
-    await cookieStore.delete("auth");
+    cookieStore.delete("accessToken");
+    cookieStore.delete("refreshToken");
+    cookieStore.delete("auth");
     return { success: true, message: "Logged out locally" };
   }
 };

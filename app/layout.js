@@ -1,4 +1,3 @@
-// app\layout.js
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/layout/Navbar";
@@ -19,12 +18,12 @@ export const metadata = {
 
 export default async function RootLayout({ children }) {
   const cookieStore = await cookies();
-  const auth = cookieStore.get("accessToken");
+  const accessToken = cookieStore.get("accessToken");
   return (
     <html lang="en">
       <body className={`${inter.className} antialiased`}>
         <BackgroundWrapper>
-          {!auth && <Navbar />}
+          {!accessToken?.value && <Navbar />}
           {children}
           <Toaster richColors position="top-center" />
         </BackgroundWrapper>

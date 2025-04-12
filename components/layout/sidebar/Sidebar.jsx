@@ -38,8 +38,11 @@ const Sidebar = ({ children, accessToken, previousChats }) => {
   }, [previousChats, setChats]);
 
   const handleLogout = async () => {
-    await logoutAction();
-    router.push("/");
+    const res = await logoutAction();
+
+    if (res.success) {
+      router.push("/login");
+    }
   };
 
   const openProfileModal = () => {
