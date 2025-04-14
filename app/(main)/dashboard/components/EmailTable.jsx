@@ -18,7 +18,7 @@ import {
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import gmail from "@/public/gmail.png";
-import { Archive, Reply, Trash2 } from "lucide-react";
+import { Reply, Trash2 } from "lucide-react";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
 
@@ -27,7 +27,7 @@ const extractEmail = (fromString) => {
   return match ? match[1] : fromString; // Return email or original string if no match
 };
 
-export default function EmailTable({ emails }) {
+export default function EmailTable({ emails, user }) {
   const [selectedEmail, setSelectedEmail] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -71,6 +71,7 @@ export default function EmailTable({ emails }) {
     // Try to detect content type
     const isHtml = rawBody.includes("<!DOCTYPE") || rawBody.includes("<html");
     const isMarkdown = /^#{1,6}\s|^\*\s|^\d+\.\s/.test(rawBody);
+    const hasBracketedUrls = /\[https?:\/\/[^\]]+\]/.test(rawBody);
 
     let sanitizedContent = "";
 
@@ -81,9 +82,36 @@ export default function EmailTable({ emails }) {
       // Convert markdown to HTML and sanitize
       const htmlContent = marked.parse(rawBody);
       sanitizedContent = DOMPurify.sanitize(htmlContent);
+    } else if (hasBracketedUrls) {
+      // Handle plain text emails with URLs in square brackets
+      let processedContent = rawBody
+        // Convert URLs in square brackets to actual links
+        .replace(
+          /\[(https?:\/\/[^\]]+)\]/g,
+          '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>'
+        )
+        // Convert bullet points with asterisks to HTML list items
+        .replace(/\s\*\s(.*?)(?=\n|$)/g, "<li>$1</li>")
+        // Wrap consecutive list items in a ul tag
+        .replace(/(<li>.*?<\/li>)+/g, "<ul>$&</ul>")
+        // Convert double newlines to paragraph breaks
+        .replace(/\n\n/g, "</p><p>")
+        // Convert single newlines to line breaks
+        .replace(/\n/g, "<br>");
+
+      // Wrap in paragraph tags if not already
+      if (!processedContent.startsWith("<p>")) {
+        processedContent = "<p>" + processedContent + "</p>";
+      }
+
+      sanitizedContent = DOMPurify.sanitize(processedContent);
     } else {
       // Plain text - convert to HTML and escape
-      sanitizedContent = DOMPurify.sanitize(rawBody.replace(/\n/g, "<br>"));
+      sanitizedContent = DOMPurify.sanitize(
+        "<p>" +
+          rawBody.replace(/\n\n/g, "</p><p>").replace(/\n/g, "<br>") +
+          "</p>"
+      );
     }
 
     return sanitizedContent;
@@ -118,13 +146,13 @@ export default function EmailTable({ emails }) {
                   }`}
                 >
                   <Image
-                    src={gmail}
+                    src={gmail || "/placeholder.svg"}
                     width={24}
                     height={24}
                     alt="Gmail"
                     className="mr-2"
                   />
-                  {email.provider || "Unknown"}
+                  {user?.authProvider || "Unknown"}
                 </div>
               </TableCell>
 
@@ -179,8 +207,12 @@ export default function EmailTable({ emails }) {
       </Table>
 
       {/* Email Details Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={handleClose}>
-        <DialogContent className="max-w-3xl flex flex-col">
+      <Dialog
+        open={isDialogOpen}
+        onOpenChange={handleClose}
+        className="bg-red-400"
+      >
+        <DialogContent className="max-w-3xl flex flex-col max-h-[70vh]">
           <DialogHeader>
             <DialogTitle>{selectedEmail?.subject}</DialogTitle>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -188,7 +220,7 @@ export default function EmailTable({ emails }) {
                 From: {selectedEmail?.from && extractEmail(selectedEmail?.from)}
               </span>
               <span>•</span>
-              <span>Provider: {selectedEmail?.provider || "Unknown"}</span>
+              <span>Provider: {user?.authProvider || "Unknown"}</span>
             </div>
           </DialogHeader>
           <div className="flex gap-2 py-2">
