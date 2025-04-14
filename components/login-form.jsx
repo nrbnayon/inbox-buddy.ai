@@ -68,7 +68,7 @@ export function LoginForm({ className, ...props }) {
                   id="email"
                   type="email"
                   name="email"
-                  placeholder="m@example.com"
+                  placeholder="admin@example.com"
                   required
                   disabled={loading}
                 />
