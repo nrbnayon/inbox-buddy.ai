@@ -1,8 +1,11 @@
 "use client";
-
 import { useState, useEffect } from "react";
+import { logout } from "@/lib/api/user";
+import { Button } from "@/components/ui/button";
+import { Loader2, LogOut } from "lucide-react";
 
-export default function ChatHeader() {
+export default function AdminHeader({ user }) {
+  const [loading, setLoading] = useState(false);
   const [currentTime, setCurrentTime] = useState("");
 
   // Function to format the date and time
@@ -12,14 +15,7 @@ export default function ChatHeader() {
       hour: "numeric",
       minute: "2-digit",
       hour12: true,
-      // second: "2-digit",
     });
-    const dateString = now.toLocaleDateString("en-US", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
-    // Add ordinal suffix (e.g., "12th" instead of "12")
     const day = now.getDate();
     const ordinalSuffix =
       day % 10 === 1 && day !== 11
@@ -29,26 +25,40 @@ export default function ChatHeader() {
         : day % 10 === 3 && day !== 13
         ? "rd"
         : "th";
-    const formattedDate = `${day}${ordinalSuffix} ${now.toLocaleString(
-      "en-US",
-      {
-        month: "long",
-      }
-    )}, ${now.getFullYear()}`;
-    setCurrentTime(`It's ${timeString} | ${formattedDate}`);
+    const formattedDate = `${day}${ordinalSuffix} ${now.toLocaleString("en-US", {
+      month: "long",
+    })}, ${now.getFullYear()}`;
+    setCurrentTime(`${timeString} | ${formattedDate}`);
   };
 
-  // Update time every second
+  // Initialize and update time
   useEffect(() => {
-    updateTime(); // Set initial time
-    const interval = setInterval(updateTime, 1000); // Update every second
-    return () => clearInterval(interval); // Cleanup on unmount
+    updateTime();
+    const interval = setInterval(updateTime, 60000); 
+    return () => clearInterval(interval); 
   }, []);
 
   return (
-    <div className="bg-[#F1F1F1] flex justify-between items-center p-3 lg:p-6 rounded-lg mb-3 lg:mb-6 sticky top-0">
-      <h1 className="text-xl font-semibold">Welcome Josh</h1>
-      <div className="text-lg text-gray-900">{currentTime}</div>
-    </div>
+    <header className="link-btn text-white shadow-lg p-4 lg:p-6 rounded-xl mb-6 sticky top-0 z-10">
+      <div className="max-w-7xl mx-auto flex justify-between items-center">
+        {/* Left: Welcome Message */}
+        <div className="flex items-center space-x-3">
+          {user ? (
+            <h1 className="text-xl lg:text-2xl font-bold tracking-tight">
+              Welcome, {user.firstName || user.name || "User"}
+            </h1>
+          ) : (
+            <Loader2 className="animate-spin h-6 w-6" />
+          )}
+        </div>
+
+        {/* Right: Time and Logout */}
+        <div className="flex items-center space-x-4">
+          <div className="text-sm lg:text-base font-medium">
+            It's {currentTime || "Loading time..."}
+          </div>
+        </div>
+      </div>
+    </header>
   );
 }

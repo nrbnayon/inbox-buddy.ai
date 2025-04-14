@@ -1,9 +1,3 @@
-/**
- * v0 by Vercel.
- * @see https://v0.dev/t/4p67afrMzU1
- * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
- */
-
 "use client";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -59,14 +53,14 @@ export default function AdminSidebar({ children, user }) {
             >
               <Avatar>
                 <AvatarImage src={user?.profilePicture} alt={user?.name} />
-                <AvatarFallback className="bg-gradient-to-r from-[#00ACDA] to-[#43D4FB] text-sm">
-                  N/A
+                <AvatarFallback className="bg-gradient-to-r from-[#00ACDA] to-[#43D4FB] text-sm text-white">
+                  {user?.name?.substring(0, 2).toUpperCase() || "N/A"}
                 </AvatarFallback>
               </Avatar>
-              <div>
-                <h4 className="font-semibold text-[20px]">
+              <div className='flex flex-col gap-0.5'>
+                <p className="font-semibold text-[20px]">
                   {user?.name || "N/A"}
-                </h4>
+                </p>
                 <span className="text-xs font-light text-[#101010]">
                   {user?.email || "N/A"}
                 </span>
@@ -204,7 +198,7 @@ export default function AdminSidebar({ children, user }) {
           </div>
         </header>
         <section className="p-2 pb-0 md:p-10 md:pb-0">
-          {<AdminHeader />}
+          <AdminHeader user={user} />
           {children}
         </section>
       </div>
