@@ -1,3 +1,4 @@
+// app\(main)\dashboard\components\EmailsContainer.jsx
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -14,50 +15,72 @@ import LoadingPing from "@/components/LoadingPing";
 export default function EmailsContainer({ user }) {
   const [emails, setEmails] = useState([]);
   const [emailResponse, setEmailResponse] = useState({});
-  const [currentPage, setCurrentPage] = useState(1); // Track current page
+  const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
-  // Add state for page tokens
   const [nextPageToken, setNextPageToken] = useState(null);
   const [prevPageToken, setPrevPageToken] = useState(null);
+  const [pageTokens, setPageTokens] = useState([]); // Store tokens for each page
+  const EMAILS_PER_PAGE = 5;
 
-  // Modified fetchEmails to accept pageToken
-  const fetchEmails = async (pageToken = null) => {
+  const fetchEmails = async (pageToken = null, targetPage) => {
     setLoading(true);
-    const res = await axiosInstance.get("/emails", {
-      params: { maxResults: 6, pageToken },
-    });
+    try {
+      const res = await axiosInstance.get("/emails", {
+        params: {
+          maxResults: EMAILS_PER_PAGE,
+          pageToken,
+          provider: user?.authProvider,
+          _t: Date.now(),
+        },
+      });
 
-    if (res?.data?.success) {
+      if (res?.data?.success) {
+        console.log(
+          "Received emails:",
+          res.data.emails.map((e) => e.id)
+        );
+        setEmailResponse(res?.data);
+        setEmails(res?.data?.emails);
+        setNextPageToken(res?.data?.nextPageToken);
+        setPrevPageToken(res?.data?.prevPageToken);
+
+        if (pageToken && targetPage > 1) {
+          setPageTokens((prev) => {
+            const newTokens = [...prev];
+            newTokens[targetPage - 2] = pageToken;
+            return newTokens;
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching emails:", error);
+    } finally {
       setLoading(false);
-      setEmailResponse(res?.data);
-      setEmails(res?.data?.emails);
-      // Store the page tokens from the response
-      setNextPageToken(res?.data?.nextPageToken || null);
-      setPrevPageToken(res?.data?.prevPageToken || null);
     }
   };
 
   useEffect(() => {
-    fetchEmails();
+    fetchEmails(null, 1); // Initial fetch for page 1
   }, []);
 
-  // Handle page navigation
-  const handlePageChange = (page) => {
-    if (page === currentPage + 1 && nextPageToken) {
-      // Next page
-      fetchEmails(nextPageToken);
-      setCurrentPage(page);
-    } else if (page === currentPage - 1 && prevPageToken) {
-      // Previous page
-      fetchEmails(prevPageToken);
-      setCurrentPage(page);
-    } else if (page !== currentPage) {
-      // Direct jump attempted
-      console.log(
-        `Direct jump to page ${page} not supported with current backend`
-      );
-      // Note: Sequential fetching could be implemented here if desired
+  const handlePageChange = async (page) => {
+    if (page === currentPage) return;
+
+    let tokenToUse = null;
+
+    if (page === 1) {
+      // Go to first page, no token needed
+      tokenToUse = null;
+    } else if (page > currentPage) {
+      // Moving forward
+      tokenToUse = nextPageToken;
+    } else {
+      // Moving backward
+      tokenToUse = pageTokens[page - 2] || prevPageToken; // Use token for the previous page
     }
+
+    await fetchEmails(tokenToUse, page);
+    setCurrentPage(page);
   };
 
   return (
@@ -66,9 +89,6 @@ export default function EmailsContainer({ user }) {
         <h2 className="text-[#2D3748] text-2xl font-semibold mb-5">
           Your Top Recipients
         </h2>
-        {/* <div className="block md:hidden">
-            <SearchBar />
-          </div> */}
         <FilterMails />
       </div>
 
@@ -76,17 +96,14 @@ export default function EmailsContainer({ user }) {
         <LoadingPing />
       ) : (
         <>
-          {/* emails table */}
           <div className="rounded-2xl border">
-            {/* Table for larger screens */}
-            <EmailTable emails={emails} user={user} />
+            <EmailTable key={currentPage} emails={emails} user={user} />
 
-            {/* Card layout with scrollbar for smaller screens */}
             <div className="block xl:hidden p-2">
               <div className="max-h-[40vh] overflow-y-auto space-y-4 messages">
-                {emails.map((email, index) => (
+                {emails.map((email) => (
                   <div
-                    key={index}
+                    key={email.id}
                     className="border rounded-lg p-4 bg-white shadow-sm"
                   >
                     <div className="flex items-center mb-2">
@@ -97,12 +114,12 @@ export default function EmailsContainer({ user }) {
                         alt="Gmail"
                         className="mr-2"
                       />
-                      <span className="font-medium">{email.provider}</span>
+                      <span className="font-medium">{user?.authProvider}</span>
                     </div>
                     <div className="space-y-2">
                       <p>
-                        <span className="font-semibold">Name:</span>{" "}
-                        {email.name}
+                        <span className="font-semibold">From:</span>{" "}
+                        {email.from}
                       </p>
                       <p>
                         <span className="font-semibold">Subject:</span>{" "}
@@ -114,7 +131,7 @@ export default function EmailsContainer({ user }) {
                       </p>
                       <p>
                         <span className="font-semibold">Preview:</span>{" "}
-                        {email.preview}
+                        {email.preview || email.snippet}
                       </p>
                     </div>
                   </div>
@@ -123,20 +140,22 @@ export default function EmailsContainer({ user }) {
             </div>
           </div>
 
-          {/* paginations */}
           <div className="flex flex-col md:flex-row items-end justify-between mt-8 md:items-center">
             <Link
               href="/chat"
               className="link-btn w-[230px] px-6 py-2 rounded-full hidden xl:flex items-center gap-2"
             >
               <RiSparkling2Line />
-              <span>Ask Ai For Help</span>
+              <span>Ask AI For Help</span>
             </Link>
 
             <EmailPagination
-              totalEmails={emailResponse?.totalEmails}
+              totalEmails={emailResponse?.totalEmails || 0}
               currentPage={currentPage}
-              setCurrentPage={handlePageChange} // Pass handlePageChange instead of setCurrentPage
+              onPageChange={handlePageChange}
+              emailsPerPage={EMAILS_PER_PAGE}
+              hasNextPage={!!nextPageToken}
+              hasPrevPage={!!prevPageToken || currentPage > 1}
             />
           </div>
         </>

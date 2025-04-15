@@ -1,3 +1,4 @@
+// app\(main)\dashboard\components\EmailTable.jsx
 "use client";
 
 import { useState, useMemo } from "react";
@@ -85,21 +86,15 @@ export default function EmailTable({ emails, user }) {
     } else if (hasBracketedUrls) {
       // Handle plain text emails with URLs in square brackets
       let processedContent = rawBody
-        // Convert URLs in square brackets to actual links
         .replace(
           /\[(https?:\/\/[^\]]+)\]/g,
           '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>'
         )
-        // Convert bullet points with asterisks to HTML list items
         .replace(/\s\*\s(.*?)(?=\n|$)/g, "<li>$1</li>")
-        // Wrap consecutive list items in a ul tag
         .replace(/(<li>.*?<\/li>)+/g, "<ul>$&</ul>")
-        // Convert double newlines to paragraph breaks
         .replace(/\n\n/g, "</p><p>")
-        // Convert single newlines to line breaks
         .replace(/\n/g, "<br>");
 
-      // Wrap in paragraph tags if not already
       if (!processedContent.startsWith("<p>")) {
         processedContent = "<p>" + processedContent + "</p>";
       }
@@ -132,19 +127,15 @@ export default function EmailTable({ emails, user }) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {emails.map((email, index) => (
+          {emails.map((email) => (
             <TableRow
-              key={index}
+              key={email.id} // Changed from key={index} to key={email.id}
               className="border-gray-200 cursor-pointer hover:bg-gray-50"
               onClick={() => handleRowClick(email)}
             >
               {/* provider */}
               <TableCell className="py-3 pl-5">
-                <div
-                  className={`flex items-center ${
-                    index === emails?.length - 1 ? "" : "border-b pb-3"
-                  }`}
-                >
+                <div className="flex items-center">
                   <Image
                     src={gmail || "/placeholder.svg"}
                     width={24}
@@ -158,60 +149,70 @@ export default function EmailTable({ emails, user }) {
 
               {/* from */}
               <TableCell className="py-3">
-                <div
-                  className={`${
-                    index === emails?.length - 1 ? "" : "border-b pb-4"
-                  }`}
-                >
-                  {extractEmail(email.from).length > 28
-                    ? extractEmail(email.from).slice(0, 28) + " ..."
-                    : extractEmail(email.from)}
-                </div>
+                {extractEmail(email.from).length > 28
+                  ? extractEmail(email.from).slice(0, 28) + " ..."
+                  : extractEmail(email.from)}
               </TableCell>
 
               {/* subject */}
-              <TableCell>
-                <div
-                  className={`${
-                    index === emails?.length - 1 ? "" : "border-b pb-4"
-                  }`}
-                >
-                  {email.subject.slice(0, 20)} ...
-                </div>
-              </TableCell>
+              <TableCell>{email.subject.slice(0, 20)} ...</TableCell>
 
               {/* email date */}
               <TableCell>
-                <div
-                  className={`${
-                    index === emails?.length - 1 ? "" : "border-b pb-4"
-                  }`}
-                >
-                  {email.date.split(" ").slice(0, 4).join(" ")}
-                </div>
+                {email.date.split(" ").slice(0, 4).join(" ")}
               </TableCell>
 
               {/* email preview */}
               <TableCell className="pr-5 hidden lg:table-cell">
-                <div
-                  className={`${
-                    index === emails?.length - 1 ? "" : "border-b pb-4"
-                  }`}
-                >
-                  {email.preview || email.snippet?.slice(0, 35)} ...
-                </div>
+                {email.preview || email.snippet?.slice(0, 35)} ...
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
 
+      {/* Mobile View */}
+      <div className="block xl:hidden p-2">
+        <div className="max-h-[40vh] overflow-y-auto space-y-4 messages">
+          {emails.map((email) => (
+            <div
+              key={email.id} // Changed from key={index} to key={email.id}
+              className="border rounded-lg p-4 bg-white shadow-sm"
+            >
+              <div className="flex items-center mb-2">
+                <Image
+                  src={gmail}
+                  width={24}
+                  height={24}
+                  alt="Gmail"
+                  className="mr-2"
+                />
+                <span className="font-medium">{user?.authProvider}</span>
+              </div>
+              <div className="space-y-2">
+                <p>
+                  <span className="font-semibold">From:</span>{" "}
+                  {extractEmail(email.from)}
+                </p>
+                <p>
+                  <span className="font-semibold">Subject:</span>{" "}
+                  {email.subject}
+                </p>
+                <p>
+                  <span className="font-semibold">Date:</span> {email.date}
+                </p>
+                <p>
+                  <span className="font-semibold">Preview:</span>{" "}
+                  {email.preview || email.snippet}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Email Details Dialog */}
-      <Dialog
-        open={isDialogOpen}
-        onOpenChange={handleClose}
-        className="bg-red-400"
-      >
+      <Dialog open={isDialogOpen} onOpenChange={handleClose}>
         <DialogContent className="max-w-3xl flex flex-col max-h-[70vh]">
           <DialogHeader>
             <DialogTitle>{selectedEmail?.subject}</DialogTitle>
@@ -245,9 +246,7 @@ export default function EmailTable({ emails, user }) {
           </div>
           <div
             className="prose dark:prose-invert max-w-none flex-1 overflow-auto"
-            dangerouslySetInnerHTML={{
-              __html: renderEmailBody,
-            }}
+            dangerouslySetInnerHTML={{ __html: renderEmailBody }}
           />
         </DialogContent>
       </Dialog>
