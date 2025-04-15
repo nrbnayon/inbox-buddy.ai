@@ -7,12 +7,10 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-  PaginationEllipsis,
 } from "@/components/ui/pagination";
 
-export function EmailPagination({ totalEmails }) {
+export function EmailPagination({ totalEmails, currentPage, setCurrentPage }) {
   const totalPages = Math.ceil(totalEmails / 6); // Assuming 6 emails per page
-  const [currentPage, setCurrentPage] = useState(1); // Track current page
 
   // Handle page change
   const handlePageChange = (page) => {
@@ -33,48 +31,40 @@ export function EmailPagination({ totalEmails }) {
     }
   };
 
-  // Function to determine which page numbers to show
+  // Generate page numbers to display
   const getPageNumbers = () => {
-    const pageNumbers = [];
-
-    // Always show current page
-    // Show 1 page before and 1 page after current page if they exist
-    const startPage = Math.max(1, currentPage - 1);
-    const endPage = Math.min(totalPages, currentPage + 1);
-
-    // Show first page if we're not starting from page 1
-    if (startPage > 1) {
-      pageNumbers.push(1);
-      // Add ellipsis if there's a gap
-      if (startPage > 2) {
-        pageNumbers.push("ellipsis-start");
+    const pages = [];
+    if (totalPages <= 3) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      if (currentPage <= 2) {
+        pages.push(1, 2, 3, "...", totalPages);
+      } else if (currentPage >= totalPages - 1) {
+        pages.push(1, "...", totalPages - 2, totalPages - 1, totalPages);
+      } else {
+        pages.push(
+          1,
+          "...",
+          currentPage - 1,
+          currentPage,
+          currentPage + 1,
+          "...",
+          totalPages
+        );
       }
     }
-
-    // Add the pages in our window
-    for (let i = startPage; i <= endPage; i++) {
-      pageNumbers.push(i);
-    }
-
-    // Show last page if we're not ending at the last page
-    if (endPage < totalPages) {
-      // Add ellipsis if there's a gap
-      if (endPage < totalPages - 1) {
-        pageNumbers.push("ellipsis-end");
-      }
-      pageNumbers.push(totalPages);
-    }
-
-    return pageNumbers;
+    return pages;
   };
 
   return (
-    <div className="flex flex-col w-full items-center md:items-end justify-center">
-      <div className="text-sm text-muted-foreground mb-2 sm:mb-0 block md:hidden">
+    <div className="flex flex-col items-center xl:items-end gap-2 w-full">
+      <p className="text-sm text-muted-foreground">
         Page {currentPage} of {totalPages}
-      </div>
-      <Pagination className="w-fit mx-0">
-        <PaginationContent className="gap-1 sm:gap-2">
+      </p>
+      <Pagination className="w-fit mx-0 mt-2 md:mt-0 mb-4 md:mb-0">
+        <PaginationContent className="gap-2 md:gap-4">
           <PaginationItem>
             <PaginationPrevious
               href="#"
@@ -82,29 +72,21 @@ export function EmailPagination({ totalEmails }) {
                 e.preventDefault();
                 handlePrevious();
               }}
-              className={`hover:link-btn hover:border-transparent border bg-white border-[#101010] ${
-                currentPage === 1 ? "opacity-50 pointer-events-none" : ""
-              }`}
+              className="hover:link-btn hover:border-transparent border bg-white border-[#101010]"
               aria-disabled={currentPage === 1}
             />
           </PaginationItem>
 
-          {getPageNumbers().map((page, index) => {
-            if (page === "ellipsis-start" || page === "ellipsis-end") {
-              return (
-                <PaginationItem key={`ellipsis-${index}`}>
-                  <PaginationEllipsis />
-                </PaginationItem>
-              );
-            }
-
-            return (
-              <PaginationItem key={page}>
+          {getPageNumbers().map((page, index) => (
+            <PaginationItem key={index}>
+              {page === "..." ? (
+                <span className="px-4 py-2">...</span>
+              ) : (
                 <PaginationLink
                   href="#"
                   onClick={(e) => {
                     e.preventDefault();
-                    handlePageChange(page);
+                    handlePageChange(Number(page));
                   }}
                   isActive={currentPage === page}
                   className={
@@ -113,11 +95,11 @@ export function EmailPagination({ totalEmails }) {
                       : "hover:link-btn hover:border-transparent border bg-white border-[#101010]"
                   }
                 >
-                  {page}
+                  {String(page)}
                 </PaginationLink>
-              </PaginationItem>
-            );
-          })}
+              )}
+            </PaginationItem>
+          ))}
 
           <PaginationItem>
             <PaginationNext
@@ -126,11 +108,7 @@ export function EmailPagination({ totalEmails }) {
                 e.preventDefault();
                 handleNext();
               }}
-              className={`hover:link-btn hover:border-transparent border bg-white border-[#101010] ${
-                currentPage === totalPages
-                  ? "opacity-50 pointer-events-none"
-                  : ""
-              }`}
+              className="hover:link-btn hover:border-transparent border bg-white border-[#101010]"
               aria-disabled={currentPage === totalPages}
             />
           </PaginationItem>

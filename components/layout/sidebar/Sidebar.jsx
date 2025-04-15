@@ -116,7 +116,7 @@ const Sidebar = ({ children, accessToken, previousChats }) => {
             </Sheet>
           </div>
         </header>
-        <section className="w-full h-screen overflow-hidden p-2 md:px-10">
+        <section className="w-full h-screen overflow-hidden p-2 pb-0 md:px-10">
           {/* {pathName === "/chat" && <ChatHeader />} */}
           {children}
         </section>

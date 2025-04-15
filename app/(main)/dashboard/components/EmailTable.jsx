@@ -118,7 +118,7 @@ export default function EmailTable({ emails, user }) {
   }, [selectedEmail]);
 
   return (
-    <div className="hidden md:block overflow-x-auto">
+    <div className="hidden xl:block overflow-x-auto">
       <Table className="w-full">
         <TableHeader className="bg-gray-200">
           <TableRow>
