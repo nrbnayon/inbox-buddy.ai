@@ -28,10 +28,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { EmailPagination } from "@/app/(main)/dashboard/components/EmailPagination";
 import { Badge } from "@/components/ui/badge";
 import { getAllUsers, updateUser, deleteUser } from "@/lib/api/user";
 import LoadingPing from "@/components/LoadingPing";
+import { UserPagination } from "@/app/(admin)/components/UserPagination";
 
 export default function UsersListTable() {
   const [users, setUsers] = useState([]);
@@ -43,24 +43,16 @@ export default function UsersListTable() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  // Fetch users data on component mount
-  useEffect(() => {
+useEffect(() => {
     fetchUsers();
   }, [currentPage]);
 
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const data = await getAllUsers();
-
-      // Assuming the API returns { users: [...], totalCount, totalPages }
-      if (data && Array.isArray(data.users)) {
-        setUsers(data.users);
-        setTotalPages(data.totalPages || 1);
-      } else {
-        setUsers(Array.isArray(data) ? data : []);
-      }
-
+      const data = await getAllUsers(currentPage, 10);
+      setUsers(data?.users || []);
+      setTotalPages(data?.totalPages || 1);
       setError(null);
     } catch (err) {
       console.error("Failed to fetch users:", err);
@@ -86,11 +78,6 @@ export default function UsersListTable() {
           await updateUser(selectedUser._id, {
             status: selectedUser.status === "blocked" ? "active" : "blocked",
           });
-          console.log(
-            `User ${selectedUser?.name} ${
-              selectedUser.status === "blocked" ? "unblocked" : "blocked"
-            }`
-          );
           break;
         case "cancel":
           await updateUser(selectedUser._id, {
@@ -100,21 +87,16 @@ export default function UsersListTable() {
               autoRenew: false,
             },
           });
-          console.log(`Subscription cancelled for: ${selectedUser?.name}`);
           break;
         case "delete":
           await deleteUser(selectedUser._id);
-          console.log(`User deleted: ${selectedUser?.name}`);
           break;
         default:
           break;
       }
-
-      // Refresh the user list after action
       fetchUsers();
     } catch (err) {
       console.error(`Error performing ${actionType} action:`, err);
-      // You could set an error state here to display to the user
     }
 
     setIsConfirmOpen(false);
@@ -124,7 +106,6 @@ export default function UsersListTable() {
 
   const getActionMessage = () => {
     if (!selectedUser) return "";
-
     switch (actionType) {
       case "block":
         return `Are you sure you want to ${
@@ -145,27 +126,22 @@ export default function UsersListTable() {
     setCurrentPage(page);
   };
 
-  // Function to render the subscription status badge with appropriate color variant
   const renderStatusBadge = (status) => {
     let variant = "default";
-
     switch (status) {
       case "active":
         variant = "success";
         break;
       case "cancelled":
+      case "blocked":
         variant = "destructive";
         break;
       case "pending":
         variant = "warning";
         break;
-      case "blocked":
-        variant = "destructive";
-        break;
       default:
         variant = "default";
     }
-
     return <Badge variant={variant}>{status}</Badge>;
   };
 
@@ -248,7 +224,6 @@ export default function UsersListTable() {
                           Cancel Subscription
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                          variant="destructive"
                           onClick={() => handleActionClick(user, "delete")}
                           className="text-red-600 hover:text-red-700 hover:bg-red-50"
                         >
@@ -265,10 +240,9 @@ export default function UsersListTable() {
         </Table>
       </div>
 
-      {/* Pagination */}
       {users.length > 0 && (
         <div className="flex mt-10 justify-center">
-          <EmailPagination
+          <UserPagination
             currentPage={currentPage}
             totalPages={totalPages}
             onPageChange={handlePageChange}
@@ -276,7 +250,6 @@ export default function UsersListTable() {
         </div>
       )}
 
-      {/* Confirmation Dialog */}
       <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -287,7 +260,10 @@ export default function UsersListTable() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>No, go back</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmAction} className="bg-red-600 hover:bg-red-700 text-white">
+            <AlertDialogAction
+              onClick={handleConfirmAction}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
               Yes, proceed
             </AlertDialogAction>
           </AlertDialogFooter>
