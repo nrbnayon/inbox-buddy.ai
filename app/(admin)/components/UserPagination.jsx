@@ -65,8 +65,11 @@ export function UserPagination({ currentPage, totalPages, onPageChange }) {
                 e.preventDefault();
                 handlePrevious();
               }}
-              className="hover:link-btn hover:border-transparent border bg-white border-[#101010]"
+              className={`hover:link-btn hover:border-transparent border bg-white border-[#101010] ${
+                currentPage === 1 ? "opacity-50 cursor-not-allowed" : ""
+              }`}
               aria-disabled={currentPage === 1}
+              disabled={currentPage === 1}
             />
           </PaginationItem>
 
@@ -101,8 +104,13 @@ export function UserPagination({ currentPage, totalPages, onPageChange }) {
                 e.preventDefault();
                 handleNext();
               }}
-              className="hover:link-btn hover:border-transparent border bg-white border-[#101010]"
+              className={`hover:link-btn hover:border-transparent border bg-white border-[#101010] ${
+                currentPage === totalPages
+                  ? "opacity-50 cursor-not-allowed"
+                  : ""
+              }`}
               aria-disabled={currentPage === totalPages}
+              disabled={currentPage === totalPages}
             />
           </PaginationItem>
         </PaginationContent>

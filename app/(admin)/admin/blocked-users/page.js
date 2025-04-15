@@ -1,3 +1,9 @@
+import BlockedUsersTable from "./components/BlockedUsersTable";
+
 export default function blockedUsersPage() {
-  return <div>Blocked User List</div>;
+  return (
+    <div>
+      <BlockedUsersTable />
+    </div>
+  );
 }

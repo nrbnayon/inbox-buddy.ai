@@ -3,7 +3,7 @@
 import { GiReceiveMoney } from "react-icons/gi";
 import { FaUser, FaUserClock } from "react-icons/fa6";
 import { useState, useEffect } from "react";
-import { getAllUsers, getIncome, getAllWaitingListUsers } from "@/lib/api/user";
+import { getIncome, getUserStats } from "@/lib/api/user";
 import SmallLoader from "@/components/SmallLoader";
 
 export default function AdminDashboard() {
@@ -17,16 +17,10 @@ export default function AdminDashboard() {
     const fetchData = async () => {
       try {
         // Fetch total users
-        const usersResponse = await getAllUsers(1, 10); 
-        setTotalUsers(usersResponse?.totalCount || 0);
+        const stats = await getUserStats();
 
-        // Fetch total waiting users
-        const waitingResponse = await getAllWaitingListUsers(1, 10);
-        console.log(waitingResponse);
-        const waitingCount =
-          waitingResponse?.data?.filter((entry) => entry.status === "waiting")
-            ?.length || 0;
-        setTotalWaitingUsers(waitingCount);
+        setTotalUsers(stats.totalUsers);
+        setTotalWaitingUsers(stats.waitingListUsers);
 
         // Fetch total income
         const incomeResponse = await getIncome();

@@ -24,7 +24,7 @@ export default async function RootLayout({ children }) {
     }
   }
 
-  console.log("ADMIN DATA::", user);
+  // console.log("ADMIN DATA::", user);
 
   return (
     <section className="bg-gray-100 min-h-screen overflow-hidden">

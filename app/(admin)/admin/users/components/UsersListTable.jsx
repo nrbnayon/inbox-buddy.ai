@@ -43,14 +43,14 @@ export default function UsersListTable() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-useEffect(() => {
+  useEffect(() => {
     fetchUsers();
   }, [currentPage]);
 
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const data = await getAllUsers(currentPage, 10);
+      const data = await getAllUsers(currentPage, 10, "active");
       setUsers(data?.users || []);
       setTotalPages(data?.totalPages || 1);
       setError(null);
@@ -162,7 +162,7 @@ useEffect(() => {
               <TableHead className="pl-9 py-6">Name</TableHead>
               <TableHead className="hidden md:table-cell">Email</TableHead>
               <TableHead className="text-center">Provider</TableHead>
-              <TableHead className="text-center">Status</TableHead>
+              {/* <TableHead className="text-center">Status</TableHead> */}
               <TableHead className="text-center">Subs. Plan</TableHead>
               <TableHead className="text-center">Subs. Status</TableHead>
               <TableHead className="text-center">Actions</TableHead>
@@ -187,9 +187,9 @@ useEffect(() => {
                   <TableCell className="text-center">
                     {user.authProvider || "email"}
                   </TableCell>
-                  <TableCell className="text-center">
+                  {/* <TableCell className="text-center">
                     {renderStatusBadge(user.status || "active")}
-                  </TableCell>
+                  </TableCell> */}
                   <TableCell className="text-center">
                     {user.subscription?.plan || "free"}
                   </TableCell>
