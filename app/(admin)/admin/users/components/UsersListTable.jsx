@@ -160,7 +160,7 @@ export default function UsersListTable() {
         variant = "warning";
         break;
       case "blocked":
-        variant = "outline";
+        variant = "destructive";
         break;
       default:
         variant = "default";
@@ -170,7 +170,7 @@ export default function UsersListTable() {
   };
 
   if (loading && users.length === 0) {
-    return <LoadingPing/>;
+    return <LoadingPing />;
   }
 
   if (error && users.length === 0) {
@@ -186,6 +186,7 @@ export default function UsersListTable() {
               <TableHead className="pl-9 py-6">Name</TableHead>
               <TableHead className="hidden md:table-cell">Email</TableHead>
               <TableHead className="text-center">Provider</TableHead>
+              <TableHead className="text-center">Status</TableHead>
               <TableHead className="text-center">Subs. Plan</TableHead>
               <TableHead className="text-center">Subs. Status</TableHead>
               <TableHead className="text-center">Actions</TableHead>
@@ -194,7 +195,7 @@ export default function UsersListTable() {
           <TableBody>
             {users.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-10">
+                <TableCell colSpan={7} className="text-center py-10">
                   No users found.
                 </TableCell>
               </TableRow>
@@ -211,12 +212,13 @@ export default function UsersListTable() {
                     {user.authProvider || "email"}
                   </TableCell>
                   <TableCell className="text-center">
+                    {renderStatusBadge(user.status || "active")}
+                  </TableCell>
+                  <TableCell className="text-center">
                     {user.subscription?.plan || "free"}
                   </TableCell>
                   <TableCell className="text-center">
-                    {renderStatusBadge(
-                      user.subscription?.status || user.status || "active"
-                    )}
+                    {renderStatusBadge(user.subscription?.status || "active")}
                   </TableCell>
                   <TableCell className="text-center">
                     <DropdownMenu>
