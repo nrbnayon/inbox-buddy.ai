@@ -16,21 +16,49 @@ export default function EmailsContainer({ user }) {
   const [emailResponse, setEmailResponse] = useState({});
   const [currentPage, setCurrentPage] = useState(1); // Track current page
   const [loading, setLoading] = useState(false);
+  // Add state for page tokens
+  const [nextPageToken, setNextPageToken] = useState(null);
+  const [prevPageToken, setPrevPageToken] = useState(null);
+
+  // Modified fetchEmails to accept pageToken
+  const fetchEmails = async (pageToken = null) => {
+    setLoading(true);
+    const res = await axiosInstance.get("/emails", {
+      params: { maxResults: 6, pageToken },
+    });
+
+    if (res?.data?.success) {
+      setLoading(false);
+      setEmailResponse(res?.data);
+      setEmails(res?.data?.emails);
+      // Store the page tokens from the response
+      setNextPageToken(res?.data?.nextPageToken || null);
+      setPrevPageToken(res?.data?.prevPageToken || null);
+    }
+  };
 
   useEffect(() => {
-    const fetchEmails = async () => {
-      setLoading(true);
-      const res = await axiosInstance.get("/emails?maxResults=6");
-
-      if (res?.data?.success) {
-        setLoading(false);
-        setEmailResponse(res?.data);
-        setEmails(res?.data?.emails);
-      }
-    };
-
     fetchEmails();
   }, []);
+
+  // Handle page navigation
+  const handlePageChange = (page) => {
+    if (page === currentPage + 1 && nextPageToken) {
+      // Next page
+      fetchEmails(nextPageToken);
+      setCurrentPage(page);
+    } else if (page === currentPage - 1 && prevPageToken) {
+      // Previous page
+      fetchEmails(prevPageToken);
+      setCurrentPage(page);
+    } else if (page !== currentPage) {
+      // Direct jump attempted
+      console.log(
+        `Direct jump to page ${page} not supported with current backend`
+      );
+      // Note: Sequential fetching could be implemented here if desired
+    }
+  };
 
   return (
     <div className="mt-10">
@@ -108,7 +136,7 @@ export default function EmailsContainer({ user }) {
             <EmailPagination
               totalEmails={emailResponse?.totalEmails}
               currentPage={currentPage}
-              setCurrentPage={setCurrentPage}
+              setCurrentPage={handlePageChange} // Pass handlePageChange instead of setCurrentPage
             />
           </div>
         </>

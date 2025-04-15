@@ -22,6 +22,7 @@ import { updateChatById, deleteChatById } from "@/app/actions/chatActions"; // I
 import SmallLoader from "@/components/SmallLoader";
 import { toast } from "sonner";
 import { useChat } from "@/app/(main)/contexts/ChatContext";
+import { useRouter } from "next/navigation";
 
 const SidebarChatItem = ({
   chat,
@@ -39,6 +40,8 @@ const SidebarChatItem = ({
   const [selectedChatId, setSelectedChatId] = useState(null);
   const [updateLoading, setUpdateLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+
+  const router = useRouter();
 
   const { setChats } = useChat();
 
@@ -97,6 +100,7 @@ const SidebarChatItem = ({
         if (isMobile && setIsOpen) setIsOpen(false);
         setOpenDropdowns((prev) => ({ ...prev, [chatId]: false })); // Close dropdown
         toast.success("Chat Deleted.");
+        router.push("/chat");
       } else {
         throw new Error(res?.message || "Failed to delete chat");
       }
