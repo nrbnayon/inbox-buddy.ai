@@ -14,7 +14,7 @@ export function EmailPagination({ totalEmails, currentPage, setCurrentPage }) {
 
   // Handle page change
   const handlePageChange = (page) => {
-    setCurrentPage(page);
+    setCurrentPage(page); // This calls handlePageChange in EmailsContainer
   };
 
   // Handle previous page
