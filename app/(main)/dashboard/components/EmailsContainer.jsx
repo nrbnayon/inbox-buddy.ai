@@ -1,4 +1,3 @@
-// app\(main)\dashboard\components\EmailsContainer.jsx
 "use client";
 
 import React, { useEffect, useState, useCallback } from "react";
@@ -31,11 +30,11 @@ export default function EmailsContainer({ user }) {
   });
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedKeywords, setSelectedKeywords] = useState([]);
-  const [timePeriod, setTimePeriod] = useState("monthly");
+  const [timePeriod, setTimePeriod] = useState("all");
   const [selectedDate, setSelectedDate] = useState(null); // Changed to null initially
   const [pageTokens, setPageTokens] = useState({ 1: null });
   const [pageCache, setPageCache] = useState({});
-  const EMAILS_PER_PAGE = 7;
+  const EMAILS_PER_PAGE = 4;
 
   // Function to compute the full Gmail search query
   const computeQuery = useCallback(() => {
@@ -54,35 +53,8 @@ export default function EmailsContainer({ user }) {
       qParts.push(`(${keywordsPart})`); // e.g., "(subscriptions)"
     }
 
-    // Add date or time period filters
-    if (selectedDate) {
-      const dateStr = selectedDate
-        .toISOString()
-        .split("T")[0]
-        .replace(/-/g, "/"); // Format as YYYY/MM/DD
-      qParts.push(`after:${dateStr}`);
-    }
-    if (timePeriod) {
-      const today = new Date();
-      let afterDate;
-      if (timePeriod === "daily") {
-        afterDate = new Date(today.setDate(today.getDate() - 1)); // Last 24 hours
-      } else if (timePeriod === "weekly") {
-        afterDate = new Date(today.setDate(today.getDate() - 7)); // Last week
-      } else if (timePeriod === "monthly") {
-        afterDate = new Date(today.setMonth(today.getMonth() - 1)); // Last month
-      }
-      if (afterDate) {
-        const afterStr = afterDate
-          .toISOString()
-          .split("T")[0]
-          .replace(/-/g, "/");
-        qParts.push(`after:${afterStr}`);
-      }
-    }
-
     return qParts.join(" ") || undefined;
-  }, [searchQuery, selectedKeywords, timePeriod, selectedDate]);
+  }, [searchQuery, selectedKeywords]);
 
   const fetchEmails = async (
     pageToken = null,
@@ -100,6 +72,11 @@ export default function EmailsContainer({ user }) {
           pageToken,
           provider: user?.authProvider,
           q,
+          timeFilter: selectedDate
+            ? selectedDate.toISOString().split("T")[0].replace(/-/g, "/")
+            : timePeriod === "all"
+            ? undefined
+            : timePeriod,
           _t: Date.now(),
         },
       });
@@ -118,6 +95,10 @@ export default function EmailsContainer({ user }) {
             emails: fetchedEmails,
           });
           setEmails(fetchedEmails);
+          console.log(
+            "Fetched emails dates:",
+            fetchedEmails.map((e) => e.date)
+          );
           setNextPageToken(res.data.nextPageToken || null);
           setPrevPageToken(res.data.prevPageToken || null);
           setPageTokens((prev) => ({
@@ -186,12 +167,18 @@ export default function EmailsContainer({ user }) {
     setPageCache({});
     setPreFetchedNext({ emails: [], token: null });
     setPreFetchedPrev({ emails: [], token: null });
-    fetchEmails(null, 1);
+    if (selectedKeywords.length > 0) {
+      fetchImportantEmails(); // Fetch important emails when keywords are selected
+    } else {
+      fetchEmails(null, 1); // Fetch regular emails otherwise
+    }
   }, [searchQuery, selectedKeywords, timePeriod, selectedDate]);
 
   const handlePageChange = useCallback(
     async (page) => {
       if (page === currentPage) return;
+      const fetchFunction =
+        selectedKeywords.length > 0 ? fetchImportantEmails : fetchEmails;
 
       if (pageCache[page]) {
         setEmails(pageCache[page]);
@@ -325,6 +312,11 @@ export default function EmailsContainer({ user }) {
             pageToken: currentToken,
             provider: user?.authProvider,
             q: computeQuery(),
+            timeFilter: selectedDate
+              ? selectedDate.toISOString().split("T")[0].replace(/-/g, "/")
+              : timePeriod === "all"
+              ? undefined
+              : timePeriod,
             _t: Date.now(),
           },
         });
@@ -367,6 +359,7 @@ export default function EmailsContainer({ user }) {
       pageTokens,
       pageCache,
       user?.authProvider,
+      selectedKeywords,
     ]
   );
 
@@ -406,7 +399,7 @@ export default function EmailsContainer({ user }) {
 
   const handleDateChange = useCallback((date) => {
     setSelectedDate(date);
-    setTimePeriod(null); // Reset time period when selecting a date
+    setTimePeriod("all"); // Reset time period when selecting a date
     setCurrentPage(1);
     setPreFetchedNext({ emails: [], token: null });
     setPreFetchedPrev({ emails: [], token: null });
@@ -435,31 +428,94 @@ export default function EmailsContainer({ user }) {
     [currentPage]
   );
 
-  const fetchImportantEmails = async () => {
-    setIsLoading(true); // Start loading indicator
+  const fetchImportantEmails = async (
+    pageToken = null,
+    targetPage = 1,
+    isPreFetch = false
+  ) => {
+    if (!isPreFetch) setIsPageLoading(true);
     try {
       const res = await axiosInstance.get("/emails/important", {
         params: {
+          maxResults: 1000,
+          pageToken,
           q: computeQuery(),
           keywords: selectedKeywords.join(","),
-          timeRange: timePeriod,
-          date: selectedDate
-            ? selectedDate.toISOString().split("T")[0]
-            : undefined, // e.g., "2025-03-16"
+          timeRange: selectedDate
+            ? selectedDate.toISOString().split("T")[0].replace(/-/g, "/")
+            : timePeriod === "all"
+            ? undefined
+            : timePeriod,
         },
       });
-
-      console.log(`Important emails response: ${res.data}`); // Log the response
       if (res?.data?.success) {
-        setEmails(res.data.emails); // Update email list
+        const fetchedEmails = (res.data.messages || []).slice(
+          0,
+          EMAILS_PER_PAGE
+        );
+        if (isPreFetch) {
+          return {
+            emails: fetchedEmails,
+            nextPageToken: res.data.nextPageToken || null,
+            prevPageToken: res.data.prevPageToken || null,
+          };
+        }
+        setEmailResponse({
+          ...res.data,
+          emails: fetchedEmails,
+        });
+        setEmails(fetchedEmails);
+        setNextPageToken(res.data.nextPageToken || null);
+        setPrevPageToken(res.data.prevPageToken || null);
+        setPageTokens((prev) => ({
+          ...prev,
+          [targetPage]: pageToken,
+          [targetPage + 1]: res.data.nextPageToken || null,
+          [targetPage - 1]: res.data.prevPageToken || null,
+        }));
+        setPageCache((prev) => ({
+          ...prev,
+          [targetPage]: fetchedEmails,
+        }));
+        if (res.data.nextPageToken) {
+          const nextData = await fetchImportantEmails(
+            res.data.nextPageToken,
+            targetPage + 1,
+            true
+          );
+          setPreFetchedNext({
+            emails: nextData.emails,
+            token: nextData.nextPageToken,
+          });
+        }
+        if (res.data.prevPageToken && targetPage > 1) {
+          const prevData = await fetchImportantEmails(
+            res.data.prevPageToken,
+            targetPage - 1,
+            true
+          );
+          setPreFetchedPrev({
+            emails: prevData.emails,
+            token: prevData.prevPageToken,
+          });
+        }
       } else {
-        setEmails([]); // Clear emails if no success
+        if (!isPreFetch) {
+          setEmails([]);
+          setEmailResponse({});
+        }
       }
     } catch (error) {
       console.error("Error fetching important emails:", error);
-      setEmails([]); // Clear emails on error
+      if (!isPreFetch) {
+        setEmails([]);
+        setEmailResponse({});
+      }
     } finally {
-      setIsLoading(false); // Stop loading indicator
+      if (!isPreFetch) {
+        setIsPageLoading(false);
+        setIsLoading(false);
+      }
     }
   };
 
@@ -475,9 +531,9 @@ export default function EmailsContainer({ user }) {
   }, []);
 
   return (
-    <div className="mt-10">
-      <div className="flex flex-col md:flex-row justify-between">
-        <h2 className="text-[#2D3748] text-2xl font-semibold mb-5">
+    <div className='mt-10'>
+      <div className='flex flex-col md:flex-row justify-between'>
+        <h2 className='text-[#2D3748] text-2xl font-semibold mb-5'>
           Your Top Recipients
         </h2>
         <FilterMails
@@ -491,15 +547,15 @@ export default function EmailsContainer({ user }) {
       {isLoading ? (
         <EmailTableSkeleton />
       ) : emails.length === 0 ? (
-        <div className="text-center py-4">
+        <div className='text-center py-4'>
           <p>No emails found matching your criteria.</p>
         </div>
       ) : (
         <>
-          <div className="rounded-2xl border relative">
+          <div className='rounded-2xl border relative'>
             {isPageLoading && (
-              <div className="absolute inset-0 flex justify-center items-center bg-white bg-opacity-50 z-10">
-                <Loader2 className="h-6 w-6 animate-spin" />
+              <div className='absolute inset-0 flex justify-center items-center bg-white bg-opacity-50 z-10'>
+                <Loader2 className='h-6 w-6 animate-spin' />
               </div>
             )}
             <EmailTable
@@ -510,38 +566,38 @@ export default function EmailsContainer({ user }) {
               onRefresh={handleRefresh}
             />
 
-            <div className="block xl:hidden p-2">
-              <div className="max-h-[40vh] overflow-y-auto space-y-4 messages">
+            <div className='block xl:hidden p-2'>
+              <div className='max-h-[40vh] overflow-y-auto space-y-4 messages'>
                 {emails.map((email) => (
                   <div
                     key={email.id}
-                    className="border rounded-lg p-4 bg-white shadow-sm"
+                    className='border rounded-lg p-4 bg-white shadow-sm'
                   >
-                    <div className="flex items-center mb-2">
+                    <div className='flex items-center mb-2'>
                       <Image
                         src={gmail}
                         width={24}
                         height={24}
-                        alt="Gmail"
-                        className="mr-2"
+                        alt='Gmail'
+                        className='mr-2'
                       />
-                      <span className="font-medium">{user?.authProvider}</span>
+                      <span className='font-medium'>{user?.authProvider}</span>
                     </div>
-                    <div className="space-y-2">
+                    <div className='space-y-2'>
                       <p>
-                        <span className="font-semibold">From:</span>{" "}
+                        <span className='font-semibold'>From:</span>{" "}
                         {email.from}
                       </p>
                       <p>
-                        <span className="font-semibold">Subject:</span>{" "}
+                        <span className='font-semibold'>Subject:</span>{" "}
                         {email.subject}
                       </p>
                       <p>
-                        <span className="font-semibold">Date:</span>{" "}
+                        <span className='font-semibold'>Date:</span>{" "}
                         {email.date}
                       </p>
                       <p>
-                        <span className="font-semibold">Preview:</span>{" "}
+                        <span className='font-semibold'>Preview:</span>{" "}
                         {email.preview || email.snippet}
                       </p>
                     </div>
@@ -551,10 +607,10 @@ export default function EmailsContainer({ user }) {
             </div>
           </div>
 
-          <div className="flex flex-col md:flex-row items-end justify-between mt-8 md:items-center">
+          <div className='flex flex-col md:flex-row items-end justify-between mt-8 md:items-center'>
             <Link
-              href="/chat"
-              className="link-btn w-[230px] px-6 py-2 rounded-full hidden xl:flex items-center gap-2"
+              href='/chat'
+              className='link-btn w-[230px] px-6 py-2 rounded-full hidden xl:flex items-center gap-2'
             >
               <RiSparkling2Line />
               <span>Ask AI For Help</span>
