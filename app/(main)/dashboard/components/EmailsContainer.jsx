@@ -10,14 +10,15 @@ import { RiSparkling2Line } from "react-icons/ri";
 import { EmailPagination } from "./EmailPagination";
 import gmail from "@/public/gmail.png";
 import { axiosInstance } from "@/lib/axios";
-import { Loader2 } from "lucide-react"; // Assuming you have lucide-react for spinner
+import { Loader2 } from "lucide-react";
+import EmailTableSkeleton from "./EmailTableSkeleton";
 
 export default function EmailsContainer({ user }) {
   const [emails, setEmails] = useState([]);
   const [emailResponse, setEmailResponse] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(false); // For initial or major loads
-  const [isPageLoading, setIsPageLoading] = useState(false); // For page transitions
+  const [isLoading, setIsLoading] = useState(false);
+  const [isPageLoading, setIsPageLoading] = useState(false);
   const [nextPageToken, setNextPageToken] = useState(null);
   const [prevPageToken, setPrevPageToken] = useState(null);
   const [preFetchedNext, setPreFetchedNext] = useState({
@@ -31,10 +32,57 @@ export default function EmailsContainer({ user }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedKeywords, setSelectedKeywords] = useState([]);
   const [timePeriod, setTimePeriod] = useState("monthly");
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [pageTokens, setPageTokens] = useState({ 1: null }); // Map page numbers to tokens
-  const [pageCache, setPageCache] = useState({}); // Cache emails for pages
+  const [selectedDate, setSelectedDate] = useState(null); // Changed to null initially
+  const [pageTokens, setPageTokens] = useState({ 1: null });
+  const [pageCache, setPageCache] = useState({});
   const EMAILS_PER_PAGE = 7;
+
+  // Function to compute the full Gmail search query
+  const computeQuery = useCallback(() => {
+    let qParts = [];
+
+    // Add search term if present
+    if (searchQuery) {
+      qParts.push(searchQuery);
+    }
+
+    // Add keywords with OR logic, wrapped in quotes if they contain spaces
+    if (selectedKeywords.length > 0) {
+      const keywordsPart = selectedKeywords
+        .map((k) => (k.includes(" ") ? `"${k}"` : k)) // Quote keywords with spaces
+        .join(" OR "); // Use OR instead of AND
+      qParts.push(`(${keywordsPart})`); // e.g., "(subscriptions)"
+    }
+
+    // Add date or time period filters
+    if (selectedDate) {
+      const dateStr = selectedDate
+        .toISOString()
+        .split("T")[0]
+        .replace(/-/g, "/"); // Format as YYYY/MM/DD
+      qParts.push(`after:${dateStr}`);
+    }
+    if (timePeriod) {
+      const today = new Date();
+      let afterDate;
+      if (timePeriod === "daily") {
+        afterDate = new Date(today.setDate(today.getDate() - 1)); // Last 24 hours
+      } else if (timePeriod === "weekly") {
+        afterDate = new Date(today.setDate(today.getDate() - 7)); // Last week
+      } else if (timePeriod === "monthly") {
+        afterDate = new Date(today.setMonth(today.getMonth() - 1)); // Last month
+      }
+      if (afterDate) {
+        const afterStr = afterDate
+          .toISOString()
+          .split("T")[0]
+          .replace(/-/g, "/");
+        qParts.push(`after:${afterStr}`);
+      }
+    }
+
+    return qParts.join(" ") || undefined;
+  }, [searchQuery, selectedKeywords, timePeriod, selectedDate]);
 
   const fetchEmails = async (
     pageToken = null,
@@ -45,21 +93,18 @@ export default function EmailsContainer({ user }) {
       setIsPageLoading(true);
     }
     try {
+      const q = computeQuery();
       const res = await axiosInstance.get("/emails", {
         params: {
           maxResults: EMAILS_PER_PAGE,
           pageToken,
           provider: user?.authProvider,
-          q: searchQuery || undefined,
+          q,
           _t: Date.now(),
         },
       });
 
       if (res?.data?.success) {
-        console.log(
-          "Fetched email IDs:",
-          res.data.emails.map((e) => e.id)
-        );
         const fetchedEmails = (res.data.emails || []).slice(0, EMAILS_PER_PAGE);
         if (isPreFetch) {
           return {
@@ -85,7 +130,6 @@ export default function EmailsContainer({ user }) {
             ...prev,
             [targetPage]: fetchedEmails,
           }));
-          // Pre-fetch next and previous pages
           if (res.data.nextPageToken) {
             const nextData = await fetchEmails(
               res.data.nextPageToken,
@@ -115,7 +159,6 @@ export default function EmailsContainer({ user }) {
           prevPageToken: res.data.prevPageToken,
         };
       } else {
-        console.warn("API response unsuccessful:", res.data);
         if (!isPreFetch) {
           setEmails([]);
           setEmailResponse({});
@@ -150,16 +193,13 @@ export default function EmailsContainer({ user }) {
     async (page) => {
       if (page === currentPage) return;
 
-      // Check cache first
       if (pageCache[page]) {
         setEmails(pageCache[page]);
         setCurrentPage(page);
-        // Update tokens from stored data or fetch new ones
         const storedNextToken = pageTokens[page + 1] || null;
         const storedPrevToken = pageTokens[page - 1] || null;
         setNextPageToken(storedNextToken);
         setPrevPageToken(storedPrevToken);
-        // Pre-fetch next and previous if not already cached
         if (storedNextToken && !pageCache[page + 1]) {
           const nextData = await fetchEmails(storedNextToken, page + 1, true);
           setPreFetchedNext({
@@ -179,11 +219,10 @@ export default function EmailsContainer({ user }) {
         return;
       }
 
-      // Check pre-fetched data
       if (page === currentPage + 1 && preFetchedNext.emails.length) {
         setEmails(preFetchedNext.emails);
         setNextPageToken(preFetchedNext.token);
-        setPrevPageToken(nextPageToken); // Current page becomes previous
+        setPrevPageToken(nextPageToken);
         setEmailResponse((prev) => ({
           ...prev,
           emails: preFetchedNext.emails,
@@ -198,7 +237,6 @@ export default function EmailsContainer({ user }) {
         setPageCache((prev) => ({ ...prev, [page]: preFetchedNext.emails }));
         setPreFetchedNext({ emails: [], token: null });
         setCurrentPage(page);
-        // Pre-fetch next and previous
         if (preFetchedNext.token) {
           const nextData = await fetchEmails(
             preFetchedNext.token,
@@ -224,7 +262,7 @@ export default function EmailsContainer({ user }) {
 
       if (page === currentPage - 1 && preFetchedPrev.emails.length) {
         setEmails(preFetchedPrev.emails);
-        setNextPageToken(prevPageToken); // Current page becomes next
+        setNextPageToken(prevPageToken);
         setPrevPageToken(preFetchedPrev.token);
         setEmailResponse((prev) => ({
           ...prev,
@@ -240,7 +278,6 @@ export default function EmailsContainer({ user }) {
         setPageCache((prev) => ({ ...prev, [page]: preFetchedPrev.emails }));
         setPreFetchedPrev({ emails: [], token: null });
         setCurrentPage(page);
-        // Pre-fetch next and previous
         if (prevPageToken) {
           const nextData = await fetchEmails(prevPageToken, page + 1, true);
           setPreFetchedNext({
@@ -264,14 +301,12 @@ export default function EmailsContainer({ user }) {
         return;
       }
 
-      // Check stored tokens for direct access
       if (pageTokens[page] !== undefined) {
         await fetchEmails(pageTokens[page], page);
         setCurrentPage(page);
         return;
       }
 
-      // Fallback: Sequential fetch for direct jumps
       console.warn(
         `No direct token for page ${page}, attempting sequential fetch`
       );
@@ -289,7 +324,7 @@ export default function EmailsContainer({ user }) {
             maxResults: EMAILS_PER_PAGE,
             pageToken: currentToken,
             provider: user?.authProvider,
-            q: searchQuery || undefined,
+            q: computeQuery(),
             _t: Date.now(),
           },
         });
@@ -331,7 +366,6 @@ export default function EmailsContainer({ user }) {
       emailResponse,
       pageTokens,
       pageCache,
-      searchQuery,
       user?.authProvider,
     ]
   );
@@ -360,6 +394,7 @@ export default function EmailsContainer({ user }) {
 
   const handleTimePeriodChange = useCallback((period) => {
     setTimePeriod(period);
+    setSelectedDate(null); // Reset date when changing time period
     setCurrentPage(1);
     setPreFetchedNext({ emails: [], token: null });
     setPreFetchedPrev({ emails: [], token: null });
@@ -371,6 +406,7 @@ export default function EmailsContainer({ user }) {
 
   const handleDateChange = useCallback((date) => {
     setSelectedDate(date);
+    setTimePeriod(null); // Reset time period when selecting a date
     setCurrentPage(1);
     setPreFetchedNext({ emails: [], token: null });
     setPreFetchedPrev({ emails: [], token: null });
@@ -379,6 +415,8 @@ export default function EmailsContainer({ user }) {
     setPageTokens({ 1: null });
     setPageCache({});
   }, []);
+
+  // In EmailsContainer.jsx
 
   const handleEmailRead = useCallback(
     (emailId) => {
@@ -397,6 +435,34 @@ export default function EmailsContainer({ user }) {
     [currentPage]
   );
 
+  const fetchImportantEmails = async () => {
+    setIsLoading(true); // Start loading indicator
+    try {
+      const res = await axiosInstance.get("/emails/important", {
+        params: {
+          q: computeQuery(),
+          keywords: selectedKeywords.join(","),
+          timeRange: timePeriod,
+          date: selectedDate
+            ? selectedDate.toISOString().split("T")[0]
+            : undefined, // e.g., "2025-03-16"
+        },
+      });
+
+      console.log(`Important emails response: ${res.data}`); // Log the response
+      if (res?.data?.success) {
+        setEmails(res.data.emails); // Update email list
+      } else {
+        setEmails([]); // Clear emails if no success
+      }
+    } catch (error) {
+      console.error("Error fetching important emails:", error);
+      setEmails([]); // Clear emails on error
+    } finally {
+      setIsLoading(false); // Stop loading indicator
+    }
+  };
+
   const handleRefresh = useCallback(() => {
     setPreFetchedNext({ emails: [], token: null });
     setPreFetchedPrev({ emails: [], token: null });
@@ -405,6 +471,7 @@ export default function EmailsContainer({ user }) {
     setPageTokens({ 1: null });
     setPageCache({});
     fetchEmails(null, 1);
+    fetchImportantEmails();
   }, []);
 
   return (
@@ -422,11 +489,11 @@ export default function EmailsContainer({ user }) {
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center items-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
+        <EmailTableSkeleton />
       ) : emails.length === 0 ? (
-        <p className="text-center text-gray-500">No emails found.</p>
+        <div className="text-center py-4">
+          <p>No emails found matching your criteria.</p>
+        </div>
       ) : (
         <>
           <div className="rounded-2xl border relative">
