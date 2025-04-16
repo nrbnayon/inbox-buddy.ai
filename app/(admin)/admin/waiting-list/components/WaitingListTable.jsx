@@ -39,6 +39,7 @@ import {
 import { toast } from "sonner";
 import { UserPagination } from "@/app/(admin)/components/UserPagination";
 import LoadingPing from "@/components/LoadingPing";
+import SmallLoader from "@/components/SmallLoader";
 
 export default function WaitingListTable() {
   const [waitingListUsers, setWaitingListUsers] = useState([]);
@@ -49,7 +50,9 @@ export default function WaitingListTable() {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const itemsPerPage = 8; // Constant instead of state since it's fixed
+  const [isRejecting, setIsRejecting] = useState(false);
+  const [isApproving, setIsApproving] = useState(false);
+  const itemsPerPage = 8;
 
   useEffect(() => {
     fetchWaitingListUsers();
@@ -81,34 +84,36 @@ export default function WaitingListTable() {
   };
 
   const handleConfirmCancel = async () => {
-    setIsConfirmOpen(false);
-    if (selectedUser) {
-      try {
-        await rejectWaitingList({ email: selectedUser.email });
-        toast.success(`Access request for ${selectedUser.name} was rejected`);
-        fetchWaitingListUsers();
-      } catch (err) {
-        toast.error("Failed to reject waiting list request");
-        console.error("Error rejecting waiting list request:", err);
-      }
+    setIsRejecting(true);
+    try {
+      await rejectWaitingList({ email: selectedUser.email });
+      toast.success(`Access request for ${selectedUser.name} was rejected`);
+      fetchWaitingListUsers();
+    } catch (err) {
+      toast.error("Failed to reject waiting list request");
+      console.error("Error rejecting waiting list request:", err);
+    } finally {
+      setIsRejecting(false);
+      setIsConfirmOpen(false);
+      setIsDetailsOpen(false);
+      setSelectedUser(null);
     }
-    setIsDetailsOpen(false);
-    setSelectedUser(null);
   };
 
   const handleGiveAccess = async () => {
-    if (selectedUser) {
-      try {
-        await approveWaitingList({ email: selectedUser.email });
-        toast.success(`Access granted to ${selectedUser.name}`);
-        fetchWaitingListUsers();
-      } catch (err) {
-        toast.error("Failed to approve waiting list request");
-        console.error("Error approving waiting list request:", err);
-      }
+    setIsApproving(true);
+    try {
+      await approveWaitingList({ email: selectedUser.email });
+      toast.success(`Access granted to ${selectedUser.name}`);
+      fetchWaitingListUsers();
+    } catch (err) {
+      toast.error("Failed to approve waiting list request");
+      console.error("Error approving waiting list request:", err);
+    } finally {
+      setIsApproving(false);
+      setIsDetailsOpen(false);
+      setSelectedUser(null);
     }
-    setIsDetailsOpen(false);
-    setSelectedUser(null);
   };
 
   const handlePageChange = (page) => {
@@ -163,8 +168,8 @@ export default function WaitingListTable() {
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
                     {user.description
-                      ? user.description.length > 100
-                        ? `${user.description.substring(0, 100)}...`
+                      ? user.description.length > 25
+                        ? `${user.description.substring(0, 25)}...`
                         : user.description
                       : "No description provided"}
                   </TableCell>
@@ -182,7 +187,6 @@ export default function WaitingListTable() {
                       size="icon"
                       onClick={() => handleInfoClick(user)}
                       aria-label={`View details for ${user.name}`}
-                      // disabled={user.status !== "waiting"}
                     >
                       <Info className="h-4 w-4" />
                     </Button>
@@ -250,13 +254,28 @@ export default function WaitingListTable() {
           </div>
           <DialogFooter className="sm:justify-end">
             {selectedUser?.status !== "rejected" && (
-              <Button variant="outline" onClick={handleCancelClick}>
+              <Button
+                variant="destructive"
+                onClick={handleCancelClick}
+                disabled={isApproving || isRejecting}
+                className="hover:bg-red-600 bg-red-500"
+              >
                 Reject Request
               </Button>
             )}
             {selectedUser?.status !== "approved" && (
-              <Button variant="blueGradient" onClick={handleGiveAccess}>
-                Approve Access
+              <Button
+                variant="blueGradient"
+                onClick={handleGiveAccess}
+                disabled={isApproving || isRejecting}
+              >
+                {isApproving ? (
+                  <div className="flex justify-center">
+                    <SmallLoader className="text-white" />
+                  </div>
+                ) : (
+                  "Approve Access"
+                )}
               </Button>
             )}
           </DialogFooter>
@@ -273,9 +292,19 @@ export default function WaitingListTable() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmCancel}>
-              Yes, reject request
+            <AlertDialogCancel disabled={isRejecting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmCancel}
+              disabled={isRejecting}
+              className="bg-red-500 hover:bg-red-500/90 cursor-pointer"
+            >
+              {isRejecting ? (
+                <div className="flex justify-center">
+                  <SmallLoader className="text-white" />
+                </div>
+              ) : (
+                "Yes, reject request"
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
