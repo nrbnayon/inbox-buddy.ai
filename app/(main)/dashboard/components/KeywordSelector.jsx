@@ -1,7 +1,6 @@
 // app\(main)\dashboard\components\KeywordSelector.jsx
 "use client";
 import * as React from "react";
-
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -35,11 +34,9 @@ export function KeywordSelector({ onKeywordChange }) {
   const [keywordToDelete, setKeywordToDelete] = React.useState(null);
 
   React.useEffect(() => {
-    // Report selected keywords to parent component
     const selectedKeywords = keywords
-      .filter(keyword => keyword.checked)
-      .map(keyword => keyword.text);
-    
+      .filter((keyword) => keyword.checked)
+      .map((keyword) => keyword.text);
     if (onKeywordChange) {
       onKeywordChange(selectedKeywords);
     }
@@ -50,11 +47,7 @@ export function KeywordSelector({ onKeywordChange }) {
     if (newKeyword.trim()) {
       setKeywords([
         ...keywords,
-        {
-          id: Date.now(),
-          text: newKeyword.trim(),
-          checked: false,
-        },
+        { id: Date.now(), text: newKeyword.trim(), checked: false },
       ]);
       setNewKeyword("");
       setOpenAdd(false);
@@ -127,7 +120,6 @@ export function KeywordSelector({ onKeywordChange }) {
         ))}
       </DropdownMenuContent>
 
-      {/* Add Keyword Dialog */}
       <Dialog open={openAdd} onOpenChange={setOpenAdd}>
         <DialogContent>
           <DialogHeader>
@@ -147,7 +139,6 @@ export function KeywordSelector({ onKeywordChange }) {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
       <Dialog open={openDelete} onOpenChange={setOpenDelete}>
         <DialogContent>
           <DialogHeader>

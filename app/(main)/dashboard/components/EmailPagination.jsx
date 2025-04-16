@@ -17,7 +17,7 @@ export function EmailPagination({
   hasNextPage,
   hasPrevPage,
 }) {
-  const totalPages = Math.ceil(totalEmails / emailsPerPage);
+  const totalPages = Math.max(1, Math.ceil(totalEmails / emailsPerPage));
 
   const handlePrevious = () => {
     if (hasPrevPage) {
@@ -36,29 +36,24 @@ export function EmailPagination({
     const maxVisiblePages = 5;
 
     if (totalPages <= maxVisiblePages) {
-      // Show all pages if total pages are less than or equal to max visible pages
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
       }
     } else {
-      // Always show first page
-      pages.push(1);
+      pages.push(1); // Always show first page
 
       if (currentPage <= 3) {
-        // Near the start
         for (let i = 2; i <= 4; i++) {
           pages.push(i);
         }
         pages.push("...");
         pages.push(totalPages);
       } else if (currentPage >= totalPages - 2) {
-        // Near the end
         pages.push("...");
         for (let i = totalPages - 3; i <= totalPages; i++) {
           pages.push(i);
         }
       } else {
-        // Middle
         pages.push("...");
         pages.push(currentPage - 1);
         pages.push(currentPage);
@@ -74,7 +69,7 @@ export function EmailPagination({
   return (
     <div className="flex flex-col items-center xl:items-end gap-2 w-full">
       <p className="text-sm text-muted-foreground">
-        Page {currentPage} of {totalPages || 1}
+        Page {currentPage} of {totalPages}
       </p>
       <Pagination className="w-fit mx-0 mt-2 md:mt-0 mb-4 md:mb-0">
         <PaginationContent className="gap-2 md:gap-4">
@@ -110,7 +105,7 @@ export function EmailPagination({
                       : "hover:link-btn hover:border-transparent border bg-white border-[#101010]"
                   }
                 >
-                  {String(page)}
+                  {page}
                 </PaginationLink>
               )}
             </PaginationItem>

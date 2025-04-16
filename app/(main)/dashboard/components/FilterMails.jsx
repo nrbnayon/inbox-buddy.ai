@@ -1,33 +1,29 @@
 // app\(main)\dashboard\components\FilterMails.jsx
+// app\(main)\dashboard\components\FilterMails.jsx
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { KeywordSelector } from "./KeywordSelector";
 import { SelectComponent } from "../../../../components/SelectComponent";
 import { DatePicker } from "@/components/DatePicker";
 import SearchBar from "./SearchBar";
 
 const timePeriods = [
-  {
-    label: "Daily",
-    value: "daily",
-  },
-  {
-    label: "Weekly",
-    value: "weekly",
-  },
-  {
-    label: "Monthly",
-    value: "monthly",
-  },
+  { label: "Daily", value: "daily" },
+  { label: "Weekly", value: "weekly" },
+  { label: "Monthly", value: "monthly" },
 ];
 
-export default function FilterMails({ onSearch, onKeywordChange, onTimePeriodChange, onDateChange }) {
+export default function FilterMails({
+  onSearch,
+  onKeywordChange,
+  onTimePeriodChange,
+  onDateChange,
+}) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [timePeriod, setTimePeriod] = useState("monthly");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
 
-  // Debounce search to prevent too many API calls
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
@@ -37,23 +33,32 @@ export default function FilterMails({ onSearch, onKeywordChange, onTimePeriodCha
     return () => clearTimeout(timer);
   }, [searchQuery, onSearch]);
 
-  const handleSearchChange = (query) => {
+  const handleSearchChange = useCallback((query) => {
     setSearchQuery(query);
-  };
+  }, []);
 
-  const handleDateChange = (date) => {
-    setSelectedDate(date);
-    if (onDateChange) onDateChange(date);
-  };
+  const handleDateChange = useCallback(
+    (date) => {
+      setSelectedDate(date);
+      if (onDateChange) onDateChange(date);
+    },
+    [onDateChange]
+  );
 
-  const handleTimePeriodChange = (period) => {
-    setTimePeriod(period);
-    if (onTimePeriodChange) onTimePeriodChange(period);
-  };
+  const handleTimePeriodChange = useCallback(
+    (period) => {
+      setTimePeriod(period);
+      if (onTimePeriodChange) onTimePeriodChange(period);
+    },
+    [onTimePeriodChange]
+  );
 
-  const handleKeywordChange = (keywords) => {
-    if (onKeywordChange) onKeywordChange(keywords);
-  };
+  const handleKeywordChange = useCallback(
+    (keywords) => {
+      if (onKeywordChange) onKeywordChange(keywords);
+    },
+    [onKeywordChange]
+  );
 
   return (
     <div className="grid grid-cols-2 sm:grid-cols-2 2xl:grid-cols-4 gap-2 pb-4">
