@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Info } from "lucide-react";
+import { EllipsisVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -160,7 +160,7 @@ export default function BlockedUsersTable() {
                       onClick={() => handleInfoClick(user)}
                       aria-label={`View details for ${user.name || "user"}`}
                     >
-                      <Info className="h-4 w-4" />
+                      <EllipsisVertical className="h-4 w-4" />
                     </Button>
                   </TableCell>
                 </TableRow>
