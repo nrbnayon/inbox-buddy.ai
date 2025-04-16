@@ -44,7 +44,7 @@ export default function AdminDashboard() {
             <FaUser size={30} color="#00ACDA" />
             <p className="text-lg mt-5">Total Users:</p>
           </div>
-          <p className="h-full flex items-center text-3xl font-bold">
+          <p className="h-full flex items-end text-3xl font-bold">
             {loading ? <SmallLoader /> : error ? "Error" : totalUsers}
           </p>
         </div>
@@ -55,7 +55,7 @@ export default function AdminDashboard() {
             <FaUserClock size={30} color="#e3e300" />
             <p className="text-lg mt-5">Total Waiting Users:</p>
           </div>
-          <p className="h-full flex items-center text-3xl font-bold">
+          <p className="h-full flex items-end text-3xl font-bold">
             {loading ? <SmallLoader /> : error ? "Error" : totalWaitingUsers}
           </p>
         </div>
@@ -66,7 +66,7 @@ export default function AdminDashboard() {
             <GiReceiveMoney size={30} color="#1ac72e" />
             <p className="text-lg mt-5">Total Income:</p>
           </div>
-          <p className="h-full flex items-center text-3xl font-bold">
+          <p className="h-full flex items-end text-2xl font-bold">
             {loading ? <SmallLoader /> : error ? "Error" : `$ ${totalIncome}`}
           </p>
         </div>
