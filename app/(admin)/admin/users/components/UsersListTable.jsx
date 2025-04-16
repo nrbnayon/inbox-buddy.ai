@@ -32,6 +32,8 @@ import { Badge } from "@/components/ui/badge";
 import { getAllUsers, updateUser, deleteUser } from "@/lib/api/user";
 import LoadingPing from "@/components/LoadingPing";
 import { UserPagination } from "@/app/(admin)/components/UserPagination";
+import SmallLoader from "@/components/SmallLoader";
+import { toast } from "sonner";
 
 export default function UsersListTable() {
   const [users, setUsers] = useState([]);
@@ -42,6 +44,7 @@ export default function UsersListTable() {
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [isActionLoading, setIsActionLoading] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -72,36 +75,54 @@ export default function UsersListTable() {
   const handleConfirmAction = async () => {
     if (!selectedUser || !actionType) return;
 
+    setIsActionLoading(true);
     try {
+      let res;
+      let successMessage = "";
+
       switch (actionType) {
         case "block":
-          await updateUser(selectedUser._id, {
+          res = await updateUser(selectedUser._id, {
             status: selectedUser.status === "blocked" ? "active" : "blocked",
           });
+          successMessage =
+            selectedUser.status === "blocked"
+              ? "User unblocked successfully"
+              : "User blocked successfully";
           break;
         case "cancel":
-          await updateUser(selectedUser._id, {
+          res = await updateUser(selectedUser._id, {
             subscription: {
               ...selectedUser.subscription,
               status: "cancelled",
               autoRenew: false,
             },
           });
+          successMessage = "Subscription cancelled successfully";
           break;
         case "delete":
-          await deleteUser(selectedUser._id);
+          res = await deleteUser(selectedUser._id);
+          successMessage = "User deleted successfully";
           break;
         default:
           break;
       }
-      fetchUsers();
+
+      if (res?.success) {
+        toast.success(successMessage);
+        fetchUsers();
+      } else {
+        throw new Error(res?.message || "Action failed");
+      }
     } catch (err) {
       console.error(`Error performing ${actionType} action:`, err);
+      toast.error(err.message || "Failed to perform action");
+    } finally {
+      setIsActionLoading(false);
+      setIsConfirmOpen(false);
+      setSelectedUser(null);
+      setActionType(null);
     }
-
-    setIsConfirmOpen(false);
-    setSelectedUser(null);
-    setActionType(null);
   };
 
   const getActionMessage = () => {
@@ -162,7 +183,6 @@ export default function UsersListTable() {
               <TableHead className="pl-9 py-6">Name</TableHead>
               <TableHead className="hidden md:table-cell">Email</TableHead>
               <TableHead className="text-center">Provider</TableHead>
-              {/* <TableHead className="text-center">Status</TableHead> */}
               <TableHead className="text-center">Subs. Plan</TableHead>
               <TableHead className="text-center">Subs. Status</TableHead>
               <TableHead className="text-center">Actions</TableHead>
@@ -187,9 +207,6 @@ export default function UsersListTable() {
                   <TableCell className="text-center">
                     {user.authProvider || "email"}
                   </TableCell>
-                  {/* <TableCell className="text-center">
-                    {renderStatusBadge(user.status || "active")}
-                  </TableCell> */}
                   <TableCell className="text-center">
                     {user.subscription?.plan || "free"}
                   </TableCell>
@@ -259,12 +276,19 @@ export default function UsersListTable() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>No, go back</AlertDialogCancel>
+            <AlertDialogCancel disabled={isActionLoading}>
+              No, go back
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmAction}
               className="bg-red-600 hover:bg-red-700 text-white"
+              disabled={isActionLoading}
             >
-              Yes, proceed
+              {isActionLoading ? (
+                <SmallLoader className="text-white" />
+              ) : (
+                "Yes, proceed"
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
