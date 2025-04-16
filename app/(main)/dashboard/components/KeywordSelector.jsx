@@ -1,3 +1,4 @@
+// app\(main)\dashboard\components\KeywordSelector.jsx
 "use client";
 import * as React from "react";
 
@@ -22,9 +23,9 @@ import { FaAngleDown } from "react-icons/fa";
 import { GoPlus } from "react-icons/go";
 import { FaRegTrashCan } from "react-icons/fa6";
 
-export function KeywordSelector() {
+export function KeywordSelector({ onKeywordChange }) {
   const [keywords, setKeywords] = React.useState([
-    { id: 1, text: "meetings", checked: true },
+    { id: 1, text: "meetings", checked: false },
     { id: 2, text: "subscriptions", checked: false },
     { id: 3, text: "interviews", checked: false },
   ]);
@@ -32,6 +33,17 @@ export function KeywordSelector() {
   const [openAdd, setOpenAdd] = React.useState(false);
   const [openDelete, setOpenDelete] = React.useState(false);
   const [keywordToDelete, setKeywordToDelete] = React.useState(null);
+
+  React.useEffect(() => {
+    // Report selected keywords to parent component
+    const selectedKeywords = keywords
+      .filter(keyword => keyword.checked)
+      .map(keyword => keyword.text);
+    
+    if (onKeywordChange) {
+      onKeywordChange(selectedKeywords);
+    }
+  }, [keywords, onKeywordChange]);
 
   const handleAddKeyword = (e) => {
     e.preventDefault();
@@ -78,7 +90,7 @@ export function KeywordSelector() {
           className="ring-0 focus-within:ring-0 focus-visible:ring-0 cursor-pointer"
         >
           Select Keywords
-          <FaAngleDown />
+          <FaAngleDown className="ml-2" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
