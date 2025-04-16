@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { EllipsisVertical } from "lucide-react";
+import { Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -123,7 +123,7 @@ export default function BlockedUsersTable() {
   }
 
   return (
-    <div className="py-10">
+    <>
       <div className="rounded-md border">
         <Table>
           <TableHeader className="bg-blue-100">
@@ -160,7 +160,7 @@ export default function BlockedUsersTable() {
                       onClick={() => handleInfoClick(user)}
                       aria-label={`View details for ${user.name || "user"}`}
                     >
-                      <EllipsisVertical className="h-4 w-4" />
+                      <Info className="h-4 w-4" />
                     </Button>
                   </TableCell>
                 </TableRow>
@@ -253,6 +253,6 @@ export default function BlockedUsersTable() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </>
   );
 }

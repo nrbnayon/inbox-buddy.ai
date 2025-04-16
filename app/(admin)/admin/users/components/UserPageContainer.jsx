@@ -24,7 +24,6 @@ export default function UserPageContainer() {
         "active",
         confirmedSearchQuery
       );
-      console.log(data?.users);
       const normalUsers =
         data?.users.filter((usr) => usr.role === "user") || [];
       setUsers(normalUsers || []);

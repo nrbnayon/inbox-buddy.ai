@@ -141,7 +141,7 @@ export default function WaitingListTable() {
   }
 
   return (
-    <div className="py-10">
+    <>
       <div className="rounded-md border">
         <Table>
           <TableHeader className="bg-blue-100">
@@ -309,6 +309,6 @@ export default function WaitingListTable() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </>
   );
 }
