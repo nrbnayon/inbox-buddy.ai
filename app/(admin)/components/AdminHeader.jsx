@@ -43,7 +43,7 @@ export default function AdminHeader({ user }) {
 
   return (
     <header className="link-btn text-white shadow p-4 lg:p-6 rounded-xl mb-6 sticky top-0 z-10">
-      <div className="max-w-7xl mx-auto flex justify-between items-center">
+      <div className="mx-auto flex justify-between items-center">
         {/* Left: Welcome Message */}
         <div className="flex items-center space-x-3">
           {user ? (
