@@ -1,13 +1,5 @@
-import React from "react";
-import UsersListTable from "./components/UsersListTable";
-
-import UserPageHeader from "./components/UserPageHeader";
+import UserPageContainer from "./components/UserPageContainer";
 
 export default async function usersPage() {
-  return (
-    <>
-      <UserPageHeader />
-      <UsersListTable />
-    </>
-  );
+  return <UserPageContainer />;
 }

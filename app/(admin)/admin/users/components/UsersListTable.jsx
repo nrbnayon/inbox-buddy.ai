@@ -1,7 +1,6 @@
-// app\(admin)\admin\users\components\UsersListTable.jsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { EllipsisVertical, Ban, XCircle, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,42 +28,25 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { getAllUsers, updateUser, deleteUser } from "@/lib/api/user";
+import { updateUser, deleteUser } from "@/lib/api/user";
 import LoadingPing from "@/components/LoadingPing";
 import { UserPagination } from "@/app/(admin)/components/UserPagination";
 import SmallLoader from "@/components/SmallLoader";
 import { toast } from "sonner";
 
-export default function UsersListTable() {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+export default function UsersListTable({
+  users,
+  loading,
+  error,
+  currentPage,
+  totalPages,
+  onPageChange,
+  onActionComplete,
+}) {
   const [selectedUser, setSelectedUser] = useState(null);
   const [actionType, setActionType] = useState(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [isActionLoading, setIsActionLoading] = useState(false);
-
-  useEffect(() => {
-    fetchUsers();
-  }, [currentPage]);
-
-  const fetchUsers = async () => {
-    try {
-      setLoading(true);
-      const data = await getAllUsers(currentPage, 10, "active");
-      setUsers(data?.users || []);
-      setTotalPages(data?.totalPages || 1);
-      setError(null);
-    } catch (err) {
-      console.error("Failed to fetch users:", err);
-      setError("Failed to load users. Please try again.");
-      setUsers([]);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleActionClick = (user, action) => {
     setSelectedUser(user);
@@ -110,7 +92,7 @@ export default function UsersListTable() {
 
       if (res?.success) {
         toast.success(successMessage);
-        fetchUsers();
+        onActionComplete();
       } else {
         throw new Error(res?.message || "Action failed");
       }
@@ -143,10 +125,6 @@ export default function UsersListTable() {
     }
   };
 
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
-
   const renderStatusBadge = (status) => {
     let variant = "default";
     switch (status) {
@@ -175,7 +153,7 @@ export default function UsersListTable() {
   }
 
   return (
-    <div className="py-10">
+    <>
       <div className="rounded-md border">
         <Table>
           <TableHeader className="bg-blue-100">
@@ -262,7 +240,7 @@ export default function UsersListTable() {
           <UserPagination
             currentPage={currentPage}
             totalPages={totalPages}
-            onPageChange={handlePageChange}
+            onPageChange={onPageChange}
           />
         </div>
       )}
@@ -293,6 +271,6 @@ export default function UsersListTable() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </>
   );
 }
