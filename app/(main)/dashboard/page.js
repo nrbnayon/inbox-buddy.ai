@@ -58,7 +58,7 @@ export default async function DashboardPage() {
         <div className="flex gap-3">
           <Image src={mail} alt="gmail logo" className="size-11" />
           <div className="flex flex-col">
-            <p className="text-[#A0AEC0]">Unread Emails</p>
+            <p className="text-gray-500">Unread Emails</p>
             <h4 className="text-[#2D3748]">{unreadEmailsCount}</h4>
           </div>
         </div>
@@ -67,7 +67,7 @@ export default async function DashboardPage() {
         <div className="flex gap-3">
           <Image src={meeting} alt="gmail logo" className="size-11" />
           <div className="flex flex-col">
-            <p className="text-[#A0AEC0]">Meetings this week</p>
+            <p className="text-gray-500">Meetings this week</p>
             <h4 className="text-[#2D3748]">{meetingsCount}</h4>
           </div>
         </div>
