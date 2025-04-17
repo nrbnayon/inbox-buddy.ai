@@ -11,6 +11,7 @@ import gmail from "@/public/gmail.png";
 import { axiosInstance } from "@/lib/axios";
 import { Loader2 } from "lucide-react";
 import EmailTableSkeleton from "./EmailTableSkeleton";
+import LoadingPing from "@/components/LoadingPing";
 
 export default function EmailsContainer({ user }) {
   const [emails, setEmails] = useState([]);
@@ -581,7 +582,7 @@ export default function EmailsContainer({ user }) {
           <div className="rounded-2xl border relative">
             {isPageLoading && (
               <div className="absolute inset-0 flex justify-center items-center bg-white bg-opacity-50 z-10">
-                <Loader2 className="h-6 w-6 animate-spin" />
+                <LoadingPing />
               </div>
             )}
             <EmailTable

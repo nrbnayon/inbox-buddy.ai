@@ -20,12 +20,12 @@ import { Input } from "@/components/ui/input";
 import { FaAngleDown } from "react-icons/fa";
 import { GoPlus } from "react-icons/go";
 import { FaRegTrashCan } from "react-icons/fa6";
-import { toast } from "sonner"; 
+import { toast } from "sonner";
 import {
   getUserKeywords,
   addUserKeyword,
   deleteUserKeyword,
-} from "@/lib/api/keyword"; 
+} from "@/lib/api/keyword";
 
 export function KeywordSelector({ onKeywordChange }) {
   const [keywords, setKeywords] = React.useState([]);
@@ -167,32 +167,37 @@ export function KeywordSelector({ onKeywordChange }) {
             No keywords available
           </div>
         )}
-        {keywords.map((keyword) => (
-          <div
-            key={keyword.id}
-            className="flex items-center justify-between px-2 py-1.5"
-          >
-            <DropdownMenuCheckboxItem
-              checked={keyword.checked}
-              onCheckedChange={() => handleToggleKeyword(keyword.id)}
-              onSelect={(e) => e.preventDefault()}
-              className="w-full mr-2"
-              disabled={isLoading}
+        <div
+          className="max-h-[200px] overflow-y-auto"
+          style={{ maxHeight: keywords.length > 5 ? "200px" : "auto" }}
+        >
+          {keywords.map((keyword) => (
+            <div
+              key={keyword.id}
+              className="flex items-center justify-between px-2 py-1.5"
             >
-              {keyword.text}
-            </DropdownMenuCheckboxItem>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                confirmDelete(keyword.id);
-              }}
-              className="text-red-500 hover:text-red-700 flex-shrink-0 cursor-pointer"
-              disabled={isLoading}
-            >
-              <FaRegTrashCan size={14} />
-            </button>
-          </div>
-        ))}
+              <DropdownMenuCheckboxItem
+                checked={keyword.checked}
+                onCheckedChange={() => handleToggleKeyword(keyword.id)}
+                onSelect={(e) => e.preventDefault()}
+                className="w-full mr-2"
+                disabled={isLoading}
+              >
+                {keyword.text}
+              </DropdownMenuCheckboxItem>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  confirmDelete(keyword.id);
+                }}
+                className="text-red-500 hover:text-red-700 flex-shrink-0 cursor-pointer"
+                disabled={isLoading}
+              >
+                <FaRegTrashCan size={14} />
+              </button>
+            </div>
+          ))}
+        </div>
       </DropdownMenuContent>
 
       <Dialog open={openAdd} onOpenChange={setOpenAdd}>
@@ -208,7 +213,11 @@ export function KeywordSelector({ onKeywordChange }) {
               className="w-full"
               disabled={isLoading}
             />
-            <Button type="submit" className="w-full link-btn" disabled={isLoading}>
+            <Button
+              type="submit"
+              className="w-full link-btn"
+              disabled={isLoading}
+            >
               {isLoading ? "Adding..." : "Add Keyword"}
             </Button>
           </form>
