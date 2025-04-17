@@ -23,6 +23,7 @@ const DesktopSidebar = ({
   openProfileModal,
   handleLogout,
 }) => {
+  console.log(imageSrc);
   const { setMessages } = useChat();
   return (
     <div className="hidden lg:block lg:w-64 lg:shrink-0 lg:bg-[#F1F1F1] dark:lg:bg-gray-800">

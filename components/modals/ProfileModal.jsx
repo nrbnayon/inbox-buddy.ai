@@ -44,27 +44,27 @@ import {
 } from "lucide-react";
 import useGetUser from "@/hooks/useGetUser";
 
-const ProfileModal = ({ isOpen, onClose, initialUser, onProfileUpdate }) => {
-  const [user, setUser] = useState(initialUser || null);
+const ProfileModal = ({ isOpen, onClose, accessToken, setUser }) => {
+  // const [user, setUser] = useState(initialUser || null);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({});
   const [profilePicture, setProfilePicture] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
-  const { setUser: setUpdatedUser } = useGetUser();
+  const { user } = useGetUser(accessToken);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
-      if (initialUser) {
-        setUser(initialUser);
-        setFormData(initialUser);
+      if (user) {
+        // setUser(initialUser);
+        setFormData(user);
       } else {
         fetchUserProfile();
       }
     }
-  }, [isOpen, initialUser]);
+  }, [isOpen, user]);
 
   const fetchUserProfile = async () => {
     try {
@@ -118,12 +118,6 @@ const ProfileModal = ({ isOpen, onClose, initialUser, onProfileUpdate }) => {
       // Update local state with the new data
       const updatedUser = response.user;
       setUser(updatedUser);
-      setUpdatedUser(updatedUser);
-
-      // Notify parent component about the profile update
-      if (onProfileUpdate && typeof onProfileUpdate === "function") {
-        onProfileUpdate(updatedUser);
-      }
 
       setIsEditing(false);
       setProfilePicture(null);
