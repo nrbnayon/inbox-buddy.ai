@@ -183,9 +183,11 @@ const ProfileModal = ({ isOpen, onClose, accessToken, setUser }) => {
                 <TabsTrigger value="edit" className="flex-1">
                   Edit Profile
                 </TabsTrigger>
-                <TabsTrigger value="settings" className="flex-1">
-                  Settings
-                </TabsTrigger>
+                {user?.role !== "super_admin" && (
+                  <TabsTrigger value="settings" className="flex-1">
+                    Settings
+                  </TabsTrigger>
+                )}
               </TabsList>
             </div>
 
@@ -393,64 +395,66 @@ const ProfileModal = ({ isOpen, onClose, accessToken, setUser }) => {
                 </form>
               </TabsContent>
 
-              <TabsContent value="settings" className="mt-0">
-                <div className="space-y-6">
-                  <div className="p-4 border border-red-200 rounded-lg bg-red-50 dark:bg-red-900/10 dark:border-red-900/20">
-                    <div className="flex items-center space-x-3">
-                      <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400" />
-                      <h3 className="text-lg font-semibold text-red-600 dark:text-red-400">
-                        Danger Zone
-                      </h3>
-                    </div>
-                    <p className="mt-2 text-sm text-red-600 dark:text-red-400">
-                      Once you delete your account, there is no going back. This
-                      will permanently delete your account and remove your data
-                      from our servers.
-                    </p>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          variant="destructive"
-                          className="mt-4"
-                          disabled={isLoading}
-                        >
-                          <Trash2 className="w-4 h-4 mr-2" />
-                          Delete Account
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>
-                            Are you absolutely sure?
-                          </AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This action cannot be undone. This will permanently
-                            delete your account and remove your data from our
-                            servers.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={handleDeleteAccount}
-                            className="bg-red-600 hover:bg-red-700 text-white"
+              {user?.role !== "super_admin" && (
+                <TabsContent value="settings" className="mt-0">
+                  <div className="space-y-6">
+                    <div className="p-4 border border-red-200 rounded-lg bg-red-50 dark:bg-red-900/10 dark:border-red-900/20">
+                      <div className="flex items-center space-x-3">
+                        <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400" />
+                        <h3 className="text-lg font-semibold text-red-600 dark:text-red-400">
+                          Danger Zone
+                        </h3>
+                      </div>
+                      <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                        Once you delete your account, there is no going back.
+                        This will permanently delete your account and remove
+                        your data from our servers.
+                      </p>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="destructive"
+                            className="mt-4"
                             disabled={isLoading}
                           >
-                            {isLoading ? (
-                              <>
-                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                Deleting...
-                              </>
-                            ) : (
-                              "Yes, delete account"
-                            )}
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete Account
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              Are you absolutely sure?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This action cannot be undone. This will
+                              permanently delete your account and remove your
+                              data from our servers.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={handleDeleteAccount}
+                              className="bg-red-600 hover:bg-red-700 text-white"
+                              disabled={isLoading}
+                            >
+                              {isLoading ? (
+                                <>
+                                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                  Deleting...
+                                </>
+                              ) : (
+                                "Yes, delete account"
+                              )}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   </div>
-                </div>
-              </TabsContent>
+                </TabsContent>
+              )}
             </ScrollArea>
           </Tabs>
         </DialogContent>

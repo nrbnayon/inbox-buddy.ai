@@ -15,7 +15,6 @@ const DesktopSidebar = ({
   imageSrc,
   pathName,
   chats,
-  setChats,
   openDropdowns,
   setOpenDropdowns,
   handleNewChat,

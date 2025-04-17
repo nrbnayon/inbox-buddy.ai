@@ -6,13 +6,15 @@ import { GrLogout } from "react-icons/gr";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { usePathname, useRouter } from "next/navigation";
 import { logoutAction } from "@/app/actions/authActions";
-import { use, useState } from "react";
+import { useState } from "react";
 import { AiOutlineMenu } from "react-icons/ai";
 import { FaUserCircle } from "react-icons/fa";
 import logoImage from "@/public/Frame 2.svg";
 import Image from "next/image";
 import AdminHeader from "./AdminHeader";
 import navLinks from "@/utils/navlinks";
+import ProfileModal from "@/components/modals/ProfileModal";
+import useGetUser from "@/hooks/useGetUser";
 
 const publicRoutes = [
   "/",
@@ -23,8 +25,16 @@ const publicRoutes = [
   "/login",
 ];
 
-export default function AdminSidebar({ children, user }) {
+export default function AdminSidebar({ children, accessToken }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+
+  const { user, setUser } = useGetUser(accessToken);
+
+  const openProfileModal = () => {
+    setIsProfileModalOpen(true);
+    setIsOpen(false);
+  };
 
   const pathName = usePathname();
 
@@ -53,7 +63,13 @@ export default function AdminSidebar({ children, user }) {
               prefetch={false}
             >
               <Avatar>
-                <AvatarImage src={user?.profilePicture} alt={user?.name} />
+                <AvatarImage
+                  src={
+                    user?.profilePicture &&
+                    `${user?.profilePicture}?${Date.now()}`
+                  }
+                  alt={user?.name}
+                />
                 <AvatarFallback className="bg-gradient-to-r from-[#00ACDA] to-[#43D4FB] text-sm text-white">
                   {user?.name?.substring(0, 2).toUpperCase() || "N/A"}
                 </AvatarFallback>
@@ -72,7 +88,7 @@ export default function AdminSidebar({ children, user }) {
             <nav className="space-y-1">
               {/* dashboard */}
               {navLinks?.map((link) => {
-                if (user.role === "admin" && link.label === "Manage Admins")
+                if (user?.role === "admin" && link.label === "Manage Admins")
                   return;
                 else
                   return (
@@ -111,7 +127,7 @@ export default function AdminSidebar({ children, user }) {
               type="submit"
               className="flex items-center gap-2 text-sm cursor-pointer"
               variant="ghost"
-              onClick={() => console.log("to profile page")}
+              onClick={openProfileModal}
             >
               <FaUserCircle className="size-6" />
               <span>Profile</span>
@@ -208,6 +224,13 @@ export default function AdminSidebar({ children, user }) {
           {children}
         </section>
       </div>
+
+      <ProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        accessToken={accessToken}
+        setUser={setUser}
+      />
     </div>
   );
 }

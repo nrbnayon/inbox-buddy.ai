@@ -24,12 +24,10 @@ export default async function RootLayout({ children }) {
     }
   }
 
-  // console.log("ADMIN DATA::", user);
-
   return (
     <section className="bg-gray-100 min-h-screen overflow-hidden">
       {token?.value && user ? (
-        <AdminSidebar user={user} children={children} />
+        <AdminSidebar children={children} accessToken={token?.value} />
       ) : (
         <section className="h-[90vh] flex items-center justify-center">
           {children}
