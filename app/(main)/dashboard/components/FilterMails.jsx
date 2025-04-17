@@ -1,4 +1,3 @@
-// app\(main)\dashboard\components\FilterMails.jsx
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
 import { KeywordSelector } from "./KeywordSelector";
@@ -8,14 +7,9 @@ import SearchBar from "./SearchBar";
 
 const timePeriods = [
   { label: "All", value: "all" },
-  { label: "Today", value: "today" },
-  { label: "Yesterday", value: "yesterday" },
-  { label: "This Week", value: "this week" },
-  { label: "Last Week", value: "last week" },
-  { label: "This Month", value: "this month" },
-  { label: "Last Month", value: "last month" },
-  { label: "This Year", value: "this year" },
-  { label: "Last Year", value: "last year" },
+  { label: "Today", value: "daily" },
+  { label: "This Week", value: "weekly" },
+  { label: "This Month", value: "monthly" },
 ];
 
 export default function FilterMails({
@@ -45,27 +39,31 @@ export default function FilterMails({
     (date) => {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      if (date <= today) {
+      if (date && date <= today) {
+        console.log("FilterMails date selected:", date);
         setSelectedDate(date);
-        if (timePeriod !== "all") {
-          setTimePeriod("all");
-          if (onTimePeriodChange) onTimePeriodChange("all");
-        }
+        setTimePeriod("all"); // Reset to "all" when selecting a date
         if (onDateChange) onDateChange(date);
+        if (onTimePeriodChange) onTimePeriodChange("all");
+      } else {
+        setSelectedDate(null);
+        if (onDateChange) onDateChange(null);
       }
     },
-    [onDateChange, onTimePeriodChange, timePeriod]
+    [onDateChange, onTimePeriodChange]
   );
 
   const handleTimePeriodChange = useCallback(
     (period) => {
+      console.log("FilterMails time period selected:", period);
       setTimePeriod(period);
-      if (selectedDate && period !== "all") {
+      if (selectedDate) {
         setSelectedDate(null);
+        if (onDateChange) onDateChange(null);
       }
       if (onTimePeriodChange) onTimePeriodChange(period);
     },
-    [onTimePeriodChange, selectedDate]
+    [onDateChange, selectedDate, onTimePeriodChange]
   );
 
   const handleKeywordChange = useCallback(
@@ -78,8 +76,8 @@ export default function FilterMails({
   const maxDate = new Date();
 
   return (
-    <div className='grid grid-cols-2 sm:grid-cols-2 2xl:grid-cols-4 gap-2 pb-4'>
-      <div className='col-span-2 md:col-span-1'>
+    <div className="grid grid-cols-2 sm:grid-cols-2 2xl:grid-cols-4 gap-2 pb-4">
+      <div className="col-span-2 md:col-span-1">
         <SearchBar onSearch={handleSearchChange} />
       </div>
       <DatePicker
@@ -87,16 +85,16 @@ export default function FilterMails({
         maxDate={maxDate}
         selected={selectedDate}
         isClearable={true}
-        placeholderText='Select specific date'
+        placeholderText="Select specific date"
       />
       <SelectComponent
-        title='Select Time Period'
-        label='Time Periods'
-        className='border'
+        title="Select Time Period"
+        label="Time Periods"
+        className="border"
         seperator={true}
         options={timePeriods}
         onChange={handleTimePeriodChange}
-        defaultValue='all'
+        defaultValue="all"
         value={timePeriod}
       />
       <KeywordSelector onKeywordChange={handleKeywordChange} />

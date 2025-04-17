@@ -31,52 +31,77 @@ export default function EmailsContainer({ user }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedKeywords, setSelectedKeywords] = useState([]);
   const [timePeriod, setTimePeriod] = useState("all");
-  const [selectedDate, setSelectedDate] = useState(null); // Changed to null initially
+  const [selectedDate, setSelectedDate] = useState(null);
   const [pageTokens, setPageTokens] = useState({ 1: null });
   const [pageCache, setPageCache] = useState({});
-  const EMAILS_PER_PAGE = 4;
+  const EMAILS_PER_PAGE = 7;
 
-  // Function to compute the full Gmail search query
   const computeQuery = useCallback(() => {
     let qParts = [];
-
-    // Add search term if present
     if (searchQuery) {
       qParts.push(searchQuery);
     }
-
-    // Add keywords with OR logic, wrapped in quotes if they contain spaces
     if (selectedKeywords.length > 0) {
       const keywordsPart = selectedKeywords
-        .map((k) => (k.includes(" ") ? `"${k}"` : k)) // Quote keywords with spaces
-        .join(" OR "); // Use OR instead of AND
-      qParts.push(`(${keywordsPart})`); // e.g., "(subscriptions)"
+        .map((k) => (k.includes(" ") ? `"${k}"` : k))
+        .join(" OR ");
+      qParts.push(`(${keywordsPart})`);
     }
-
     return qParts.join(" ") || undefined;
   }, [searchQuery, selectedKeywords]);
+
+  const formatTimeFilter = useCallback(() => {
+    if (selectedDate) {
+      return selectedDate.toISOString().split("T")[0].replace(/-/g, "/");
+    }
+    switch (timePeriod) {
+      case "daily":
+      case "weekly":
+      case "monthly":
+        return timePeriod;
+      case "yesterday": {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        return yesterday.toISOString().split("T")[0].replace(/-/g, "/");
+      }
+      case "last week": {
+        const today = new Date();
+        const lastWeekEnd = new Date(today);
+        lastWeekEnd.setDate(today.getDate() - 7);
+        return lastWeekEnd.toISOString().split("T")[0].replace(/-/g, "/");
+      }
+      case "last month": {
+        const today = new Date();
+        const lastMonthEnd = new Date(today);
+        lastMonthEnd.setMonth(today.getMonth() - 1);
+        return lastMonthEnd.toISOString().split("T")[0].replace(/-/g, "/");
+      }
+      case "all":
+      default:
+        return undefined;
+    }
+  }, [selectedDate, timePeriod]);
 
   const fetchEmails = async (
     pageToken = null,
     targetPage = 1,
-    isPreFetch = false
+    isPreFetch = false,
+    fallbackQuery = null
   ) => {
     if (!isPreFetch) {
       setIsPageLoading(true);
     }
     try {
-      const q = computeQuery();
+      const q = fallbackQuery || computeQuery();
+      const timeFilter = formatTimeFilter();
+      console.log("Sending timeFilter for emails:", timeFilter);
       const res = await axiosInstance.get("/emails", {
         params: {
           maxResults: EMAILS_PER_PAGE,
           pageToken,
           provider: user?.authProvider,
           q,
-          timeFilter: selectedDate
-            ? selectedDate.toISOString().split("T")[0].replace(/-/g, "/")
-            : timePeriod === "all"
-            ? undefined
-            : timePeriod,
+          timeFilter,
           _t: Date.now(),
         },
       });
@@ -89,50 +114,49 @@ export default function EmailsContainer({ user }) {
             nextPageToken: res.data.nextPageToken || null,
             prevPageToken: res.data.prevPageToken || null,
           };
-        } else {
-          setEmailResponse({
-            ...res.data,
-            emails: fetchedEmails,
-          });
-          setEmails(fetchedEmails);
-          console.log(
-            "Fetched emails dates:",
-            fetchedEmails.map((e) => e.date)
+        }
+        setEmailResponse({
+          ...res.data,
+          emails: fetchedEmails,
+        });
+        setEmails(fetchedEmails);
+        console.log(
+          "Fetched emails dates:",
+          fetchedEmails.map((e) => e.date)
+        );
+        setNextPageToken(res.data.nextPageToken || null);
+        setPrevPageToken(res.data.prevPageToken || null);
+        setPageTokens((prev) => ({
+          ...prev,
+          [targetPage]: pageToken,
+          [targetPage + 1]: res.data.nextPageToken || null,
+          [targetPage - 1]: res.data.prevPageToken || null,
+        }));
+        setPageCache((prev) => ({
+          ...prev,
+          [targetPage]: fetchedEmails,
+        }));
+        if (res.data.nextPageToken) {
+          const nextData = await fetchEmails(
+            res.data.nextPageToken,
+            targetPage + 1,
+            true
           );
-          setNextPageToken(res.data.nextPageToken || null);
-          setPrevPageToken(res.data.prevPageToken || null);
-          setPageTokens((prev) => ({
-            ...prev,
-            [targetPage]: pageToken,
-            [targetPage + 1]: res.data.nextPageToken || null,
-            [targetPage - 1]: res.data.prevPageToken || null,
-          }));
-          setPageCache((prev) => ({
-            ...prev,
-            [targetPage]: fetchedEmails,
-          }));
-          if (res.data.nextPageToken) {
-            const nextData = await fetchEmails(
-              res.data.nextPageToken,
-              targetPage + 1,
-              true
-            );
-            setPreFetchedNext({
-              emails: nextData.emails,
-              token: nextData.nextPageToken,
-            });
-          }
-          if (res.data.prevPageToken && targetPage > 1) {
-            const prevData = await fetchEmails(
-              res.data.prevPageToken,
-              targetPage - 1,
-              true
-            );
-            setPreFetchedPrev({
-              emails: prevData.emails,
-              token: prevData.prevPageToken,
-            });
-          }
+          setPreFetchedNext({
+            emails: nextData.emails,
+            token: nextData.nextPageToken,
+          });
+        }
+        if (res.data.prevPageToken && targetPage > 1) {
+          const prevData = await fetchEmails(
+            res.data.prevPageToken,
+            targetPage - 1,
+            true
+          );
+          setPreFetchedPrev({
+            emails: prevData.emails,
+            token: prevData.prevPageToken,
+          });
         }
         return {
           emails: fetchedEmails,
@@ -161,273 +185,6 @@ export default function EmailsContainer({ user }) {
     }
   };
 
-  useEffect(() => {
-    setIsLoading(true);
-    setPageTokens({ 1: null });
-    setPageCache({});
-    setPreFetchedNext({ emails: [], token: null });
-    setPreFetchedPrev({ emails: [], token: null });
-    if (selectedKeywords.length > 0) {
-      fetchImportantEmails(); // Fetch important emails when keywords are selected
-    } else {
-      fetchEmails(null, 1); // Fetch regular emails otherwise
-    }
-  }, [searchQuery, selectedKeywords, timePeriod, selectedDate]);
-
-  const handlePageChange = useCallback(
-    async (page) => {
-      if (page === currentPage) return;
-      const fetchFunction =
-        selectedKeywords.length > 0 ? fetchImportantEmails : fetchEmails;
-
-      if (pageCache[page]) {
-        setEmails(pageCache[page]);
-        setCurrentPage(page);
-        const storedNextToken = pageTokens[page + 1] || null;
-        const storedPrevToken = pageTokens[page - 1] || null;
-        setNextPageToken(storedNextToken);
-        setPrevPageToken(storedPrevToken);
-        if (storedNextToken && !pageCache[page + 1]) {
-          const nextData = await fetchEmails(storedNextToken, page + 1, true);
-          setPreFetchedNext({
-            emails: nextData.emails,
-            token: nextData.nextPageToken,
-          });
-          setPageCache((prev) => ({ ...prev, [page + 1]: nextData.emails }));
-        }
-        if (storedPrevToken && !pageCache[page - 1] && page > 1) {
-          const prevData = await fetchEmails(storedPrevToken, page - 1, true);
-          setPreFetchedPrev({
-            emails: prevData.emails,
-            token: prevData.prevPageToken,
-          });
-          setPageCache((prev) => ({ ...prev, [page - 1]: prevData.emails }));
-        }
-        return;
-      }
-
-      if (page === currentPage + 1 && preFetchedNext.emails.length) {
-        setEmails(preFetchedNext.emails);
-        setNextPageToken(preFetchedNext.token);
-        setPrevPageToken(nextPageToken);
-        setEmailResponse((prev) => ({
-          ...prev,
-          emails: preFetchedNext.emails,
-          nextPageToken: preFetchedNext.token,
-          prevPageToken: nextPageToken,
-        }));
-        setPageTokens((prev) => ({
-          ...prev,
-          [page]: nextPageToken,
-          [page + 1]: preFetchedNext.token || null,
-        }));
-        setPageCache((prev) => ({ ...prev, [page]: preFetchedNext.emails }));
-        setPreFetchedNext({ emails: [], token: null });
-        setCurrentPage(page);
-        if (preFetchedNext.token) {
-          const nextData = await fetchEmails(
-            preFetchedNext.token,
-            page + 1,
-            true
-          );
-          setPreFetchedNext({
-            emails: nextData.emails,
-            token: nextData.nextPageToken,
-          });
-          setPageCache((prev) => ({ ...prev, [page + 1]: nextData.emails }));
-        }
-        if (nextPageToken && page > 1) {
-          const prevData = await fetchEmails(nextPageToken, page - 1, true);
-          setPreFetchedPrev({
-            emails: prevData.emails,
-            token: prevData.prevPageToken,
-          });
-          setPageCache((prev) => ({ ...prev, [page - 1]: prevData.emails }));
-        }
-        return;
-      }
-
-      if (page === currentPage - 1 && preFetchedPrev.emails.length) {
-        setEmails(preFetchedPrev.emails);
-        setNextPageToken(prevPageToken);
-        setPrevPageToken(preFetchedPrev.token);
-        setEmailResponse((prev) => ({
-          ...prev,
-          emails: preFetchedPrev.emails,
-          nextPageToken: prevPageToken,
-          prevPageToken: preFetchedPrev.token,
-        }));
-        setPageTokens((prev) => ({
-          ...prev,
-          [page]: prevPageToken,
-          [page - 1]: preFetchedPrev.token || null,
-        }));
-        setPageCache((prev) => ({ ...prev, [page]: preFetchedPrev.emails }));
-        setPreFetchedPrev({ emails: [], token: null });
-        setCurrentPage(page);
-        if (prevPageToken) {
-          const nextData = await fetchEmails(prevPageToken, page + 1, true);
-          setPreFetchedNext({
-            emails: nextData.emails,
-            token: nextData.nextPageToken,
-          });
-          setPageCache((prev) => ({ ...prev, [page + 1]: nextData.emails }));
-        }
-        if (preFetchedPrev.token && page > 1) {
-          const prevData = await fetchEmails(
-            preFetchedPrev.token,
-            page - 1,
-            true
-          );
-          setPreFetchedPrev({
-            emails: prevData.emails,
-            token: prevData.prevPageToken,
-          });
-          setPageCache((prev) => ({ ...prev, [page - 1]: prevData.emails }));
-        }
-        return;
-      }
-
-      if (pageTokens[page] !== undefined) {
-        await fetchEmails(pageTokens[page], page);
-        setCurrentPage(page);
-        return;
-      }
-
-      console.warn(
-        `No direct token for page ${page}, attempting sequential fetch`
-      );
-      const closestPage = Object.keys(pageTokens)
-        .map(Number)
-        .reduce((prev, curr) =>
-          Math.abs(curr - page) < Math.abs(prev - page) ? curr : prev
-        );
-      let currentToken = pageTokens[closestPage];
-      let currentFetchPage = closestPage;
-
-      while (currentFetchPage < page && currentToken) {
-        const res = await axiosInstance.get("/emails", {
-          params: {
-            maxResults: EMAILS_PER_PAGE,
-            pageToken: currentToken,
-            provider: user?.authProvider,
-            q: computeQuery(),
-            timeFilter: selectedDate
-              ? selectedDate.toISOString().split("T")[0].replace(/-/g, "/")
-              : timePeriod === "all"
-              ? undefined
-              : timePeriod,
-            _t: Date.now(),
-          },
-        });
-        if (res?.data?.success) {
-          currentFetchPage++;
-          currentToken = res.data.nextPageToken || null;
-          setPageTokens((prev) => ({
-            ...prev,
-            [currentFetchPage]: currentToken,
-          }));
-          setPageCache((prev) => ({
-            ...prev,
-            [currentFetchPage]: (res.data.emails || []).slice(
-              0,
-              EMAILS_PER_PAGE
-            ),
-          }));
-        } else {
-          console.error("Failed to fetch intermediate page");
-          setIsPageLoading(false);
-          return;
-        }
-      }
-
-      if (currentFetchPage === page) {
-        await fetchEmails(currentToken, page);
-        setCurrentPage(page);
-      } else {
-        console.error(`Could not reach page ${page}`);
-        setIsPageLoading(false);
-      }
-    },
-    [
-      currentPage,
-      nextPageToken,
-      prevPageToken,
-      preFetchedNext,
-      preFetchedPrev,
-      emailResponse,
-      pageTokens,
-      pageCache,
-      user?.authProvider,
-      selectedKeywords,
-    ]
-  );
-
-  const handleSearch = useCallback((query) => {
-    setSearchQuery(query);
-    setCurrentPage(1);
-    setPreFetchedNext({ emails: [], token: null });
-    setPreFetchedPrev({ emails: [], token: null });
-    setNextPageToken(null);
-    setPrevPageToken(null);
-    setPageTokens({ 1: null });
-    setPageCache({});
-  }, []);
-
-  const handleKeywordChange = useCallback((keywords) => {
-    setSelectedKeywords(keywords);
-    setCurrentPage(1);
-    setPreFetchedNext({ emails: [], token: null });
-    setPreFetchedPrev({ emails: [], token: null });
-    setNextPageToken(null);
-    setPrevPageToken(null);
-    setPageTokens({ 1: null });
-    setPageCache({});
-  }, []);
-
-  const handleTimePeriodChange = useCallback((period) => {
-    setTimePeriod(period);
-    setSelectedDate(null); // Reset date when changing time period
-    setCurrentPage(1);
-    setPreFetchedNext({ emails: [], token: null });
-    setPreFetchedPrev({ emails: [], token: null });
-    setNextPageToken(null);
-    setPrevPageToken(null);
-    setPageTokens({ 1: null });
-    setPageCache({});
-  }, []);
-
-  const handleDateChange = useCallback((date) => {
-    setSelectedDate(date);
-    setTimePeriod("all"); // Reset time period when selecting a date
-    setCurrentPage(1);
-    setPreFetchedNext({ emails: [], token: null });
-    setPreFetchedPrev({ emails: [], token: null });
-    setNextPageToken(null);
-    setPrevPageToken(null);
-    setPageTokens({ 1: null });
-    setPageCache({});
-  }, []);
-
-  // In EmailsContainer.jsx
-
-  const handleEmailRead = useCallback(
-    (emailId) => {
-      setEmails((prev) =>
-        prev.map((email) =>
-          email.id === emailId ? { ...email, isRead: true } : email
-        )
-      );
-      setPageCache((prev) => ({
-        ...prev,
-        [currentPage]: prev[currentPage].map((email) =>
-          email.id === emailId ? { ...email, isRead: true } : email
-        ),
-      }));
-    },
-    [currentPage]
-  );
-
   const fetchImportantEmails = async (
     pageToken = null,
     targetPage = 1,
@@ -435,17 +192,14 @@ export default function EmailsContainer({ user }) {
   ) => {
     if (!isPreFetch) setIsPageLoading(true);
     try {
+      const timeFilter = formatTimeFilter();
+      console.log("Sending timeFilter for important emails:", timeFilter);
       const res = await axiosInstance.get("/emails/important", {
         params: {
-          maxResults: 1000,
+          maxResults: 500,
           pageToken,
-          q: computeQuery(),
           keywords: selectedKeywords.join(","),
-          timeRange: selectedDate
-            ? selectedDate.toISOString().split("T")[0].replace(/-/g, "/")
-            : timePeriod === "all"
-            ? undefined
-            : timePeriod,
+          timeFilter,
         },
       });
       if (res?.data?.success) {
@@ -500,17 +254,13 @@ export default function EmailsContainer({ user }) {
           });
         }
       } else {
-        if (!isPreFetch) {
-          setEmails([]);
-          setEmailResponse({});
-        }
+        console.warn("Important emails fetch failed, falling back to /emails with q=meeting");
+        return await fetchEmails(pageToken, targetPage, isPreFetch, "meeting");
       }
     } catch (error) {
       console.error("Error fetching important emails:", error);
-      if (!isPreFetch) {
-        setEmails([]);
-        setEmailResponse({});
-      }
+      console.warn("Falling back to /emails with q=meeting");
+      return await fetchEmails(pageToken, targetPage, isPreFetch, "meeting");
     } finally {
       if (!isPreFetch) {
         setIsPageLoading(false);
@@ -519,6 +269,279 @@ export default function EmailsContainer({ user }) {
     }
   };
 
+  useEffect(() => {
+    console.log("useEffect triggered with:", {
+      searchQuery,
+      selectedKeywords,
+      timePeriod,
+      selectedDate,
+    });
+    setIsLoading(true);
+    setPageTokens({ 1: null });
+    setPageCache({});
+    setPreFetchedNext({ emails: [], token: null });
+    setPreFetchedPrev({ emails: [], token: null });
+    if (selectedKeywords.length > 0) {
+      fetchImportantEmails();
+    } else {
+      fetchEmails(null, 1);
+    }
+  }, [searchQuery, selectedKeywords, timePeriod, selectedDate]);
+
+  const handlePageChange = useCallback(
+    async (page) => {
+      if (page === currentPage) return;
+      const fetchFunction =
+        selectedKeywords.length > 0 ? fetchImportantEmails : fetchEmails;
+
+      if (pageCache[page]) {
+        setEmails(pageCache[page]);
+        setCurrentPage(page);
+        const storedNextToken = pageTokens[page + 1] || null;
+        const storedPrevToken = pageTokens[page - 1] || null;
+        setNextPageToken(storedNextToken);
+        setPrevPageToken(storedPrevToken);
+        if (storedNextToken && !pageCache[page + 1]) {
+          const nextData = await fetchFunction(storedNextToken, page + 1, true);
+          setPreFetchedNext({
+            emails: nextData.emails,
+            token: nextData.nextPageToken,
+          });
+          setPageCache((prev) => ({ ...prev, [page + 1]: nextData.emails }));
+        }
+        if (storedPrevToken && !pageCache[page - 1] && page > 1) {
+          const prevData = await fetchFunction(storedPrevToken, page - 1, true);
+          setPreFetchedPrev({
+            emails: prevData.emails,
+            token: prevData.prevPageToken,
+          });
+          setPageCache((prev) => ({ ...prev, [page - 1]: prevData.emails }));
+        }
+        return;
+      }
+
+      if (page === currentPage + 1 && preFetchedNext.emails.length) {
+        setEmails(preFetchedNext.emails);
+        setNextPageToken(preFetchedNext.token);
+        setPrevPageToken(nextPageToken);
+        setEmailResponse((prev) => ({
+          ...prev,
+          emails: preFetchedNext.emails,
+          nextPageToken: preFetchedNext.token,
+          prevPageToken: nextPageToken,
+        }));
+        setPageTokens((prev) => ({
+          ...prev,
+          [page]: nextPageToken,
+          [page + 1]: preFetchedNext.token || null,
+        }));
+        setPageCache((prev) => ({ ...prev, [page]: preFetchedNext.emails }));
+        setPreFetchedNext({ emails: [], token: null });
+        setCurrentPage(page);
+        if (preFetchedNext.token) {
+          const nextData = await fetchFunction(
+            preFetchedNext.token,
+            page + 1,
+            true
+          );
+          setPreFetchedNext({
+            emails: nextData.emails,
+            token: nextData.nextPageToken,
+          });
+          setPageCache((prev) => ({ ...prev, [page + 1]: nextData.emails }));
+        }
+        if (nextPageToken && page > 1) {
+          const prevData = await fetchFunction(nextPageToken, page - 1, true);
+          setPreFetchedPrev({
+            emails: prevData.emails,
+            token: prevData.prevPageToken,
+          });
+          setPageCache((prev) => ({ ...prev, [page - 1]: prevData.emails }));
+        }
+        return;
+      }
+
+      if (page === currentPage - 1 && preFetchedPrev.emails.length) {
+        setEmails(preFetchedPrev.emails);
+        setNextPageToken(prevPageToken);
+        setPrevPageToken(preFetchedPrev.token);
+        setEmailResponse((prev) => ({
+          ...prev,
+          emails: preFetchedPrev.emails,
+          nextPageToken: prevPageToken,
+          prevPageToken: preFetchedPrev.token,
+        }));
+        setPageTokens((prev) => ({
+          ...prev,
+          [page]: prevPageToken,
+          [page - 1]: preFetchedPrev.token || null,
+        }));
+        setPageCache((prev) => ({ ...prev, [page]: preFetchedPrev.emails }));
+        setPreFetchedPrev({ emails: [], token: null });
+        setCurrentPage(page);
+        if (prevPageToken) {
+          const nextData = await fetchFunction(prevPageToken, page + 1, true);
+          setPreFetchedNext({
+            emails: nextData.emails,
+            token: nextData.nextPageToken,
+          });
+          setPageCache((prev) => ({ ...prev, [page + 1]: nextData.emails }));
+        }
+        if (preFetchedPrev.token && page > 1) {
+          const prevData = await fetchFunction(
+            preFetchedPrev.token,
+            page - 1,
+            true
+          );
+          setPreFetchedPrev({
+            emails: prevData.emails,
+            token: prevData.prevPageToken,
+          });
+          setPageCache((prev) => ({ ...prev, [page - 1]: prevData.emails }));
+        }
+        return;
+      }
+
+      if (pageTokens[page] !== undefined) {
+        await fetchFunction(pageTokens[page], page);
+        setCurrentPage(page);
+        return;
+      }
+
+      console.warn(
+        `No direct token for page ${page}, attempting sequential fetch`
+      );
+      const closestPage = Object.keys(pageTokens)
+        .map(Number)
+        .reduce((prev, curr) =>
+          Math.abs(curr - page) < Math.abs(prev - page) ? curr : prev
+        );
+      let currentToken = pageTokens[closestPage];
+      let currentFetchPage = closestPage;
+
+      while (currentFetchPage < page && currentToken) {
+        const res = await axiosInstance.get("/emails", {
+          params: {
+            maxResults: EMAILS_PER_PAGE,
+            pageToken: currentToken,
+            provider: user?.authProvider,
+            q: computeQuery(),
+            timeFilter: formatTimeFilter(),
+            _t: Date.now(),
+          },
+        });
+        if (res?.data?.success) {
+          currentFetchPage++;
+          currentToken = res.data.nextPageToken || null;
+          setPageTokens((prev) => ({
+            ...prev,
+            [currentFetchPage]: currentToken,
+          }));
+          setPageCache((prev) => ({
+            ...prev,
+            [currentFetchPage]: (res.data.emails || []).slice(
+              0,
+              EMAILS_PER_PAGE
+            ),
+          }));
+        } else {
+          console.error("Failed to fetch intermediate page");
+          setIsPageLoading(false);
+          return;
+        }
+      }
+
+      if (currentFetchPage === page) {
+        await fetchFunction(currentToken, page);
+        setCurrentPage(page);
+      } else {
+        console.error(`Could not reach page ${page}`);
+        setIsPageLoading(false);
+      }
+    },
+    [
+      currentPage,
+      nextPageToken,
+      prevPageToken,
+      preFetchedNext,
+      preFetchedPrev,
+      emailResponse,
+      pageTokens,
+      pageCache,
+      user?.authProvider,
+      selectedKeywords,
+      timePeriod,
+      selectedDate,
+    ]
+  );
+
+  const handleSearch = useCallback((query) => {
+    setSearchQuery(query);
+    setCurrentPage(1);
+    setPreFetchedNext({ emails: [], token: null });
+    setPreFetchedPrev({ emails: [], token: null });
+    setNextPageToken(null);
+    setPrevPageToken(null);
+    setPageTokens({ 1: null });
+    setPageCache({});
+  }, []);
+
+  const handleKeywordChange = useCallback((keywords) => {
+    setSelectedKeywords(keywords);
+    setCurrentPage(1);
+    setPreFetchedNext({ emails: [], token: null });
+    setPreFetchedPrev({ emails: [], token: null });
+    setNextPageToken(null);
+    setPrevPageToken(null);
+    setPageTokens({ 1: null });
+    setPageCache({});
+  }, []);
+
+  const handleTimePeriodChange = useCallback((period) => {
+    console.log("Time period changed to:", period);
+    setTimePeriod(period);
+    if (selectedDate) {
+      setSelectedDate(null);
+    }
+    setCurrentPage(1);
+    setPreFetchedNext({ emails: [], token: null });
+    setPreFetchedPrev({ emails: [], token: null });
+    setNextPageToken(null);
+    setPrevPageToken(null);
+    setPageTokens({ 1: null });
+    setPageCache({});
+  }, [selectedDate]);
+
+  const handleDateChange = useCallback((date) => {
+    console.log("Date changed to:", date);
+    setSelectedDate(date);
+    setTimePeriod("all");
+    setCurrentPage(1);
+    setPreFetchedNext({ emails: [], token: null });
+    setPreFetchedPrev({ emails: [], token: null });
+    setNextPageToken(null);
+    setPrevPageToken(null);
+    setPageTokens({ 1: null });
+    setPageCache({});
+  }, []);
+
+  const handleEmailRead = useCallback(
+    (emailId) => {
+      setEmails((prev) =>
+        prev.map((email) =>
+          email.id === emailId ? { ...email, isRead: true } : email
+        )
+      );
+      setPageCache((prev) => ({
+        ...prev,
+        [currentPage]: prev[currentPage].map((email) =>
+          email.id === emailId ? { ...email, isRead: true } : email
+        ),
+      }));
+    },
+    [currentPage]
+  );
+
   const handleRefresh = useCallback(() => {
     setPreFetchedNext({ emails: [], token: null });
     setPreFetchedPrev({ emails: [], token: null });
@@ -526,14 +549,17 @@ export default function EmailsContainer({ user }) {
     setPrevPageToken(null);
     setPageTokens({ 1: null });
     setPageCache({});
-    fetchEmails(null, 1);
-    fetchImportantEmails();
-  }, []);
+    if (selectedKeywords.length > 0) {
+      fetchImportantEmails();
+    } else {
+      fetchEmails(null, 1);
+    }
+  }, [selectedKeywords]);
 
   return (
-    <div className='mt-10'>
-      <div className='flex flex-col md:flex-row justify-between'>
-        <h2 className='text-[#2D3748] text-2xl font-semibold mb-5'>
+    <div className="mt-10">
+      <div className="flex flex-col md:flex-row justify-between">
+        <h2 className="text-[#2D3748] text-2xl font-semibold mb-5">
           Your Top Recipients
         </h2>
         <FilterMails
@@ -547,15 +573,15 @@ export default function EmailsContainer({ user }) {
       {isLoading ? (
         <EmailTableSkeleton />
       ) : emails.length === 0 ? (
-        <div className='text-center py-4'>
+        <div className="text-center py-4">
           <p>No emails found matching your criteria.</p>
         </div>
       ) : (
         <>
-          <div className='rounded-2xl border relative'>
+          <div className="rounded-2xl border relative">
             {isPageLoading && (
-              <div className='absolute inset-0 flex justify-center items-center bg-white bg-opacity-50 z-10'>
-                <Loader2 className='h-6 w-6 animate-spin' />
+              <div className="absolute inset-0 flex justify-center items-center bg-white bg-opacity-50 z-10">
+                <Loader2 className="h-6 w-6 animate-spin" />
               </div>
             )}
             <EmailTable
@@ -566,38 +592,38 @@ export default function EmailsContainer({ user }) {
               onRefresh={handleRefresh}
             />
 
-            <div className='block xl:hidden p-2'>
-              <div className='max-h-[40vh] overflow-y-auto space-y-4 messages'>
+            <div className="block xl:hidden p-2">
+              <div className="max-h-[40vh] overflow-y-auto space-y-4 messages">
                 {emails.map((email) => (
                   <div
                     key={email.id}
-                    className='border rounded-lg p-4 bg-white shadow-sm'
+                    className="border rounded-lg p-4 bg-white shadow-sm"
                   >
-                    <div className='flex items-center mb-2'>
+                    <div className="flex items-center mb-2">
                       <Image
                         src={gmail}
                         width={24}
                         height={24}
-                        alt='Gmail'
-                        className='mr-2'
+                        alt="Gmail"
+                        className="mr-2"
                       />
-                      <span className='font-medium'>{user?.authProvider}</span>
+                      <span className="font-medium">{user?.authProvider}</span>
                     </div>
-                    <div className='space-y-2'>
+                    <div className="space-y-2">
                       <p>
-                        <span className='font-semibold'>From:</span>{" "}
+                        <span className="font-semibold">From:</span>{" "}
                         {email.from}
                       </p>
                       <p>
-                        <span className='font-semibold'>Subject:</span>{" "}
+                        <span className="font-semibold">Subject:</span>{" "}
                         {email.subject}
                       </p>
                       <p>
-                        <span className='font-semibold'>Date:</span>{" "}
+                        <span className="font-semibold">Date:</span>{" "}
                         {email.date}
                       </p>
                       <p>
-                        <span className='font-semibold'>Preview:</span>{" "}
+                        <span className="font-semibold">Preview:</span>{" "}
                         {email.preview || email.snippet}
                       </p>
                     </div>
@@ -607,10 +633,10 @@ export default function EmailsContainer({ user }) {
             </div>
           </div>
 
-          <div className='flex flex-col md:flex-row items-end justify-between mt-8 md:items-center'>
+          <div className="flex flex-col md:flex-row items-end justify-between mt-8 md:items-center">
             <Link
-              href='/chat'
-              className='link-btn w-[230px] px-6 py-2 rounded-full hidden xl:flex items-center gap-2'
+              href="/chat"
+              className="link-btn w-[230px] px-6 py-2 rounded-full hidden xl:flex items-center gap-2"
             >
               <RiSparkling2Line />
               <span>Ask AI For Help</span>

@@ -19,9 +19,11 @@ export function SelectComponent({
   options,
   seperator = false,
   className,
+  onChange,
+  value
 }) {
   return (
-    <Select>
+    <Select value={value} onValueChange={onChange}>
       <SelectTrigger
         className={cn(
           "w-full focus-visible:ring-0 outline-none shadow-none data-[placeholder]:text-[#101010] [&_svg:not([class*='text-'])]:text-[#101010] cursor-pointer",
@@ -41,7 +43,7 @@ export function SelectComponent({
           ))}
 
           {/* this is dummy SelectItem data */}
-          <SelectItem value='blueberry'>Blueberry</SelectItem>
+          {/* <SelectItem value='blueberry'>Blueberry</SelectItem> */}
         </SelectGroup>
       </SelectContent>
     </Select>
