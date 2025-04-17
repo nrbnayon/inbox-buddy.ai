@@ -43,7 +43,7 @@ const SidebarChatItem = ({
 
   const router = useRouter();
 
-  const { setChats } = useChat();
+  const { setChats, setMessages } = useChat();
 
   const openEdit = () => {
     setSelectedChatId(chat._id);
@@ -100,6 +100,7 @@ const SidebarChatItem = ({
         if (isMobile && setIsOpen) setIsOpen(false);
         setOpenDropdowns((prev) => ({ ...prev, [chatId]: false })); // Close dropdown
         toast.success("Chat Deleted.");
+        setMessages([]);
         router.push("/chat");
       } else {
         throw new Error(res?.message || "Failed to delete chat");

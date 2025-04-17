@@ -29,8 +29,6 @@ const Sidebar = ({ children, accessToken, previousChats }) => {
   const router = useRouter();
   const { chats, setChats } = useChat();
 
-  const imageSrc = user?.profilePicture;
-
   useEffect(() => {
     if (previousChats) {
       setChats(previousChats);
