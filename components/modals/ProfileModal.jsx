@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useEffect } from "react";
 import {
   Dialog,
@@ -43,9 +44,10 @@ import {
   Trash2,
 } from "lucide-react";
 import useGetUser from "@/hooks/useGetUser";
+import { logoutAction } from "@/app/actions/authActions";
+import { useRouter } from "next/navigation";
 
 const ProfileModal = ({ isOpen, onClose, accessToken, setUser }) => {
-  // const [user, setUser] = useState(initialUser || null);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({});
   const [profilePicture, setProfilePicture] = useState(null);
@@ -54,6 +56,8 @@ const ProfileModal = ({ isOpen, onClose, accessToken, setUser }) => {
   const [activeTab, setActiveTab] = useState("overview");
   const { user } = useGetUser(accessToken);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+  const router = useRouter();
 
   useEffect(() => {
     if (isOpen) {
@@ -134,11 +138,15 @@ const ProfileModal = ({ isOpen, onClose, accessToken, setUser }) => {
   const handleDeleteAccount = async () => {
     setIsLoading(true);
     try {
-      await deleteUserAccount();
-      toast.success("Account deleted successfully");
-      await logout();
-      setShowDeleteDialog(false);
-      onClose();
+      const res = await deleteUserAccount();
+      console.log(res);
+      if (res.success) {
+        toast.success("Account deleted successfully");
+        await logoutAction();
+        setShowDeleteDialog(false);
+        onClose();
+        router.push("/login");
+      }
     } catch (error) {
       toast.error(error.message || "Failed to delete account");
     } finally {

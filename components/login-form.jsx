@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { loginAction } from "@/app/actions/authActions";
+import { toast } from "sonner";
 
 export function LoginForm({ className, ...props }) {
   const [loading, setLoading] = useState(false);
@@ -35,12 +36,18 @@ export function LoginForm({ className, ...props }) {
     try {
       // Make API call with form data
       const res = await loginAction(userData);
+      console.log(res);
       if (res.success) {
         router.push("/admin");
       }
     } catch (err) {
       console.error("Login failed:", err);
-      setError(err.response?.data?.message || "An error occurred during login");
+      toast.error(err.message || "Login Failed!");
+      setError(
+        err.response?.data?.message ||
+          err.message ||
+          "An error occurred during login"
+      );
     } finally {
       setLoading(false);
     }
@@ -73,7 +80,7 @@ export function LoginForm({ className, ...props }) {
                 />
               </div>
               <div className="grid gap-3">
-                <div className="flex items-center">
+                {/* <div className="flex items-center">
                   <Label htmlFor="password">Password</Label>
                   <Link
                     href="#"
@@ -81,7 +88,7 @@ export function LoginForm({ className, ...props }) {
                   >
                     Forgot your password?
                   </Link>
-                </div>
+                </div> */}
                 <Input
                   id="password"
                   type="password"

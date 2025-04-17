@@ -52,7 +52,7 @@ export const loginAction = async (userData) => {
     process.env.NEXT_PUBLIC_API_BASE_URL ||
     "https://ai-chat-bot-assistant-server.vercel.app/api/v1";
 
-    console.log("api base url:::", apiBaseUrl);
+  console.log("api base url:::", apiBaseUrl);
 
   try {
     const res = await fetch(`${apiBaseUrl}/auth/login`, {
@@ -66,8 +66,10 @@ export const loginAction = async (userData) => {
 
     const data = await res.json();
 
+    console.log(data);
+
     if (data.success) {
-      await cookieStore.set("accessToken", data.accessToken, {
+      cookieStore.set("accessToken", data.accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
@@ -75,7 +77,7 @@ export const loginAction = async (userData) => {
         path: "/",
       });
 
-      await cookieStore.set("refreshToken", data.refreshToken, {
+      cookieStore.set("refreshToken", data.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
@@ -83,7 +85,7 @@ export const loginAction = async (userData) => {
         path: "/",
       });
 
-      await cookieStore.set("auth", "true", {
+      cookieStore.set("auth", "true", {
         httpOnly: false,
         secure: process.env.NODE_ENV === "production",
         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
