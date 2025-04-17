@@ -831,6 +831,11 @@
   resolved "https://registry.npmjs.org/@rushstack/eslint-patch/-/eslint-patch-1.11.0.tgz"
   integrity sha512-zxnHvoMQVqewTJr/W4pKjF0bMGiKJv1WX7bSrkl46Hg0QjESbzBROWK0Wg4RphzSOS5Jiy7eFimmM3UgMrMZbQ==
 
+"@stripe/stripe-js@^7.1.0":
+  version "7.1.0"
+  resolved "https://registry.yarnpkg.com/@stripe/stripe-js/-/stripe-js-7.1.0.tgz#a0e7b928a3f46d515e8df7a3a66cf4f923b0a580"
+  integrity sha512-dORq+9fb+STvq9Woi7eupUJV2UcW3tP33yQvREI0NIPDKv6KOCg/tV6h/DH1zQn2clIH/WR7HHBpbNQzWAo+Kg==
+
 "@swc/counter@0.1.3":
   version "0.1.3"
   resolved "https://registry.npmjs.org/@swc/counter/-/counter-0.1.3.tgz"
