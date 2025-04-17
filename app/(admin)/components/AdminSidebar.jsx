@@ -6,7 +6,7 @@ import { GrLogout } from "react-icons/gr";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { usePathname, useRouter } from "next/navigation";
 import { logoutAction } from "@/app/actions/authActions";
-import { useState } from "react";
+import { use, useState } from "react";
 import { AiOutlineMenu } from "react-icons/ai";
 import { FaUserCircle } from "react-icons/fa";
 import logoImage from "@/public/Frame 2.svg";
@@ -25,6 +25,7 @@ const publicRoutes = [
 
 export default function AdminSidebar({ children, user }) {
   const [isOpen, setIsOpen] = useState(false);
+
   const pathName = usePathname();
 
   const router = useRouter();
@@ -57,7 +58,7 @@ export default function AdminSidebar({ children, user }) {
                   {user?.name?.substring(0, 2).toUpperCase() || "N/A"}
                 </AvatarFallback>
               </Avatar>
-              <div className='flex flex-col gap-0.5'>
+              <div className="flex flex-col gap-0.5">
                 <p className="font-semibold text-[20px]">
                   {user?.name || "N/A"}
                 </p>
@@ -70,21 +71,26 @@ export default function AdminSidebar({ children, user }) {
             {/* sidebar links */}
             <nav className="space-y-1">
               {/* dashboard */}
-              {navLinks?.map((link) => (
-                <Link
-                  key={link.label}
-                  href={link.path}
-                  className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-50 ${
-                    pathName === link.path && "link-btn"
-                  }`}
-                  prefetch={false}
-                >
-                  <span className="bg-white p-[6px] flex justify-center items-center rounded-full">
-                    <link.icon size={16} color="#101010" />
-                  </span>
-                  {link.label}
-                </Link>
-              ))}
+              {navLinks?.map((link) => {
+                if (user.role === "admin" && link.label === "Manage Admins")
+                  return;
+                else
+                  return (
+                    <Link
+                      key={link.label}
+                      href={link.path}
+                      className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-50 ${
+                        pathName === link.path && "link-btn"
+                      }`}
+                      prefetch={false}
+                    >
+                      <span className="bg-white p-[6px] flex justify-center items-center rounded-full">
+                        <link.icon size={16} color="#101010" />
+                      </span>
+                      {link.label}
+                    </Link>
+                  );
+              })}
             </nav>
           </div>
 

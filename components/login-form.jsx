@@ -33,7 +33,6 @@ export function LoginForm({ className, ...props }) {
     };
 
     try {
-      console.log(userData);
       // Make API call with form data
       const res = await loginAction(userData);
       if (res.success) {

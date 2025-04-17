@@ -37,36 +37,36 @@ export default function AdminDashboard() {
 
   return (
     <>
-      <div className="flex gap-3">
+      <div className="flex flex-col lg:flex-row gap-3">
         {/* total users */}
-        <div className="w-full flex justify-between px-8 py-6 rounded-xl border">
+        <div className="w-full flex justify-between items-end px-8 py-6 rounded-xl border">
           <div className="flex flex-col justify-center">
             <FaUser size={30} color="#00ACDA" />
             <p className="text-lg mt-5">Total Users:</p>
           </div>
-          <p className="h-full flex items-end text-3xl font-bold">
+          <p className="h-full flex items-end text-xl xl:text-3xl font-bold">
             {loading ? <SmallLoader /> : error ? "Error" : totalUsers}
           </p>
         </div>
 
         {/* total waiting list users */}
-        <div className="w-full flex justify-between px-8 py-6 rounded-xl border">
+        <div className="w-full flex justify-between items-end px-8 py-6 rounded-xl border">
           <div className="flex flex-col justify-center">
             <FaUserClock size={30} color="#e3e300" />
             <p className="text-lg mt-5">Total Waiting Users:</p>
           </div>
-          <p className="h-full flex items-end text-3xl font-bold">
+          <p className="h-full flex items-end text-xl xl:text-3xl font-bold">
             {loading ? <SmallLoader /> : error ? "Error" : totalWaitingUsers}
           </p>
         </div>
 
         {/* total income */}
-        <div className="w-full flex justify-between px-8 py-6 rounded-xl border">
+        <div className="w-full flex justify-between items-end px-8 py-6 rounded-xl border">
           <div className="flex flex-col justify-center">
             <GiReceiveMoney size={30} color="#1ac72e" />
             <p className="text-lg mt-5">Total Income:</p>
           </div>
-          <p className="h-full flex items-end text-2xl font-bold">
+          <p className="h-full flex items-end text-xl xl:text-2xl font-bold">
             {loading ? <SmallLoader /> : error ? "Error" : `$ ${totalIncome}`}
           </p>
         </div>
