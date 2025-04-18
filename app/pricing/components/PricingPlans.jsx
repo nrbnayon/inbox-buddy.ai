@@ -1,3 +1,4 @@
+// app\pricing\components\PricingPlans.jsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -16,7 +17,6 @@ import { getUserProfile } from "@/lib/api/user";
 import { toast } from "sonner";
 import { loadStripe } from "@stripe/stripe-js";
 
-// Initialize Stripe with your publishable key
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 );
@@ -32,23 +32,17 @@ export default function PricingPlans() {
     const fetchUserData = async () => {
       setIsUserLoading(true);
       try {
-        // No need to manually pass the token - the axios interceptor handles this
         const userData = await getUserProfile();
-
-        // Check what structure the response has and set user accordingly
-        if (userData && userData.data) {
-          setUser(userData.data);
-        } else {
-          setUser(userData);
-        }
+        setUser(userData.data);
       } catch (error) {
         console.error("Failed to fetch user data:", error);
-        // User might not be logged in, which is okay on the pricing page
+        toast.error("Failed to load user data", {
+          description: "Please try refreshing the page.",
+        });
       } finally {
         setIsUserLoading(false);
       }
     };
-
     fetchUserData();
   }, []);
 
@@ -98,7 +92,7 @@ export default function PricingPlans() {
   ];
 
   const handleSubscribe = async (planId) => {
-    // Wait if still loading user data
+    console.log("Subscribing to plan:", planId);
     if (isUserLoading) {
       toast.info("Please wait", {
         description: "Verifying your account status...",
@@ -106,12 +100,14 @@ export default function PricingPlans() {
       return;
     }
 
-    // Check if user is logged in
     if (!user) {
       toast.error("Authentication required", {
         description: "Please login to subscribe to a plan",
+        action: {
+          label: "Login",
+          onClick: () => router.push("/login"),
+        },
       });
-      router.push("/login");
       return;
     }
 
@@ -121,19 +117,12 @@ export default function PricingPlans() {
     try {
       const { sessionId } = await createCheckoutSession(planId);
       const stripe = await stripePromise;
-
-      // Redirect to Stripe Checkout
-      const { error } = await stripe.redirectToCheckout({
-        sessionId,
-      });
-
+      const { error } = await stripe.redirectToCheckout({ sessionId });
       if (error) {
-        toast.error("Payment Error", {
-          description: error.message,
-        });
+        throw new Error(error.message);
       }
     } catch (error) {
-      toast.error("Error", {
+      toast.error("Subscription Error", {
         description: error.message || "Failed to process subscription",
       });
     } finally {
@@ -142,17 +131,15 @@ export default function PricingPlans() {
     }
   };
 
-  // Determine if a plan is currently active
-  const isCurrentPlan = (planId) => {
-    const subscription = user?.subscription;
-
-    return subscription?.plan === planId && subscription?.status === "active";
-  };
+  const isCurrentPlan = (planId) =>
+    user?.subscription?.plan === planId &&
+    user?.subscription?.status === "active" &&
+    new Date(user?.subscription?.endDate) > new Date();
 
   return (
-    <div className='container mx-auto px-4 py-12'>
-      <div className='flex flex-col items-center justify-center'>
-        <div className='grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl'>
+    <div className="container mx-auto px-4 py-12">
+      <div className="flex flex-col items-center justify-center">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl">
           {plans.map((plan) => (
             <Card
               key={plan.id}
@@ -162,24 +149,24 @@ export default function PricingPlans() {
                   : ""
               }`}
             >
-              <CardHeader className='text-center pb-2'>
-                <CardTitle className='text-xl'>{plan.name}</CardTitle>
+              <CardHeader className="text-center pb-2">
+                <CardTitle className="text-xl">{plan.name}</CardTitle>
               </CardHeader>
-              <CardContent className='text-center pb-4'>
-                <div className='flex justify-center items-baseline mb-6'>
-                  <span className='text-5xl font-bold'>{plan.price}</span>
-                  <span className='text-sm ml-1'>{plan.description}</span>
+              <CardContent className="text-center pb-4">
+                <div className="flex justify-center items-baseline mb-6">
+                  <span className="text-5xl font-bold">{plan.price}</span>
+                  <span className="text-sm ml-1">{plan.description}</span>
                 </div>
-                <ul className='space-y-3 text-left'>
+                <ul className="space-y-3 text-left">
                   {plan.features.map((feature, i) => (
-                    <li key={i} className='flex items-start'>
-                      <Check className='h-5 w-5 mr-2 flex-shrink-0 mt-0.5' />
+                    <li key={i} className="flex items-start">
+                      <Check className="h-5 w-5 mr-2 flex-shrink-0 mt-0.5" />
                       <span>{feature}</span>
                     </li>
                   ))}
                 </ul>
               </CardContent>
-              <CardFooter className='mt-auto pt-4'>
+              <CardFooter className="mt-auto pt-4">
                 <Button
                   className={`w-full ${
                     plan.highlighted
@@ -193,7 +180,7 @@ export default function PricingPlans() {
                 >
                   {isLoading && processingPlan === plan.id ? (
                     <>
-                      <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Processing...
                     </>
                   ) : isUserLoading ? (
