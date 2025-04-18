@@ -51,7 +51,7 @@ export default function AdminSidebar({ children, accessToken }) {
   }
 
   return (
-    <div className="flex h-screen w-full">
+    <div className="flex h-screen overflow-hidden w-full">
       <div className="hidden lg:block lg:w-64 lg:shrink-0  lg:bg-[#F1F1F1] dark:lg:bg-gray-800">
         {/* pc sidbar */}
         <div className="flex h-full flex-col justify-between py-6 px-4 ">
@@ -145,7 +145,7 @@ export default function AdminSidebar({ children, accessToken }) {
         </div>
       </div>
 
-      <div className="flex-1">
+      <div className="flex-1 overflow-y-auto">
         {/* mobile sidebar */}
         <header className="sticky top-0 z-10 border-b bg-white px-2 md:px-4 py-3 dark:border-gray-800 dark:bg-gray-900 lg:hidden">
           <div className="flex items-center justify-between">
@@ -219,7 +219,7 @@ export default function AdminSidebar({ children, accessToken }) {
             </Sheet>
           </div>
         </header>
-        <section className="p-2 pb-0 md:p-10 md:pb-0">
+        <section className="p-2 pb-0 md:p-10">
           <AdminHeader user={user} />
           {children}
         </section>

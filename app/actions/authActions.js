@@ -52,7 +52,7 @@ export const loginAction = async (userData) => {
     process.env.NEXT_PUBLIC_API_BASE_URL ||
     "https://ai-chat-bot-assistant-server.vercel.app/api/v1";
 
-  console.log("api base url:::", apiBaseUrl);
+  // console.log("api base url:::", apiBaseUrl);
 
   try {
     const res = await fetch(`${apiBaseUrl}/auth/login`, {
@@ -66,7 +66,7 @@ export const loginAction = async (userData) => {
 
     const data = await res.json();
 
-    console.log(data);
+    // console.log(data);
 
     if (data.success) {
       cookieStore.set("accessToken", data.accessToken, {

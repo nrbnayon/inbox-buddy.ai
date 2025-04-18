@@ -23,7 +23,7 @@ export default function FilterMails() {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-2 2xl:grid-cols-4 gap-2 pb-4">
       <div className="col-span-2 md:col-span-1">
-        <SearchBar />
+        <SearchBar placeHolder={"Search Users"} />
       </div>
       <DatePicker />
       <SelectComponent
