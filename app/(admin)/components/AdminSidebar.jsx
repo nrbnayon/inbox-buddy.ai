@@ -1,9 +1,3 @@
-/**
- * v0 by Vercel.
- * @see https://v0.dev/t/4p67afrMzU1
- * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
- */
-
 "use client";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -19,6 +13,8 @@ import logoImage from "@/public/Frame 2.svg";
 import Image from "next/image";
 import AdminHeader from "./AdminHeader";
 import navLinks from "@/utils/navlinks";
+import ProfileModal from "@/components/modals/ProfileModal";
+import useGetUser from "@/hooks/useGetUser";
 
 const publicRoutes = [
   "/",
@@ -29,8 +25,17 @@ const publicRoutes = [
   "/login",
 ];
 
-export default function AdminSidebar({ children, user }) {
+export default function AdminSidebar({ children, accessToken }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+
+  const { user, setUser } = useGetUser(accessToken);
+
+  const openProfileModal = () => {
+    setIsProfileModalOpen(true);
+    setIsOpen(false);
+  };
+
   const pathName = usePathname();
 
   const router = useRouter();
@@ -58,15 +63,21 @@ export default function AdminSidebar({ children, user }) {
               prefetch={false}
             >
               <Avatar>
-                <AvatarImage src={user?.profilePicture} alt={user?.name} />
-                <AvatarFallback className="bg-gradient-to-r from-[#00ACDA] to-[#43D4FB] text-sm">
-                  N/A
+                <AvatarImage
+                  src={
+                    user?.profilePicture &&
+                    `${user?.profilePicture}?${Date.now()}`
+                  }
+                  alt={user?.name}
+                />
+                <AvatarFallback className="bg-gradient-to-r from-[#00ACDA] to-[#43D4FB] text-sm text-white">
+                  {user?.name?.substring(0, 2).toUpperCase() || "N/A"}
                 </AvatarFallback>
               </Avatar>
-              <div>
-                <h4 className="font-semibold text-[20px]">
+              <div className="flex flex-col gap-0.5">
+                <p className="font-semibold text-[20px]">
                   {user?.name || "N/A"}
-                </h4>
+                </p>
                 <span className="text-xs font-light text-[#101010]">
                   {user?.email || "N/A"}
                 </span>
@@ -76,21 +87,26 @@ export default function AdminSidebar({ children, user }) {
             {/* sidebar links */}
             <nav className="space-y-1">
               {/* dashboard */}
-              {navLinks?.map((link) => (
-                <Link
-                  key={link.label}
-                  href={link.path}
-                  className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-50 ${
-                    pathName === link.path && "link-btn"
-                  }`}
-                  prefetch={false}
-                >
-                  <span className="bg-white p-[6px] flex justify-center items-center rounded-full">
-                    <link.icon size={16} color="#101010" />
-                  </span>
-                  {link.label}
-                </Link>
-              ))}
+              {navLinks?.map((link) => {
+                if (user?.role === "admin" && link.label === "Manage Admins")
+                  return;
+                else
+                  return (
+                    <Link
+                      key={link.label}
+                      href={link.path}
+                      className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-50 ${
+                        pathName === link.path && "link-btn"
+                      }`}
+                      prefetch={false}
+                    >
+                      <span className="bg-white p-[6px] flex justify-center items-center rounded-full">
+                        <link.icon size={16} color="#101010" />
+                      </span>
+                      {link.label}
+                    </Link>
+                  );
+              })}
             </nav>
           </div>
 
@@ -111,7 +127,7 @@ export default function AdminSidebar({ children, user }) {
               type="submit"
               className="flex items-center gap-2 text-sm cursor-pointer"
               variant="ghost"
-              onClick={() => console.log("to profile page")}
+              onClick={openProfileModal}
             >
               <FaUserCircle className="size-6" />
               <span>Profile</span>
@@ -204,10 +220,17 @@ export default function AdminSidebar({ children, user }) {
           </div>
         </header>
         <section className="p-2 pb-0 md:p-10 md:pb-0">
-          {<AdminHeader />}
+          <AdminHeader user={user} />
           {children}
         </section>
       </div>
+
+      <ProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        accessToken={accessToken}
+        setUser={setUser}
+      />
     </div>
   );
 }

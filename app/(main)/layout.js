@@ -1,8 +1,10 @@
 // import Sidebar from "@/components/layout/Sidebar";
-import Sidebar from "@/components/layout/Sidebar";
+import Sidebar from "@/components/layout/sidebar/Sidebar";
 import { cookies } from "next/headers";
 import { getUserData } from "@/lib/server-api";
 import LoadingPing from "@/components/LoadingPing";
+import { getAllChats } from "../actions/chatActions";
+import { ChatProvider } from "./contexts/ChatContext";
 
 export default async function RootLayout({ children }) {
   // Await the cookies function
@@ -10,14 +12,22 @@ export default async function RootLayout({ children }) {
   const token = cookieStore.get("accessToken");
 
   let user = null;
-  if (token) {
+  let previousChats = [];
+
+  if (token?.value) {
     try {
       const response = await getUserData(token.value);
       if (response && response.success) {
         user = response.data;
+
+        // Only fetch chats if user is successfully authenticated
+        const res = await getAllChats();
+        if (res?.data?.success) {
+          previousChats = res.data.data;
+        }
       }
     } catch (error) {
-      console.error("Failed to fetch user:", error);
+      console.error("Failed to fetch user or chats:", error);
     }
   }
 
@@ -32,8 +42,12 @@ export default async function RootLayout({ children }) {
   }
 
   return (
-    <section className="bg-white">
-      <Sidebar accessToken={token}>{children}</Sidebar>
-    </section>
+    <ChatProvider>
+      <section className="bg-white">
+        <Sidebar accessToken={token} previousChats={previousChats}>
+          {children}
+        </Sidebar>
+      </section>
+    </ChatProvider>
   );
 }

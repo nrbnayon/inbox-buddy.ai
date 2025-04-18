@@ -161,9 +161,9 @@ export default function LoginForm() {
       </form>
 
       <div className="text-center mt-8 text-sm text-gray-600">
-        Don't have an account?{" "}
+        Not a member?{" "}
         <Link href="/connect" className="text-[#00ACDA] hover:text-[#43D4FB]">
-          Join the waiting list
+          Request for access
         </Link>
       </div>
 

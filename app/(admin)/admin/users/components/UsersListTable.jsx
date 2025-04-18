@@ -27,62 +27,26 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { EmailPagination } from "@/app/(main)/dashboard/components/EmailPagination";
 import { Badge } from "@/components/ui/badge";
+import { updateUser, deleteUser } from "@/lib/api/user";
+import LoadingPing from "@/components/LoadingPing";
+import { UserPagination } from "@/app/(admin)/components/UserPagination";
+import SmallLoader from "@/components/SmallLoader";
+import { toast } from "sonner";
 
-// Mock data for the table
-const mockData = [
-  {
-    id: 1,
-    name: "John Doe",
-    email: "john@example.com",
-    authProvider: "gmail",
-    subsPlan: "free",
-    subStatus: "active",
-    emailDetails: "Marketing team lead with access to all campaigns.",
-  },
-  {
-    id: 2,
-    name: "Jane Smith",
-    email: "jane@example.com",
-    authProvider: "gmail",
-    subsPlan: "free",
-    subStatus: "active",
-    emailDetails: "Customer support representative handling tier 1 tickets.",
-  },
-  {
-    id: 3,
-    name: "Robert Johnson",
-    email: "robert@example.com",
-    authProvider: "gmail",
-    subsPlan: "free",
-    subStatus: "active",
-    emailDetails: "Product manager for the mobile application team.",
-  },
-  {
-    id: 4,
-    name: "Emily Davis",
-    email: "emily@example.com",
-    authProvider: "gmail",
-    subsPlan: "free",
-    subStatus: "active",
-    emailDetails: "UX designer working on the new dashboard interface.",
-  },
-  {
-    id: 5,
-    name: "Michael Wilson",
-    email: "michael@example.com",
-    authProvider: "gmail",
-    subsPlan: "free",
-    subStatus: "active",
-    emailDetails: "Backend developer responsible for API integration.",
-  },
-];
-
-export default function UsersListTable() {
+export default function UsersListTable({
+  users,
+  loading,
+  error,
+  currentPage,
+  totalPages,
+  onPageChange,
+  onActionComplete,
+}) {
   const [selectedUser, setSelectedUser] = useState(null);
   const [actionType, setActionType] = useState(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isActionLoading, setIsActionLoading] = useState(false);
 
   const handleActionClick = (user, action) => {
     setSelectedUser(user);
@@ -90,32 +54,68 @@ export default function UsersListTable() {
     setIsConfirmOpen(true);
   };
 
-  const handleConfirmAction = () => {
+  const handleConfirmAction = async () => {
     if (!selectedUser || !actionType) return;
 
-    switch (actionType) {
-      case "block":
-        console.log(`Blocking user: ${selectedUser?.name}`);
-        break;
-      case "cancel":
-        console.log(`Cancelling subscription for: ${selectedUser?.name}`);
-        break;
-      case "delete":
-        console.log(`Deleting user: ${selectedUser?.name}`);
-        break;
-      default:
-        break;
-    }
+    setIsActionLoading(true);
+    try {
+      let res;
+      let successMessage = "";
 
-    setIsConfirmOpen(false);
-    setSelectedUser(null);
-    setActionType(null);
+      switch (actionType) {
+        case "block":
+          res = await updateUser(selectedUser._id, {
+            status: selectedUser.status === "blocked" ? "active" : "blocked",
+          });
+          successMessage =
+            selectedUser.status === "blocked"
+              ? "User unblocked successfully"
+              : "User blocked successfully";
+          break;
+        case "cancel":
+          res = await updateUser(selectedUser._id, {
+            subscription: {
+              ...selectedUser.subscription,
+              status: "cancelled",
+              autoRenew: false,
+            },
+          });
+          successMessage = "Subscription cancelled successfully";
+          break;
+        case "delete":
+          res = await deleteUser(selectedUser._id);
+          successMessage = "User deleted successfully";
+          break;
+        default:
+          break;
+      }
+
+      if (res?.success) {
+        toast.success(successMessage);
+        onActionComplete();
+      } else {
+        throw new Error(res?.message || "Action failed");
+      }
+    } catch (err) {
+      console.error(`Error performing ${actionType} action:`, err);
+      toast.error(err.message || "Failed to perform action");
+    } finally {
+      setIsActionLoading(false);
+      setIsConfirmOpen(false);
+      setSelectedUser(null);
+      setActionType(null);
+    }
   };
 
   const getActionMessage = () => {
+    if (!selectedUser) return "";
     switch (actionType) {
       case "block":
-        return `Are you sure you want to block ${selectedUser?.name}? This will restrict their access.`;
+        return `Are you sure you want to ${
+          selectedUser.status === "blocked" ? "unblock" : "block"
+        } ${selectedUser?.name}? This will ${
+          selectedUser.status === "blocked" ? "restore" : "restrict"
+        } their access.`;
       case "cancel":
         return `Are you sure you want to cancel the subscription for ${selectedUser?.name}?`;
       case "delete":
@@ -125,8 +125,35 @@ export default function UsersListTable() {
     }
   };
 
+  const renderStatusBadge = (status) => {
+    let variant = "default";
+    switch (status) {
+      case "active":
+        variant = "success";
+        break;
+      case "cancelled":
+      case "blocked":
+        variant = "destructive";
+        break;
+      case "pending":
+        variant = "warning";
+        break;
+      default:
+        variant = "default";
+    }
+    return <Badge variant={variant}>{status}</Badge>;
+  };
+
+  if (loading && users.length === 0) {
+    return <LoadingPing />;
+  }
+
+  if (error && users.length === 0) {
+    return <div className="py-10 text-center text-red-500">{error}</div>;
+  }
+
   return (
-    <div className="py-10">
+    <>
       <div className="rounded-md border">
         <Table>
           <TableHeader className="bg-blue-100">
@@ -140,67 +167,84 @@ export default function UsersListTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {mockData.map((user) => (
-              <TableRow key={user.id} className="border-b">
-                <TableCell className="font-medium pl-9 py-6 pr-4">
-                  {user?.name}
-                </TableCell>
-                <TableCell className="hidden md:table-cell pr-4">
-                  {user?.email}
-                </TableCell>
-                <TableCell className="text-center">
-                  {user.authProvider}
-                </TableCell>
-                <TableCell className="text-center">{user.subsPlan}</TableCell>
-                <TableCell className="text-center">
-                  <Badge variant="success">{user.subStatus}</Badge>
-                </TableCell>
-                <TableCell className="text-center">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        aria-label={`Actions for ${user?.name}`}
-                      >
-                        <EllipsisVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        onClick={() => handleActionClick(user, "block")}
-                      >
-                        <Ban className="h-4 w-4 mr-2" />
-                        Block User
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => handleActionClick(user, "cancel")}
-                      >
-                        <XCircle className="h-4 w-4 mr-2" />
-                        Cancel Subscription
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        variant="destructive"
-                        onClick={() => handleActionClick(user, "delete")}
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete User
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+            {users.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-center py-10">
+                  No users found.
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              users.map((user) => (
+                <TableRow key={user._id} className="border-b">
+                  <TableCell className="font-medium pl-9 py-6 pr-4">
+                    {user?.name || "N/A"}
+                  </TableCell>
+                  <TableCell className="hidden md:table-cell pr-4">
+                    {user?.email || "N/A"}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {user.authProvider || "email"}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {user.subscription?.plan || "free"}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {renderStatusBadge(user.subscription?.status || "active")}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label={`Actions for ${user?.name}`}
+                        >
+                          <EllipsisVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem
+                          onClick={() => handleActionClick(user, "block")}
+                        >
+                          <Ban className="h-4 w-4 mr-2" />
+                          {user.status === "blocked"
+                            ? "Unblock User"
+                            : "Block User"}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleActionClick(user, "cancel")}
+                          disabled={user.subscription?.status === "cancelled"}
+                        >
+                          <XCircle className="h-4 w-4 mr-2" />
+                          Cancel Subscription
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleActionClick(user, "delete")}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Delete User
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>
 
-      {/* Pagination */}
-      <div className="flex mt-10 justify-center">
-        <EmailPagination />
-      </div>
+      {users.length > 0 && (
+        <div className="flex mt-10 justify-center">
+          <UserPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={onPageChange}
+          />
+        </div>
+      )}
 
-      {/* Confirmation Dialog */}
       <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -210,13 +254,23 @@ export default function UsersListTable() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>No, go back</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirmAction}>
-              Yes, proceed
+            <AlertDialogCancel disabled={isActionLoading}>
+              No, go back
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmAction}
+              className="bg-red-600 hover:bg-red-700 text-white"
+              disabled={isActionLoading}
+            >
+              {isActionLoading ? (
+                <SmallLoader className="text-white" />
+              ) : (
+                "Yes, proceed"
+              )}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </div>
+    </>
   );
 }

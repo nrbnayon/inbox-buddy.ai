@@ -1,23 +1,34 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
-import { useChat } from "./ChatContext";
+import { useChat } from "../../contexts/ChatContext";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Paperclip, Send, X } from "lucide-react";
 import { FaCheckCircle } from "react-icons/fa";
 import { IoDocumentOutline } from "react-icons/io5";
 import { sendChatMessage, clearChatContext } from "@/lib/api/chat";
+import { usePathname, useRouter } from "next/navigation";
+import { axiosInstance } from "@/lib/axios";
 
-export default function ChatInputField({ onMessageSent }) {
+export default function ChatInputField({ chatId }) {
   const [message, setMessage] = useState("");
   const [attachments, setAttachments] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState(null);
   const fileInputRef = useRef(null);
-  const { messages, addMessage, setIsTyping, selectedModel, setTokenCount } =
-    useChat();
+  const {
+    messages,
+    setChats,
+    addMessage,
+    setIsTyping,
+    selectedModel,
+    setTokenCount,
+  } = useChat();
+
+  const router = useRouter();
+  const pathName = usePathname();
 
   // useEffect(() => {
   //   console.log("Current selectedModel in ChatInputField:", selectedModel);
@@ -86,9 +97,6 @@ export default function ChatInputField({ onMessageSent }) {
         content: msg.message,
       }));
 
-      console.log("Processing messages:", JSON.stringify(messages));
-      console.log("Created history:", JSON.stringify(history));
-
       return history;
     } catch (error) {
       console.error("Error formatting conversation history:", error);
@@ -110,67 +118,80 @@ export default function ChatInputField({ onMessageSent }) {
         userRole: "user",
         date: new Date().toLocaleString(),
         message: message,
-        attachments: [...attachments], // Include attachments in the message
+        attachments: [...attachments],
       };
 
-      // Immediately clear attachments from UI
+      setMessage("");
       setAttachments([]);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
+      if (fileInputRef.current) fileInputRef.current.value = "";
 
       addMessage(userMessage);
       setIsTyping(true);
 
-      let modelId = selectedModel?.id || selectedModel?.value || null;
-
+      const modelId = selectedModel?.id || selectedModel?.value || null;
       const history = getConversationHistory();
+      const urls = pathName.split("/"); // Assuming pathName is defined (e.g., from usePathname)
 
-      try {
-        const response = await sendChatMessage(message, file, modelId, history);
+      const response =
+        urls.length > 2
+          ? await sendChatMessage(message, file, modelId, history, urls[2])
+          : await sendChatMessage(message, file, modelId, history);
 
-        console.log(response);
+      if (urls?.length < 3) {
+        if (response?.success) {
+          const res = await axiosInstance(`/chats/${response?.chatId}`);
 
-        setIsTyping(false);
+          setChats((prev) => {
+            // Combine previous chats with the new chat
+            const updatedChats = [...prev, res?.data?.data];
 
-        const assistantMessage = {
-          role: "assistant",
-          userName: "Inbox Buddy",
-          userRole: response?.modelUsed || "assistant",
-          date: new Date().toLocaleString(),
-          message: response.message,
-        };
+            // Sort chats so the most recent one is first (assuming 'createdAt' is the timestamp field)
+            const sortedChats = updatedChats.sort(
+              (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+            );
 
-        addMessage(assistantMessage);
-        if (response.tokenCount) {
-          setTokenCount((prev) => prev + response.tokenCount);
+            return sortedChats;
+          });
         }
+      }
 
-        setMessage("");
-        // Attachments already cleared above
+      setIsTyping(false);
 
-        onMessageSent?.();
-      } catch (error) {
-        console.error("Failed to send message:", error);
-        setIsTyping(false);
+      const assistantMessage = {
+        role: "assistant",
+        userName: "Inbox Buddy",
+        userRole: response?.model || "assistant",
+        date: new Date().toLocaleString(),
+        message: response.message,
+      };
 
-        const errorMessage = {
-          role: "assistant",
-          userName: "AI Assistant",
-          userRole: "Assistant",
-          date: new Date().toLocaleString(),
-          message: `I'm having trouble responding right now. ${
-            error.message || "Please try again later."
-          }`,
-        };
+      addMessage(assistantMessage);
+      if (response.tokenCount) {
+        setTokenCount((prev) => prev + response.tokenCount);
+      }
 
-        addMessage(errorMessage);
-        setError(error.message);
+      if (response?.chatId && response.chatId !== chatId) {
+        router.replace(`/chat/${response.chatId}`, { scroll: false });
+
+        // You can also try just updating the URL without any navigation
+        window.history.replaceState(null, "", `/chat/${response.chatId}`);
       }
     } catch (error) {
       console.error("Failed to send message:", error);
       setIsTyping(false);
       setError(error.message);
+
+      const errorMessage = {
+        role: "assistant",
+        userName: "AI Assistant",
+        userRole: "Assistant",
+        date: new Date().toLocaleString(),
+        message: `I'm having trouble responding right now. ${
+          error.message || "Please try again later."
+        }`,
+      };
+
+      addMessage(errorMessage);
     } finally {
       setIsSending(false);
     }

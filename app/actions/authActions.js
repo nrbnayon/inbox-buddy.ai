@@ -1,7 +1,15 @@
 // app\actions\authActions.js
 "use server";
 
+import { serverAxios } from "@/lib/server-api";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+
+export const joinWaitingListAction = async (formData) => {
+  const res = await serverAxios.post("/users/add-to-waiting-list", formData);
+
+  return res?.data;
+};
 
 export const logoutAction = async () => {
   const cookieStore = await cookies();
@@ -24,16 +32,16 @@ export const logoutAction = async () => {
     const data = await res.json();
 
     if (data.success) {
-      await cookieStore.delete("accessToken");
-      await cookieStore.delete("refreshToken");
-      await cookieStore.delete("auth");
+      cookieStore.delete("accessToken");
+      cookieStore.delete("refreshToken");
+      cookieStore.delete("auth");
     }
     return data;
   } catch (error) {
     console.error("Logout failed:", error);
-    await cookieStore.delete("accessToken");
-    await cookieStore.delete("refreshToken");
-    await cookieStore.delete("auth");
+    cookieStore.delete("accessToken");
+    cookieStore.delete("refreshToken");
+    cookieStore.delete("auth");
     return { success: true, message: "Logged out locally" };
   }
 };
@@ -43,6 +51,8 @@ export const loginAction = async (userData) => {
   const apiBaseUrl =
     process.env.NEXT_PUBLIC_API_BASE_URL ||
     "https://ai-chat-bot-assistant-server.vercel.app/api/v1";
+
+  console.log("api base url:::", apiBaseUrl);
 
   try {
     const res = await fetch(`${apiBaseUrl}/auth/login`, {
@@ -56,8 +66,10 @@ export const loginAction = async (userData) => {
 
     const data = await res.json();
 
+    console.log(data);
+
     if (data.success) {
-      await cookieStore.set("accessToken", data.accessToken, {
+      cookieStore.set("accessToken", data.accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
@@ -65,7 +77,7 @@ export const loginAction = async (userData) => {
         path: "/",
       });
 
-      await cookieStore.set("refreshToken", data.refreshToken, {
+      cookieStore.set("refreshToken", data.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
@@ -73,7 +85,7 @@ export const loginAction = async (userData) => {
         path: "/",
       });
 
-      await cookieStore.set("auth", "true", {
+      cookieStore.set("auth", "true", {
         httpOnly: false,
         secure: process.env.NODE_ENV === "production",
         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",

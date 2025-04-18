@@ -1,7 +1,7 @@
 // app\(main)\chat\components\ChatHeader.jsx
 "use client";
 import React, { useEffect } from "react";
-import { useChat } from "./ChatContext";
+import { useChat } from "../../contexts/ChatContext";
 import { getAvailableModels } from "@/lib/api/chat";
 import Link from "next/link";
 
