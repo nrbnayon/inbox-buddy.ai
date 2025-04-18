@@ -1,5 +1,5 @@
+// app\(main)\dashboard\components\EmailPagination.jsx
 "use client";
-import { useState } from "react";
 import {
   Pagination,
   PaginationContent,
@@ -9,52 +9,60 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 
-export function EmailPagination({ totalEmails, currentPage, setCurrentPage }) {
-  const totalPages = Math.ceil(totalEmails / 6); // Assuming 6 emails per page
+export function EmailPagination({
+  totalEmails,
+  currentPage,
+  onPageChange,
+  emailsPerPage,
+  hasNextPage,
+  hasPrevPage,
+}) {
+  const totalPages = Math.max(1, Math.ceil(totalEmails / emailsPerPage));
 
-  // Handle page change
-  const handlePageChange = (page) => {
-    setCurrentPage(page); // This calls handlePageChange in EmailsContainer
-  };
-
-  // Handle previous page
   const handlePrevious = () => {
-    if (currentPage > 1) {
-      setCurrentPage(currentPage - 1);
+    if (hasPrevPage) {
+      onPageChange(currentPage - 1);
     }
   };
 
-  // Handle next page
   const handleNext = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
+    if (hasNextPage) {
+      onPageChange(currentPage + 1);
     }
   };
 
-  // Generate page numbers to display
   const getPageNumbers = () => {
     const pages = [];
-    if (totalPages <= 3) {
+    const maxVisiblePages = 5;
+
+    if (totalPages <= maxVisiblePages) {
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
       }
     } else {
-      if (currentPage <= 2) {
-        pages.push(1, 2, 3, "...", totalPages);
-      } else if (currentPage >= totalPages - 1) {
-        pages.push(1, "...", totalPages - 2, totalPages - 1, totalPages);
+      pages.push(1); // Always show first page
+
+      if (currentPage <= 3) {
+        for (let i = 2; i <= 4; i++) {
+          pages.push(i);
+        }
+        pages.push("...");
+        pages.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        pages.push("...");
+        for (let i = totalPages - 3; i <= totalPages; i++) {
+          pages.push(i);
+        }
       } else {
-        pages.push(
-          1,
-          "...",
-          currentPage - 1,
-          currentPage,
-          currentPage + 1,
-          "...",
-          totalPages
-        );
+        pages.push("...");
+        pages.push(currentPage - 1);
+        pages.push(currentPage);
+        pages.push(currentPage + 1);
+        pages.push("...");
+        pages.push(totalPages);
       }
     }
+
     return pages;
   };
 
@@ -72,8 +80,10 @@ export function EmailPagination({ totalEmails, currentPage, setCurrentPage }) {
                 e.preventDefault();
                 handlePrevious();
               }}
-              className="hover:link-btn hover:border-transparent border bg-white border-[#101010]"
-              aria-disabled={currentPage === 1}
+              className={`hover:link-btn hover:border-transparent border bg-white border-[#101010] ${
+                !hasPrevPage ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              disabled={!hasPrevPage}
             />
           </PaginationItem>
 
@@ -86,7 +96,7 @@ export function EmailPagination({ totalEmails, currentPage, setCurrentPage }) {
                   href="#"
                   onClick={(e) => {
                     e.preventDefault();
-                    handlePageChange(Number(page));
+                    onPageChange(Number(page));
                   }}
                   isActive={currentPage === page}
                   className={
@@ -95,7 +105,7 @@ export function EmailPagination({ totalEmails, currentPage, setCurrentPage }) {
                       : "hover:link-btn hover:border-transparent border bg-white border-[#101010]"
                   }
                 >
-                  {String(page)}
+                  {page}
                 </PaginationLink>
               )}
             </PaginationItem>
@@ -108,8 +118,10 @@ export function EmailPagination({ totalEmails, currentPage, setCurrentPage }) {
                 e.preventDefault();
                 handleNext();
               }}
-              className="hover:link-btn hover:border-transparent border bg-white border-[#101010]"
-              aria-disabled={currentPage === totalPages}
+              className={`hover:link-btn hover:border-transparent border bg-white border-[#101010] ${
+                !hasNextPage ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              disabled={!hasNextPage}
             />
           </PaginationItem>
         </PaginationContent>
