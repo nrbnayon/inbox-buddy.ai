@@ -9,7 +9,7 @@ export default async function RootLayout({ children }) {
 
   let user = null;
 
-  if (token) {
+  if (token?.value) {
     try {
       const res = await serverAxios.get("/users/me", {
         headers: { Authorization: `Bearer ${token.value}` },
@@ -24,12 +24,10 @@ export default async function RootLayout({ children }) {
     }
   }
 
-  console.log("ADMIN DATA::", user);
-
   return (
     <section className="bg-gray-100 min-h-screen overflow-hidden">
-      {token && user ? (
-        <AdminSidebar user={user} children={children} />
+      {token?.value && user ? (
+        <AdminSidebar children={children} accessToken={token?.value} />
       ) : (
         <section className="h-[90vh] flex items-center justify-center">
           {children}

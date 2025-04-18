@@ -31,11 +31,11 @@ const navLinks = [
     icon: RiAdminLine,
     label: "Manage Admins",
   },
-  {
-    path: "/admin/train-ai",
-    icon: LuBrainCircuit,
-    label: "Train Ai",
-  },
+  // {
+  //   path: "/admin/train-ai",
+  //   icon: LuBrainCircuit,
+  //   label: "Train Ai",
+  // },
 ];
 
 export default navLinks;

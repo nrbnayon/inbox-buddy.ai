@@ -24,12 +24,10 @@ const Sidebar = ({ children, accessToken, previousChats }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [openDropdowns, setOpenDropdowns] = useState({});
-  const { user } = useGetUser(accessToken);
+  const { user, setUser } = useGetUser(accessToken);
   const pathName = usePathname();
   const router = useRouter();
   const { chats, setChats } = useChat();
-
-  const imageSrc = user?.profilePicture;
 
   useEffect(() => {
     if (previousChats) {
@@ -67,7 +65,7 @@ const Sidebar = ({ children, accessToken, previousChats }) => {
   // Shared props for both desktop and mobile sidebars
   const sidebarProps = {
     user,
-    imageSrc,
+    imageSrc: user?.profilePicture && `${user?.profilePicture}?${Date.now()}`,
     pathName,
     chats,
     openDropdowns,
@@ -125,7 +123,8 @@ const Sidebar = ({ children, accessToken, previousChats }) => {
       <ProfileModal
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}
-        initialUser={user}
+        accessToken={accessToken}
+        setUser={setUser}
       />
     </div>
   );

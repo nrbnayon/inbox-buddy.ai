@@ -1,4 +1,3 @@
-// app\(admin)\admin\waiting-list\components\WaitingListTable.jsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -31,18 +30,14 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import {
-  getAllWaitingListUsers,
-  approveWaitingList,
-  rejectWaitingList,
-} from "@/lib/api/user";
+import { getAllUsers, updateUser } from "@/lib/api/user";
 import { toast } from "sonner";
 import { UserPagination } from "@/app/(admin)/components/UserPagination";
 import LoadingPing from "@/components/LoadingPing";
 import SmallLoader from "@/components/SmallLoader";
 
-export default function WaitingListTable() {
-  const [waitingListUsers, setWaitingListUsers] = useState([]);
+export default function BlockedUsersTable() {
+  const [blockedUsers, setBlockedUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
@@ -50,25 +45,24 @@ export default function WaitingListTable() {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [isRejecting, setIsRejecting] = useState(false);
-  const [isApproving, setIsApproving] = useState(false);
+  const [isUnblocking, setIsUnblocking] = useState(false); // New loading state for unblock action
   const itemsPerPage = 8;
 
   useEffect(() => {
-    fetchWaitingListUsers();
+    fetchBlockedUsers();
   }, [currentPage]);
 
-  const fetchWaitingListUsers = async () => {
+  const fetchBlockedUsers = async () => {
     setIsLoading(true);
     try {
-      const response = await getAllWaitingListUsers(currentPage, itemsPerPage);
-      setWaitingListUsers(response?.data || []);
+      const response = await getAllUsers(currentPage, itemsPerPage, "blocked");
+      setBlockedUsers(response?.users || []);
       setTotalPages(response?.totalPages || 1);
       setError(null);
     } catch (err) {
-      setError("Failed to load waiting list users");
-      toast.error("Failed to load waiting list users");
-      console.error("Error fetching waiting list users:", err);
+      setError("Failed to load blocked users");
+      toast.error("Failed to load blocked users");
+      console.error("Error fetching blocked users:", err);
     } finally {
       setIsLoading(false);
     }
@@ -79,40 +73,31 @@ export default function WaitingListTable() {
     setIsDetailsOpen(true);
   };
 
-  const handleCancelClick = () => {
+  const handleUnblockClick = () => {
     setIsConfirmOpen(true);
   };
 
-  const handleConfirmCancel = async () => {
-    setIsRejecting(true);
-    try {
-      await rejectWaitingList({ email: selectedUser.email });
-      toast.success(`Access request for ${selectedUser.name} was rejected`);
-      fetchWaitingListUsers();
-    } catch (err) {
-      toast.error("Failed to reject waiting list request");
-      console.error("Error rejecting waiting list request:", err);
-    } finally {
-      setIsRejecting(false);
-      setIsConfirmOpen(false);
-      setIsDetailsOpen(false);
-      setSelectedUser(null);
-    }
-  };
+  const handleConfirmUnblock = async () => {
+    if (selectedUser) {
+      setIsUnblocking(true); // Start loading state
+      try {
+        const response = await updateUser(selectedUser?._id, {
+          status: selectedUser.status === "blocked" ? "active" : "blocked",
+        });
 
-  const handleGiveAccess = async () => {
-    setIsApproving(true);
-    try {
-      await approveWaitingList({ email: selectedUser.email });
-      toast.success(`Access granted to ${selectedUser.name}`);
-      fetchWaitingListUsers();
-    } catch (err) {
-      toast.error("Failed to approve waiting list request");
-      console.error("Error approving waiting list request:", err);
-    } finally {
-      setIsApproving(false);
-      setIsDetailsOpen(false);
-      setSelectedUser(null);
+        if (response.success) {
+          toast.success(`${selectedUser.name || "User"} has been unblocked`);
+          fetchBlockedUsers();
+        }
+      } catch (err) {
+        toast.error("Failed to unblock user");
+        console.error("Error unblocking user:", err);
+      } finally {
+        setIsUnblocking(false); // End loading state
+        setIsConfirmOpen(false); // Close confirmation dialog
+        setIsDetailsOpen(false); // Close details dialog
+        setSelectedUser(null); // Reset selected user
+      }
     }
   };
 
@@ -122,21 +107,18 @@ export default function WaitingListTable() {
 
   const getStatusVariant = (status) => {
     switch (status) {
-      case "approved":
-        return "success";
-      case "rejected":
+      case "blocked":
         return "destructive";
-      case "waiting":
       default:
-        return "pending";
+        return "secondary";
     }
   };
 
-  if (isLoading && !waitingListUsers.length) {
+  if (isLoading && !blockedUsers.length) {
     return <LoadingPing />;
   }
 
-  if (error && !waitingListUsers.length) {
+  if (error && !blockedUsers.length) {
     return <div className="py-10 text-center text-red-500">{error}</div>;
   }
 
@@ -148,17 +130,14 @@ export default function WaitingListTable() {
             <TableRow>
               <TableHead className="pl-9 py-6">Name</TableHead>
               <TableHead className="hidden md:table-cell">Email</TableHead>
-              <TableHead className="hidden md:table-cell">
-                Description
-              </TableHead>
+              <TableHead className="hidden md:table-cell">Inbox</TableHead>
               <TableHead className="text-center">Status</TableHead>
-              <TableHead className="text-center">Inbox</TableHead>
               <TableHead className="text-center">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {waitingListUsers.length > 0 ? (
-              waitingListUsers.map((user) => (
+            {blockedUsers.length > 0 ? (
+              blockedUsers.map((user) => (
                 <TableRow key={user._id || user.id} className="border-b">
                   <TableCell className="font-medium pl-9 py-6 pr-4">
                     {user.name || "N/A"}
@@ -167,26 +146,19 @@ export default function WaitingListTable() {
                     {user.email || "N/A"}
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
-                    {user.description
-                      ? user.description.length > 25
-                        ? `${user.description.substring(0, 25)}...`
-                        : user.description
-                      : "No description provided"}
+                    {user.inboxList?.[0] || "N/A"}
                   </TableCell>
                   <TableCell className="text-center">
                     <Badge variant={getStatusVariant(user.status)}>
-                      {user.status || "waiting"}
+                      {user.status || "blocked"}
                     </Badge>
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {user.inbox || "N/A"}
                   </TableCell>
                   <TableCell className="text-center">
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => handleInfoClick(user)}
-                      aria-label={`View details for ${user.name}`}
+                      aria-label={`View details for ${user.name || "user"}`}
                     >
                       <Info className="h-4 w-4" />
                     </Button>
@@ -195,8 +167,8 @@ export default function WaitingListTable() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-6">
-                  No waiting list users found
+                <TableCell colSpan={5} className="text-center py-6">
+                  No blocked users found
                 </TableCell>
               </TableRow>
             )}
@@ -204,7 +176,7 @@ export default function WaitingListTable() {
         </Table>
       </div>
 
-      {waitingListUsers.length > 0 && (
+      {blockedUsers.length > 0 && (
         <div className="flex mt-10 justify-center">
           <UserPagination
             currentPage={currentPage}
@@ -217,9 +189,9 @@ export default function WaitingListTable() {
       <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>Waiting List Request</DialogTitle>
+            <DialogTitle>Blocked User Details</DialogTitle>
             <DialogDescription>
-              Information about {selectedUser?.name}
+              Information about {selectedUser?.name || "the user"}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -234,17 +206,15 @@ export default function WaitingListTable() {
             <div className="grid grid-cols-4 gap-4">
               <div className="font-medium">Inbox:</div>
               <div className="col-span-3">
-                {selectedUser?.inbox || "Not specified"}
+                {selectedUser?.inboxList?.[0] || "Not specified"}
               </div>
             </div>
             <div className="grid grid-cols-4 gap-4">
-              <div className="font-medium">Description:</div>
-              <div className="col-span-3">
-                {selectedUser?.description || "No description provided"}
-              </div>
+              <div className="font-medium">Role:</div>
+              <div className="col-span-3">{selectedUser?.role || "N/A"}</div>
             </div>
             <div className="grid grid-cols-4 gap-4">
-              <div className="font-medium">Applied:</div>
+              <div className="font-medium">Blocked Since:</div>
               <div className="col-span-3">
                 {selectedUser?.createdAt
                   ? new Date(selectedUser.createdAt).toLocaleString()
@@ -253,31 +223,12 @@ export default function WaitingListTable() {
             </div>
           </div>
           <DialogFooter className="sm:justify-end">
-            {selectedUser?.status !== "rejected" && (
-              <Button
-                variant="destructive"
-                onClick={handleCancelClick}
-                disabled={isApproving || isRejecting}
-                className="hover:bg-red-600 bg-red-500"
-              >
-                Reject Request
-              </Button>
-            )}
-            {selectedUser?.status !== "approved" && (
-              <Button
-                variant="blueGradient"
-                onClick={handleGiveAccess}
-                disabled={isApproving || isRejecting}
-              >
-                {isApproving ? (
-                  <div className="flex justify-center">
-                    <SmallLoader className="text-white" />
-                  </div>
-                ) : (
-                  "Approve Access"
-                )}
-              </Button>
-            )}
+            <Button variant="outline" onClick={() => setIsDetailsOpen(false)}>
+              Close
+            </Button>
+            <Button variant="blueGradient" onClick={handleUnblockClick}>
+              Unblock User
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -287,24 +238,17 @@ export default function WaitingListTable() {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action will reject the waiting list request from{" "}
-              {selectedUser?.name}. This cannot be undone.
+              This action will unblock {selectedUser?.name || "the user"}.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isRejecting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleConfirmCancel}
-              disabled={isRejecting}
-              className="bg-red-500 hover:bg-red-500/90 cursor-pointer"
+              className="link-btn cursor-pointer text-black"
+              onClick={handleConfirmUnblock}
+              disabled={isUnblocking} // Disable button during unblock
             >
-              {isRejecting ? (
-                <div className="flex justify-center">
-                  <SmallLoader className="text-white" />
-                </div>
-              ) : (
-                "Yes, reject request"
-              )}
+              {isUnblocking ? <SmallLoader /> : "Yes, unblock user"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

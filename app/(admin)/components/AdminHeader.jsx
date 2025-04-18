@@ -25,22 +25,25 @@ export default function AdminHeader({ user }) {
         : day % 10 === 3 && day !== 13
         ? "rd"
         : "th";
-    const formattedDate = `${day}${ordinalSuffix} ${now.toLocaleString("en-US", {
-      month: "long",
-    })}, ${now.getFullYear()}`;
+    const formattedDate = `${day}${ordinalSuffix} ${now.toLocaleString(
+      "en-US",
+      {
+        month: "long",
+      }
+    )}, ${now.getFullYear()}`;
     setCurrentTime(`${timeString} | ${formattedDate}`);
   };
 
   // Initialize and update time
   useEffect(() => {
     updateTime();
-    const interval = setInterval(updateTime, 60000); 
-    return () => clearInterval(interval); 
+    const interval = setInterval(updateTime, 60000);
+    return () => clearInterval(interval);
   }, []);
 
   return (
-    <header className="link-btn text-white shadow-lg p-4 lg:p-6 rounded-xl mb-6 sticky top-0 z-10">
-      <div className="max-w-7xl mx-auto flex justify-between items-center">
+    <header className="link-btn text-white shadow p-4 lg:p-6 rounded-xl mb-6 sticky top-0 z-10">
+      <div className="mx-auto flex justify-between items-center">
         {/* Left: Welcome Message */}
         <div className="flex items-center space-x-3">
           {user ? (

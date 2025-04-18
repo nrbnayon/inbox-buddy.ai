@@ -3,7 +3,7 @@
 import { GiReceiveMoney } from "react-icons/gi";
 import { FaUser, FaUserClock } from "react-icons/fa6";
 import { useState, useEffect } from "react";
-import { getAllUsers, getIncome, getAllWaitingListUsers } from "@/lib/api/user";
+import { getIncome, getUserStats } from "@/lib/api/user";
 import SmallLoader from "@/components/SmallLoader";
 
 export default function AdminDashboard() {
@@ -17,16 +17,10 @@ export default function AdminDashboard() {
     const fetchData = async () => {
       try {
         // Fetch total users
-        const usersResponse = await getAllUsers(1, 10); 
-        setTotalUsers(usersResponse?.totalCount || 0);
+        const stats = await getUserStats();
 
-        // Fetch total waiting users
-        const waitingResponse = await getAllWaitingListUsers(1, 10);
-        console.log(waitingResponse);
-        const waitingCount =
-          waitingResponse?.data?.filter((entry) => entry.status === "waiting")
-            ?.length || 0;
-        setTotalWaitingUsers(waitingCount);
+        setTotalUsers(stats.totalUsers);
+        setTotalWaitingUsers(stats.waitingListUsers);
 
         // Fetch total income
         const incomeResponse = await getIncome();
@@ -43,36 +37,36 @@ export default function AdminDashboard() {
 
   return (
     <>
-      <div className="flex gap-3">
+      <div className="flex flex-col lg:flex-row gap-3">
         {/* total users */}
-        <div className="w-full flex justify-between px-8 py-6 rounded-xl border">
+        <div className="w-full flex justify-between items-end px-8 py-6 rounded-xl border">
           <div className="flex flex-col justify-center">
             <FaUser size={30} color="#00ACDA" />
             <p className="text-lg mt-5">Total Users:</p>
           </div>
-          <p className="h-full flex items-center text-3xl font-bold">
+          <p className="h-full flex items-end text-xl xl:text-3xl font-bold">
             {loading ? <SmallLoader /> : error ? "Error" : totalUsers}
           </p>
         </div>
 
         {/* total waiting list users */}
-        <div className="w-full flex justify-between px-8 py-6 rounded-xl border">
+        <div className="w-full flex justify-between items-end px-8 py-6 rounded-xl border">
           <div className="flex flex-col justify-center">
-            <FaUserClock size={30} color="#e3e300" />
+            <FaUserClock size={30} color="#ff6200" />
             <p className="text-lg mt-5">Total Waiting Users:</p>
           </div>
-          <p className="h-full flex items-center text-3xl font-bold">
+          <p className="h-full flex items-end text-xl xl:text-3xl font-bold">
             {loading ? <SmallLoader /> : error ? "Error" : totalWaitingUsers}
           </p>
         </div>
 
         {/* total income */}
-        <div className="w-full flex justify-between px-8 py-6 rounded-xl border">
+        <div className="w-full flex justify-between items-end px-8 py-6 rounded-xl border">
           <div className="flex flex-col justify-center">
             <GiReceiveMoney size={30} color="#1ac72e" />
             <p className="text-lg mt-5">Total Income:</p>
           </div>
-          <p className="h-full flex items-center text-3xl font-bold">
+          <p className="h-full flex items-end text-xl xl:text-2xl font-bold">
             {loading ? <SmallLoader /> : error ? "Error" : `$ ${totalIncome}`}
           </p>
         </div>

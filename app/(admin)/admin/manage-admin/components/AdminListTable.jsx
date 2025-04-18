@@ -1,14 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { EllipsisVertical, Ban, XCircle, Trash2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Ban, EllipsisVertical, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -28,34 +22,60 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { updateUser, deleteUser } from "@/lib/api/user";
-import LoadingPing from "@/components/LoadingPing";
-import { UserPagination } from "@/app/(admin)/components/UserPagination";
-import SmallLoader from "@/components/SmallLoader";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { updateUser, deleteUser, getAllUsers } from "@/lib/api/user";
 import { toast } from "sonner";
+import { UserPagination } from "@/app/(admin)/components/UserPagination";
+import LoadingPing from "@/components/LoadingPing";
+import SmallLoader from "@/components/SmallLoader";
 
-export default function UsersListTable({
-  users,
-  loading,
-  error,
-  currentPage,
-  totalPages,
-  onPageChange,
-  onActionComplete,
-}) {
-  const [selectedUser, setSelectedUser] = useState(null);
+export default function AdminListTable() {
+  const [adminUsers, setAdminUsers] = useState([]);
+  const [selectedAdmin, setSelectedAdmin] = useState(null);
   const [actionType, setActionType] = useState(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [isActionLoading, setIsActionLoading] = useState(false);
+  const itemsPerPage = 8;
 
-  const handleActionClick = (user, action) => {
-    setSelectedUser(user);
+  useEffect(() => {
+    fetchAdminUsers();
+  }, [currentPage]);
+
+  const fetchAdminUsers = async () => {
+    setIsLoading(true);
+    try {
+      const response = await getAllUsers(currentPage, itemsPerPage);
+      const adminUsers =
+        response?.users.filter((usr) => usr.role === "admin") || [];
+      setAdminUsers(adminUsers || []);
+      setTotalPages(response?.totalPages || 1);
+      setError(null);
+    } catch (err) {
+      setError("Failed to load admin users");
+      toast.error("Failed to load admin users");
+      console.error("Error fetching admin users:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleActionClick = (admin, action) => {
+    setSelectedAdmin(admin);
     setActionType(action);
     setIsConfirmOpen(true);
   };
 
   const handleConfirmAction = async () => {
-    if (!selectedUser || !actionType) return;
+    if (!selectedAdmin || !actionType) return;
 
     setIsActionLoading(true);
     try {
@@ -63,28 +83,18 @@ export default function UsersListTable({
       let successMessage = "";
 
       switch (actionType) {
-        case "block":
-          res = await updateUser(selectedUser._id, {
-            status: selectedUser.status === "blocked" ? "active" : "blocked",
+        case "toggle":
+          res = await updateUser(selectedAdmin._id, {
+            status: selectedAdmin.status === "blocked" ? "active" : "blocked",
           });
           successMessage =
-            selectedUser.status === "blocked"
-              ? "User unblocked successfully"
-              : "User blocked successfully";
-          break;
-        case "cancel":
-          res = await updateUser(selectedUser._id, {
-            subscription: {
-              ...selectedUser.subscription,
-              status: "cancelled",
-              autoRenew: false,
-            },
-          });
-          successMessage = "Subscription cancelled successfully";
+            selectedAdmin.status === "blocked"
+              ? "Admin authority restored successfully"
+              : "Admin authority revoked successfully";
           break;
         case "delete":
-          res = await deleteUser(selectedUser._id);
-          successMessage = "User deleted successfully";
+          res = await deleteUser(selectedAdmin._id);
+          successMessage = "Admin deleted successfully";
           break;
         default:
           break;
@@ -92,7 +102,7 @@ export default function UsersListTable({
 
       if (res?.success) {
         toast.success(successMessage);
-        onActionComplete();
+        fetchAdminUsers();
       } else {
         throw new Error(res?.message || "Action failed");
       }
@@ -102,53 +112,43 @@ export default function UsersListTable({
     } finally {
       setIsActionLoading(false);
       setIsConfirmOpen(false);
-      setSelectedUser(null);
+      setSelectedAdmin(null);
       setActionType(null);
     }
   };
 
   const getActionMessage = () => {
-    if (!selectedUser) return "";
+    if (!selectedAdmin) return "";
     switch (actionType) {
-      case "block":
+      case "toggle":
         return `Are you sure you want to ${
-          selectedUser.status === "blocked" ? "unblock" : "block"
-        } ${selectedUser?.name}? This will ${
-          selectedUser.status === "blocked" ? "restore" : "restrict"
-        } their access.`;
-      case "cancel":
-        return `Are you sure you want to cancel the subscription for ${selectedUser?.name}?`;
+          selectedAdmin.status === "blocked" ? "restore" : "revoke"
+        } admin authority for ${selectedAdmin?.name}?`;
       case "delete":
-        return `Are you sure you want to delete ${selectedUser?.name}? This action cannot be undone.`;
+        return `Are you sure you want to delete admin ${selectedAdmin?.name}? This action cannot be undone.`;
       default:
         return "";
     }
   };
 
-  const renderStatusBadge = (status) => {
-    let variant = "default";
+  const getStatusVariant = (status) => {
     switch (status) {
       case "active":
-        variant = "success";
-        break;
-      case "cancelled":
+        return "success";
       case "blocked":
-        variant = "destructive";
-        break;
+        return "destructive";
       case "pending":
-        variant = "warning";
-        break;
+        return "warning";
       default:
-        variant = "default";
+        return "default";
     }
-    return <Badge variant={variant}>{status}</Badge>;
   };
 
-  if (loading && users.length === 0) {
+  if (isLoading && !adminUsers.length) {
     return <LoadingPing />;
   }
 
-  if (error && users.length === 0) {
+  if (error && !adminUsers.length) {
     return <div className="py-10 text-center text-red-500">{error}</div>;
   }
 
@@ -160,36 +160,24 @@ export default function UsersListTable({
             <TableRow>
               <TableHead className="pl-9 py-6">Name</TableHead>
               <TableHead className="hidden md:table-cell">Email</TableHead>
-              <TableHead className="text-center">Provider</TableHead>
-              <TableHead className="text-center">Subs. Plan</TableHead>
-              <TableHead className="text-center">Subs. Status</TableHead>
+              <TableHead className="text-center">Status</TableHead>
               <TableHead className="text-center">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {users.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center py-10">
-                  No users found.
-                </TableCell>
-              </TableRow>
-            ) : (
-              users.map((user) => (
-                <TableRow key={user._id} className="border-b">
+            {adminUsers.length > 0 ? (
+              adminUsers.map((admin) => (
+                <TableRow key={admin._id} className="border-b">
                   <TableCell className="font-medium pl-9 py-6 pr-4">
-                    {user?.name || "N/A"}
+                    {admin.name || "N/A"}
                   </TableCell>
                   <TableCell className="hidden md:table-cell pr-4">
-                    {user?.email || "N/A"}
+                    {admin.email || "N/A"}
                   </TableCell>
                   <TableCell className="text-center">
-                    {user.authProvider || "email"}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {user.subscription?.plan || "free"}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {renderStatusBadge(user.subscription?.status || "active")}
+                    <Badge variant={getStatusVariant(admin.status)}>
+                      {admin.status || "active"}
+                    </Badge>
                   </TableCell>
                   <TableCell className="text-center">
                     <DropdownMenu>
@@ -197,50 +185,49 @@ export default function UsersListTable({
                         <Button
                           variant="ghost"
                           size="icon"
-                          aria-label={`Actions for ${user?.name}`}
+                          aria-label={`Actions for ${admin.name}`}
                         >
                           <EllipsisVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem
-                          onClick={() => handleActionClick(user, "block")}
+                          onClick={() => handleActionClick(admin, "toggle")}
                         >
                           <Ban className="h-4 w-4 mr-2" />
-                          {user.status === "blocked"
-                            ? "Unblock User"
-                            : "Block User"}
+                          {admin.status === "blocked"
+                            ? "Restore Authority"
+                            : "Revoke Authority"}
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                          onClick={() => handleActionClick(user, "cancel")}
-                          disabled={user.subscription?.status === "cancelled"}
-                        >
-                          <XCircle className="h-4 w-4 mr-2" />
-                          Cancel Subscription
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => handleActionClick(user, "delete")}
+                          onClick={() => handleActionClick(admin, "delete")}
                           className="text-red-600 hover:text-red-700 hover:bg-red-50"
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
-                          Delete User
+                          Delete Admin
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
                 </TableRow>
               ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={4} className="text-center py-6">
+                  No admins found
+                </TableCell>
+              </TableRow>
             )}
           </TableBody>
         </Table>
       </div>
 
-      {users.length > 0 && (
+      {adminUsers.length > 0 && (
         <div className="flex mt-10 justify-center">
           <UserPagination
             currentPage={currentPage}
             totalPages={totalPages}
-            onPageChange={onPageChange}
+            onPageChange={setCurrentPage}
           />
         </div>
       )}
@@ -255,7 +242,7 @@ export default function UsersListTable({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isActionLoading}>
-              No, go back
+              Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmAction}
@@ -265,7 +252,7 @@ export default function UsersListTable({
               {isActionLoading ? (
                 <SmallLoader className="text-white" />
               ) : (
-                "Yes, proceed"
+                "Confirm"
               )}
             </AlertDialogAction>
           </AlertDialogFooter>

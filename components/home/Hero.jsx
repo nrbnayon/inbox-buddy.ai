@@ -26,17 +26,17 @@ export default function Hero() {
 
             {/* features */}
             {/* read */}
-            <div className="hidden lg:flex absolute -top-16 -left-20 animate-bounce">
+            {/* <div className="hidden lg:flex absolute -top-16 -left-20">
               <p className="bg-[#F98FFD] py-2 px-10 font-medium rounded-full relative">
                 Read
               </p>
               <div className="rotate-[85deg] absolute top-8 -right-8">
                 <TiLocationArrow size={"35px"} color="#F98FFD" />
               </div>
-            </div>
+            </div> */}
 
             {/* chat */}
-            <div className="hidden lg:flex absolute -top-16 -right-30 animate-bounce">
+            {/* <div className="hidden lg:flex absolute -top-16 -right-30">
               <div className="rotate-180 absolute top-8 -left-8">
                 <TiLocationArrow size={"35px"} color="#FBE11D" />
               </div>
@@ -44,20 +44,20 @@ export default function Hero() {
               <p className="bg-[#FBE11D] py-2 px-10 font-medium rounded-full">
                 Chat
               </p>
-            </div>
+            </div> */}
 
             {/* reply */}
-            <div className="hidden lg:flex absolute bottom-0 -left-10 animate-bounce">
+            {/* <div className="hidden lg:flex absolute bottom-0 -left-10">
               <p className="bg-[#00ACDA] py-2 px-10 font-medium rounded-full">
                 Reply
               </p>
               <div className="absolute bottom-8 -right-8">
                 <TiLocationArrow size={"35px"} color="#00ACDA" />
               </div>
-            </div>
+            </div> */}
 
             {/* meeting */}
-            <div className="hidden lg:flex absolute -right-20 -bottom-10 animate-bounce">
+            {/* <div className="hidden lg:flex absolute -right-20 -bottom-10">
               <div className="rotate-[-95deg] absolute bottom-8 -left-8">
                 <TiLocationArrow size={"35px"} color="#34A853" />
               </div>
@@ -65,7 +65,7 @@ export default function Hero() {
               <p className="bg-[#34A853] py-2 px-10 font-medium rounded-full">
                 Meeting
               </p>
-            </div>
+            </div> */}
           </div>
 
           <p className="mt-8 lg:mt-14 sm:text-lg/relaxed">

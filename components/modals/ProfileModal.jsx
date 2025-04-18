@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useEffect } from "react";
 import {
   Dialog,
@@ -43,28 +44,31 @@ import {
   Trash2,
 } from "lucide-react";
 import useGetUser from "@/hooks/useGetUser";
+import { logoutAction } from "@/app/actions/authActions";
+import { useRouter } from "next/navigation";
 
-const ProfileModal = ({ isOpen, onClose, initialUser, onProfileUpdate }) => {
-  const [user, setUser] = useState(initialUser || null);
+const ProfileModal = ({ isOpen, onClose, accessToken, setUser }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({});
   const [profilePicture, setProfilePicture] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
-  const { setUser: setUpdatedUser } = useGetUser();
+  const { user } = useGetUser(accessToken);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
+  const router = useRouter();
 
   useEffect(() => {
     if (isOpen) {
-      if (initialUser) {
-        setUser(initialUser);
-        setFormData(initialUser);
+      if (user) {
+        // setUser(initialUser);
+        setFormData(user);
       } else {
         fetchUserProfile();
       }
     }
-  }, [isOpen, initialUser]);
+  }, [isOpen, user]);
 
   const fetchUserProfile = async () => {
     try {
@@ -118,12 +122,6 @@ const ProfileModal = ({ isOpen, onClose, initialUser, onProfileUpdate }) => {
       // Update local state with the new data
       const updatedUser = response.user;
       setUser(updatedUser);
-      setUpdatedUser(updatedUser);
-
-      // Notify parent component about the profile update
-      if (onProfileUpdate && typeof onProfileUpdate === "function") {
-        onProfileUpdate(updatedUser);
-      }
 
       setIsEditing(false);
       setProfilePicture(null);
@@ -140,11 +138,15 @@ const ProfileModal = ({ isOpen, onClose, initialUser, onProfileUpdate }) => {
   const handleDeleteAccount = async () => {
     setIsLoading(true);
     try {
-      await deleteUserAccount();
-      toast.success("Account deleted successfully");
-      await logout();
-      setShowDeleteDialog(false);
-      onClose();
+      const res = await deleteUserAccount();
+      console.log(res);
+      if (res.success) {
+        toast.success("Account deleted successfully");
+        await logoutAction();
+        setShowDeleteDialog(false);
+        onClose();
+        router.push("/login");
+      }
     } catch (error) {
       toast.error(error.message || "Failed to delete account");
     } finally {
@@ -189,9 +191,11 @@ const ProfileModal = ({ isOpen, onClose, initialUser, onProfileUpdate }) => {
                 <TabsTrigger value="edit" className="flex-1">
                   Edit Profile
                 </TabsTrigger>
-                <TabsTrigger value="settings" className="flex-1">
-                  Settings
-                </TabsTrigger>
+                {user?.role !== "super_admin" && (
+                  <TabsTrigger value="settings" className="flex-1">
+                    Settings
+                  </TabsTrigger>
+                )}
               </TabsList>
             </div>
 
@@ -399,64 +403,66 @@ const ProfileModal = ({ isOpen, onClose, initialUser, onProfileUpdate }) => {
                 </form>
               </TabsContent>
 
-              <TabsContent value="settings" className="mt-0">
-                <div className="space-y-6">
-                  <div className="p-4 border border-red-200 rounded-lg bg-red-50 dark:bg-red-900/10 dark:border-red-900/20">
-                    <div className="flex items-center space-x-3">
-                      <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400" />
-                      <h3 className="text-lg font-semibold text-red-600 dark:text-red-400">
-                        Danger Zone
-                      </h3>
-                    </div>
-                    <p className="mt-2 text-sm text-red-600 dark:text-red-400">
-                      Once you delete your account, there is no going back. This
-                      will permanently delete your account and remove your data
-                      from our servers.
-                    </p>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          variant="destructive"
-                          className="mt-4"
-                          disabled={isLoading}
-                        >
-                          <Trash2 className="w-4 h-4 mr-2" />
-                          Delete Account
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>
-                            Are you absolutely sure?
-                          </AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This action cannot be undone. This will permanently
-                            delete your account and remove your data from our
-                            servers.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={handleDeleteAccount}
-                            className="bg-red-600 hover:bg-red-700 text-white"
+              {user?.role !== "super_admin" && (
+                <TabsContent value="settings" className="mt-0">
+                  <div className="space-y-6">
+                    <div className="p-4 border border-red-200 rounded-lg bg-red-50 dark:bg-red-900/10 dark:border-red-900/20">
+                      <div className="flex items-center space-x-3">
+                        <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400" />
+                        <h3 className="text-lg font-semibold text-red-600 dark:text-red-400">
+                          Danger Zone
+                        </h3>
+                      </div>
+                      <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                        Once you delete your account, there is no going back.
+                        This will permanently delete your account and remove
+                        your data from our servers.
+                      </p>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="destructive"
+                            className="mt-4"
                             disabled={isLoading}
                           >
-                            {isLoading ? (
-                              <>
-                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                Deleting...
-                              </>
-                            ) : (
-                              "Yes, delete account"
-                            )}
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            Delete Account
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              Are you absolutely sure?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This action cannot be undone. This will
+                              permanently delete your account and remove your
+                              data from our servers.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={handleDeleteAccount}
+                              className="bg-red-600 hover:bg-red-700 text-white"
+                              disabled={isLoading}
+                            >
+                              {isLoading ? (
+                                <>
+                                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                  Deleting...
+                                </>
+                              ) : (
+                                "Yes, delete account"
+                              )}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    </div>
                   </div>
-                </div>
-              </TabsContent>
+                </TabsContent>
+              )}
             </ScrollArea>
           </Tabs>
         </DialogContent>
