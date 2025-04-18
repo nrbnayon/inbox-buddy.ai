@@ -52,7 +52,7 @@ export default function AdminDashboard() {
         {/* total waiting list users */}
         <div className="w-full flex justify-between items-end px-8 py-6 rounded-xl border">
           <div className="flex flex-col justify-center">
-            <FaUserClock size={30} color="#e3e300" />
+            <FaUserClock size={30} color="#ff6200" />
             <p className="text-lg mt-5">Total Waiting Users:</p>
           </div>
           <p className="h-full flex items-end text-xl xl:text-3xl font-bold">
