@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { cancelSubscription, cancelAutoRenew } from "@/lib/api/subscription";
+import { cancelSubscription, cancelAutoRenew, enableAutoRenew  } from "@/lib/api/subscription";
 import { getUserProfile } from "@/lib/api/user";
 import { useRouter } from "next/navigation";
 import {
@@ -38,7 +38,6 @@ export default function SubscriptionDetails({ onUpgrade }) {
   const router = useRouter();
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isUpdating, setIsUpdating] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
   const [isTogglingAutoRenew, setIsTogglingAutoRenew] = useState(false);
 
@@ -124,37 +123,46 @@ export default function SubscriptionDetails({ onUpgrade }) {
     setAutoRenewDialogOpen(true);
   };
 
-  const executeToggleAutoRenew = async () => {
-    setIsTogglingAutoRenew(true);
-    try {
+const executeToggleAutoRenew = async () => {
+  setIsTogglingAutoRenew(true);
+  try {
+    // Call the appropriate API based on current state
+    if (isAutoRenewOn) {
       await cancelAutoRenew();
-      const updatedUser = await getUserProfile();
-      setUser(updatedUser.data);
-
-      toast(
-        <>
-          <strong className='font-semibold'>Settings updated</strong>
-          <div>
-            Auto-renewal has been disabled. Your subscription will remain active
-            until {endDate}.
-          </div>
-        </>
-      );
-    } catch (error) {
-      toast(
-        <>
-          <strong className='font-semibold text-red-600'>
-            Failed to update auto-renewal setting
-          </strong>
-          <div>{error.message}</div>
-        </>,
-        { style: { backgroundColor: "#fee2e2", color: "#b91c1c" } }
-      );
-    } finally {
-      setIsTogglingAutoRenew(false);
-      setAutoRenewDialogOpen(false);
+    } else {
+      await enableAutoRenew();
     }
-  };
+    
+    // Update user data
+    const updatedUser = await getUserProfile();
+    setUser(updatedUser.data);
+
+    toast(
+      <>
+        <strong className='font-semibold'>Settings updated</strong>
+        <div>
+          {isAutoRenewOn 
+            ? `Auto-renewal has been disabled. Your subscription will remain active until ${endDate}.`
+            : `Auto-renewal has been enabled. Your subscription will automatically renew on ${endDate}.`
+          }
+        </div>
+      </>
+    );
+  } catch (error) {
+    toast(
+      <>
+        <strong className='font-semibold text-red-600'>
+          Failed to update auto-renewal setting
+        </strong>
+        <div>{error.message}</div>
+      </>,
+      { style: { backgroundColor: "#fee2e2", color: "#b91c1c" } }
+    );
+  } finally {
+    setIsTogglingAutoRenew(false);
+    setAutoRenewDialogOpen(false);
+  }
+};
 
   const handleCancelSubscriptionClick = () => {
     setCancelDialogOpen(true);

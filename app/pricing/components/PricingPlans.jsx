@@ -1,4 +1,3 @@
-// app\pricing\components\PricingPlans.jsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -11,11 +10,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Check, Loader2 } from "lucide-react";
+import { Check, Loader2, AlertCircle } from "lucide-react";
 import { createCheckoutSession } from "@/lib/api/subscription";
 import { getUserProfile } from "@/lib/api/user";
 import { toast } from "sonner";
 import { loadStripe } from "@stripe/stripe-js";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
@@ -27,6 +34,8 @@ export default function PricingPlans() {
   const [processingPlan, setProcessingPlan] = useState(null);
   const [user, setUser] = useState(null);
   const [isUserLoading, setIsUserLoading] = useState(true);
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -91,8 +100,12 @@ export default function PricingPlans() {
     },
   ];
 
+  const isCurrentPlan = (planId) =>
+    user?.subscription?.plan === planId &&
+    user?.subscription?.status === "active" &&
+    new Date(user?.subscription?.endDate) > new Date();
+
   const handleSubscribe = async (planId) => {
-    console.log("Subscribing to plan:", planId);
     if (isUserLoading) {
       toast.info("Please wait", {
         description: "Verifying your account status...",
@@ -111,6 +124,24 @@ export default function PricingPlans() {
       return;
     }
 
+    // If the user has an active subscription and is switching to a different plan, show confirmation
+    if (
+      user?.subscription  &&
+      user.subscription.status === "active" &&
+      new Date(user.subscription.endDate) > new Date() &&
+      user.subscription.plan !== planId
+    ) {
+      setSelectedPlan(planId);
+      setConfirmDialogOpen(true);
+      return;
+    }
+
+    // If no active subscription or same plan, proceed directly
+    await proceedWithSubscription(planId);
+  };
+
+  const proceedWithSubscription = async (planId) => {
+    console.log("Subscribing to plan:", planId);
     setIsLoading(true);
     setProcessingPlan(planId);
 
@@ -130,11 +161,6 @@ export default function PricingPlans() {
       setProcessingPlan(null);
     }
   };
-
-  const isCurrentPlan = (planId) =>
-    user?.subscription?.plan === planId &&
-    user?.subscription?.status === "active" &&
-    new Date(user?.subscription?.endDate) > new Date();
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -196,6 +222,56 @@ export default function PricingPlans() {
           ))}
         </div>
       </div>
+
+      {/* Confirmation Dialog for Switching Plans */}
+      <Dialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center">
+              <AlertCircle className="h-5 w-5 text-amber-500 mr-2" />
+              Switch Subscription Plan
+            </DialogTitle>
+            <DialogDescription>
+              You currently have an active {user?.subscription?.plan} subscription. Switching to the {selectedPlan} plan will cancel your existing subscription immediately.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="space-y-3">
+              <p>By proceeding:</p>
+              <ul className="list-disc list-inside space-y-1 pl-2">
+                <li>Your current subscription will be canceled immediately.</li>
+                <li>You will lose access to your current plan's features.</li>
+                <li>You will be redirected to subscribe to the {selectedPlan} plan.</li>
+              </ul>
+            </div>
+          </div>
+          <DialogFooter className="sm:justify-between">
+            <Button
+              variant="outline"
+              onClick={() => setConfirmDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="default"
+              onClick={() => {
+                setConfirmDialogOpen(false);
+                proceedWithSubscription(selectedPlan);
+              }}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Processing...
+                </>
+              ) : (
+                "Switch Plan"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
