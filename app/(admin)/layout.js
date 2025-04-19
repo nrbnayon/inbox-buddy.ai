@@ -14,12 +14,14 @@ export default async function RootLayout({ children }) {
       const res = await serverAxios.get("/users/me", {
         headers: { Authorization: `Bearer ${token.value}` },
       });
+
+      console.log(res.data);
       user = res.data.data;
     } catch (error) {
       console.error("Failed to fetch user data:", error);
-      cookieStore.delete("accessToken");
-      cookieStore.delete("refreshToken");
-      cookieStore.delete("auth");
+      // cookieStore.delete("accessToken");
+      // cookieStore.delete("refreshToken");
+      // cookieStore.delete("auth");
       redirect("/login");
     }
   }
