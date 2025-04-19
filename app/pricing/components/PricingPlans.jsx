@@ -28,12 +28,12 @@ const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 );
 
-export default function PricingPlans() {
+export default function PricingPlans({ accessToken }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [processingPlan, setProcessingPlan] = useState(null);
   const [user, setUser] = useState(null);
-  const [isUserLoading, setIsUserLoading] = useState(true);
+  const [isUserLoading, setIsUserLoading] = useState(false);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState(null);
 
@@ -41,7 +41,7 @@ export default function PricingPlans() {
     const fetchUserData = async () => {
       setIsUserLoading(true);
       try {
-        const userData = await getUserProfile();
+        const userData = await getUserProfile(accessToken);
         setUser(userData.data);
       } catch (error) {
         console.error("Failed to fetch user data:", error);
@@ -52,8 +52,8 @@ export default function PricingPlans() {
         setIsUserLoading(false);
       }
     };
-    fetchUserData();
-  }, []);
+    if (accessToken) fetchUserData();
+  }, [accessToken]);
 
   const plans = [
     {
@@ -100,10 +100,14 @@ export default function PricingPlans() {
     },
   ];
 
+  console.log(user);
+
   const isCurrentPlan = (planId) =>
     user?.subscription?.plan === planId &&
     user?.subscription?.status === "active" &&
     new Date(user?.subscription?.endDate) > new Date();
+
+  // console.log(isCurrentPlan);
 
   const handleSubscribe = async (planId) => {
     if (isUserLoading) {
@@ -126,7 +130,7 @@ export default function PricingPlans() {
 
     // If the user has an active subscription and is switching to a different plan, show confirmation
     if (
-      user?.subscription  &&
+      user?.subscription &&
       user.subscription.status === "active" &&
       new Date(user.subscription.endDate) > new Date() &&
       user.subscription.plan !== planId
@@ -232,7 +236,9 @@ export default function PricingPlans() {
               Switch Subscription Plan
             </DialogTitle>
             <DialogDescription>
-              You currently have an active {user?.subscription?.plan} subscription. Switching to the {selectedPlan} plan will cancel your existing subscription immediately.
+              You currently have an active {user?.subscription?.plan}{" "}
+              subscription. Switching to the {selectedPlan} plan will cancel
+              your existing subscription immediately.
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
@@ -241,7 +247,10 @@ export default function PricingPlans() {
               <ul className="list-disc list-inside space-y-1 pl-2">
                 <li>Your current subscription will be canceled immediately.</li>
                 <li>You will lose access to your current plan's features.</li>
-                <li>You will be redirected to subscribe to the {selectedPlan} plan.</li>
+                <li>
+                  You will be redirected to subscribe to the {selectedPlan}{" "}
+                  plan.
+                </li>
               </ul>
             </div>
           </div>

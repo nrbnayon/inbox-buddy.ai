@@ -19,9 +19,9 @@ export default async function RootLayout({ children }) {
       user = res.data.data;
     } catch (error) {
       console.error("Failed to fetch user data:", error);
-      // cookieStore.delete("accessToken");
-      // cookieStore.delete("refreshToken");
-      // cookieStore.delete("auth");
+      cookieStore.delete("accessToken");
+      cookieStore.delete("refreshToken");
+      cookieStore.delete("auth");
       redirect("/login");
     }
   }

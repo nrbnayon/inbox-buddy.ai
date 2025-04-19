@@ -95,7 +95,7 @@ export default function EmailsContainer({ user }) {
     try {
       const q = fallbackQuery || computeQuery();
       const timeFilter = formatTimeFilter();
-      console.log("Sending timeFilter for emails:", timeFilter);
+      // console.log("Sending timeFilter for emails:", timeFilter);
       const res = await axiosInstance.get("/emails", {
         params: {
           maxResults: EMAILS_PER_PAGE,
@@ -121,10 +121,10 @@ export default function EmailsContainer({ user }) {
           emails: fetchedEmails,
         });
         setEmails(fetchedEmails);
-        console.log(
-          "Fetched emails dates:",
-          fetchedEmails.map((e) => e.date)
-        );
+        // console.log(
+        //   "Fetched emails dates:",
+        //   fetchedEmails.map((e) => e.date)
+        // );
         setNextPageToken(res.data.nextPageToken || null);
         setPrevPageToken(res.data.prevPageToken || null);
         setPageTokens((prev) => ({
@@ -194,7 +194,7 @@ export default function EmailsContainer({ user }) {
     if (!isPreFetch) setIsPageLoading(true);
     try {
       const timeFilter = formatTimeFilter();
-      console.log("Sending timeFilter for important emails:", timeFilter);
+      // console.log("Sending timeFilter for important emails:", timeFilter);
       const res = await axiosInstance.get("/emails/important", {
         params: {
           maxResults: 500,
@@ -255,7 +255,9 @@ export default function EmailsContainer({ user }) {
           });
         }
       } else {
-        console.warn("Important emails fetch failed, falling back to /emails with q=meeting");
+        console.warn(
+          "Important emails fetch failed, falling back to /emails with q=meeting"
+        );
         return await fetchEmails(pageToken, targetPage, isPreFetch, "meeting");
       }
     } catch (error) {
@@ -271,12 +273,12 @@ export default function EmailsContainer({ user }) {
   };
 
   useEffect(() => {
-    console.log("useEffect triggered with:", {
-      searchQuery,
-      selectedKeywords,
-      timePeriod,
-      selectedDate,
-    });
+    // console.log("useEffect triggered with:", {
+    //   searchQuery,
+    //   selectedKeywords,
+    //   timePeriod,
+    //   selectedDate,
+    // });
     setIsLoading(true);
     setPageTokens({ 1: null });
     setPageCache({});
@@ -498,23 +500,26 @@ export default function EmailsContainer({ user }) {
     setPageCache({});
   }, []);
 
-  const handleTimePeriodChange = useCallback((period) => {
-    console.log("Time period changed to:", period);
-    setTimePeriod(period);
-    if (selectedDate) {
-      setSelectedDate(null);
-    }
-    setCurrentPage(1);
-    setPreFetchedNext({ emails: [], token: null });
-    setPreFetchedPrev({ emails: [], token: null });
-    setNextPageToken(null);
-    setPrevPageToken(null);
-    setPageTokens({ 1: null });
-    setPageCache({});
-  }, [selectedDate]);
+  const handleTimePeriodChange = useCallback(
+    (period) => {
+      // console.log("Time period changed to:", period);
+      setTimePeriod(period);
+      if (selectedDate) {
+        setSelectedDate(null);
+      }
+      setCurrentPage(1);
+      setPreFetchedNext({ emails: [], token: null });
+      setPreFetchedPrev({ emails: [], token: null });
+      setNextPageToken(null);
+      setPrevPageToken(null);
+      setPageTokens({ 1: null });
+      setPageCache({});
+    },
+    [selectedDate]
+  );
 
   const handleDateChange = useCallback((date) => {
-    console.log("Date changed to:", date);
+    // console.log("Date changed to:", date);
     setSelectedDate(date);
     setTimePeriod("all");
     setCurrentPage(1);
