@@ -66,10 +66,8 @@ export const loginAction = async (userData) => {
 
     const data = await res.json();
 
-    // console.log(data);
-
     if (data.success) {
-      cookieStore.set("accessToken", data.accessToken, {
+      await cookieStore.set("accessToken", data.accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
@@ -77,7 +75,7 @@ export const loginAction = async (userData) => {
         path: "/",
       });
 
-      cookieStore.set("refreshToken", data.refreshToken, {
+      await cookieStore.set("refreshToken", data.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
@@ -85,7 +83,7 @@ export const loginAction = async (userData) => {
         path: "/",
       });
 
-      cookieStore.set("auth", "true", {
+      await cookieStore.set("auth", "true", {
         httpOnly: false,
         secure: process.env.NODE_ENV === "production",
         sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
