@@ -20,7 +20,7 @@ export default function UserPageContainer() {
       setLoading(true);
       const data = await getAllUsers(
         currentPage,
-        10,
+        5,
         "active",
         confirmedSearchQuery
       );

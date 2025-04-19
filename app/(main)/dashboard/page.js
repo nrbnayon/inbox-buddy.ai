@@ -44,32 +44,40 @@ export default async function DashboardPage() {
   }
 
   return (
-    <section className="flex flex-col w-full p-2 md:p-0">
-      {/* welcome messages */}
-      <h1 className="text-3xl font-bold mb-3">Hi {user?.name || "User"},</h1>
-      <p className="inline-flex items-center gap-2">
-        <FaCheckCircle color="#68D391" />
-        Here's the latest. Let me know how I can help!
-      </p>
+    <section className="flex flex-col w-full p-2 pb-6">
+      <div className="sticky top-0 bg-white pb-5">
+        {/* welcome messages */}
+        <h1 className="text-3xl font-bold mb-3">Hi John,</h1>
+        <p className="inline-flex items-center gap-2">
+          <FaCheckCircle color="#68D391" />
+          Here&apos;s the latest. Let me know how I can help!
+        </p>
 
-      {/* statics */}
-      <div className="flex mt-6 gap-4 md:gap-16 w-full">
-        {/* unread mails */}
-        <div className="flex gap-3">
-          <Image src={mail} alt="gmail logo" className="size-11" />
-          <div className="flex flex-col">
-            <p className="text-gray-500">Unread Emails</p>
-            <h4 className="text-[#2D3748]">{unreadEmailsCount}</h4>
+        {/* statics */}
+        <div className="flex mt-6 gap-4 md:gap-16 w-full">
+          {/* unread mails */}
+          <div className="flex gap-3">
+            <Image src={mail} alt="gmail logo" className="size-11" />
+            <div className="flex flex-col">
+              <p className="text-[#A0AEC0]">Unread Emails</p>
+              <h4 className="text-[#2D3748]">100</h4>
+            </div>
           </div>
-        </div>
 
-        {/* upcoming meetings */}
-        <div className="flex gap-3">
-          <Image src={meeting} alt="gmail logo" className="size-11" />
-          <div className="flex flex-col">
-            <p className="text-gray-500">Meetings this week</p>
-            <h4 className="text-[#2D3748]">{meetingsCount}</h4>
+          {/* upcomming meetings */}
+          <div className="flex gap-3">
+            <Image src={meeting} alt="gmail logo" className="size-11" />
+            <div className="flex flex-col">
+              <p className="text-[#A0AEC0]">Meetings this week</p>
+              <h4 className="text-[#2D3748]">10</h4>
+            </div>
           </div>
+
+          {/* search bar */}
+          {/* <div className="hidden md:flex">
+          <SearchBar />
+        </div> */}
+
         </div>
       </div>
 

@@ -46,7 +46,7 @@ export default function BlockedUsersTable() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isUnblocking, setIsUnblocking] = useState(false); // New loading state for unblock action
-  const itemsPerPage = 8;
+  const itemsPerPage = 5;
 
   useEffect(() => {
     fetchBlockedUsers();

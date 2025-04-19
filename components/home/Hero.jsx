@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { TiLocationArrow } from "react-icons/ti";
 import AllProviders from "./AllProviders";
 
 export default function Hero() {

@@ -44,7 +44,7 @@ export default function AdminListTable() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isActionLoading, setIsActionLoading] = useState(false);
-  const itemsPerPage = 8;
+  const itemsPerPage = 5;
 
   useEffect(() => {
     fetchAdminUsers();

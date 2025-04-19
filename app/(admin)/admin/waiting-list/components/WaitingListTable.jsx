@@ -52,7 +52,7 @@ export default function WaitingListTable() {
   const [totalPages, setTotalPages] = useState(1);
   const [isRejecting, setIsRejecting] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
-  const itemsPerPage = 8;
+  const itemsPerPage = 5;
 
   useEffect(() => {
     fetchWaitingListUsers();
