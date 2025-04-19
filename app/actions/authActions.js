@@ -66,8 +66,6 @@ export const loginAction = async (userData) => {
 
     const data = await res.json();
 
-    // console.log(data);
-
     if (data.success) {
       cookieStore.set("accessToken", data.accessToken, {
         httpOnly: true,
