@@ -5,7 +5,7 @@ import UserPageHeader from "./UserPageHeader";
 import UsersListTable from "./UsersListTable";
 import { getAllUsers } from "@/lib/api/user";
 
-export default function UserPageContainer() {
+export default function UserPageContainer({ accessToken }) {
   const [query, setQuery] = useState("");
   const [triggerSearch, setTriggerSearch] = useState(false);
   const [confirmedSearchQuery, setConfirmedSearchQuery] = useState("");
@@ -20,12 +20,15 @@ export default function UserPageContainer() {
       setLoading(true);
       const data = await getAllUsers(
         currentPage,
-        5,
+        6,
         "active",
         confirmedSearchQuery
       );
+
+      console.log({ data });
       const normalUsers =
         data?.users.filter((usr) => usr.role === "user") || [];
+      console.log(normalUsers);
       setUsers(normalUsers || []);
       setTotalPages(data?.totalPages || 1);
       setError(null);

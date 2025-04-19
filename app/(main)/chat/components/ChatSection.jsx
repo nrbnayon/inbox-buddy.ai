@@ -7,8 +7,6 @@ import ChatMessages from "./ChatMessages";
 import ChatInputField from "./ChatInputField";
 import LoadingPing from "@/components/LoadingPing";
 import ChatHeader from "./ChatHeader";
-import { Button } from "@/components/ui/button";
-import { Bot } from "lucide-react";
 import logoImage from "@/public/bot.png";
 import Image from "next/image";
 
@@ -47,7 +45,7 @@ export default function ChatSection({ accessToken, chatId, msgFromDb }) {
   return (
     <section className="w-full max-h-[100vh] h-full flex flex-col overflow-hidden">
       {/* Chat Header - Fixed at the top */}
-      <ChatHeader />
+      <ChatHeader accessToken={accessToken} />
 
       {/* Main chat area - Takes remaining height */}
       <div className="flex-1 flex flex-col overflow-hidden">

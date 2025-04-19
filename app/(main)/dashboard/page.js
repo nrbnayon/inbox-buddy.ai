@@ -45,7 +45,7 @@ export default async function DashboardPage() {
 
   return (
     <section className="flex flex-col w-full p-2 pb-6">
-      <div className="sticky top-0 bg-white pb-5">
+      <div className="sticky top-0 bg-white pb-5 z-50">
         {/* welcome messages */}
         <h1 className="text-3xl font-bold mb-3">Hi John,</h1>
         <p className="inline-flex items-center gap-2">
@@ -77,7 +77,6 @@ export default async function DashboardPage() {
           {/* <div className="hidden md:flex">
           <SearchBar />
         </div> */}
-
         </div>
       </div>
 

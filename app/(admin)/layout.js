@@ -15,7 +15,7 @@ export default async function RootLayout({ children }) {
         headers: { Authorization: `Bearer ${token.value}` },
       });
 
-      console.log(res.data);
+      // console.log(res.data);
       user = res.data.data;
     } catch (error) {
       console.error("Failed to fetch user data:", error);

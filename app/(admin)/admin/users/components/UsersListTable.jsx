@@ -33,6 +33,7 @@ import LoadingPing from "@/components/LoadingPing";
 import { UserPagination } from "@/app/(admin)/components/UserPagination";
 import SmallLoader from "@/components/SmallLoader";
 import { toast } from "sonner";
+import { axiosInstance } from "@/lib/axios";
 
 export default function UsersListTable({
   users,
@@ -73,14 +74,14 @@ export default function UsersListTable({
               : "User blocked successfully";
           break;
         case "cancel":
-          res = await updateUser(selectedUser._id, {
-            subscription: {
-              ...selectedUser.subscription,
-              status: "cancelled",
-              autoRenew: false,
-            },
-          });
-          successMessage = "Subscription cancelled successfully";
+          const tempRes = await axiosInstance.put(
+            `/stripe/admin/cancel-user-subscription`,
+            {
+              userId: selectedUser._id,
+            }
+          );
+          res = tempRes?.data;
+          successMessage = res.message || "Operation Successful";
           break;
         case "delete":
           res = await deleteUser(selectedUser._id);
@@ -92,13 +93,19 @@ export default function UsersListTable({
 
       if (res?.success) {
         toast.success(successMessage);
-        onActionComplete();
+        // Trigger data refresh and wait for it to complete
+        await onActionComplete();
       } else {
-        throw new Error(res?.message || "Action failed");
+        toast.error(res?.message || "Action failed");
+        await onActionComplete();
       }
     } catch (err) {
       console.error(`Error performing ${actionType} action:`, err);
-      toast.error(err.message || "Failed to perform action");
+      toast.error(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Failed to perform action"
+      );
     } finally {
       setIsActionLoading(false);
       setIsConfirmOpen(false);
@@ -117,7 +124,9 @@ export default function UsersListTable({
           selectedUser.status === "blocked" ? "restore" : "restrict"
         } their access.`;
       case "cancel":
-        return `Are you sure you want to cancel the subscription for ${selectedUser?.name}?`;
+        return isActionLoading
+          ? "Cancelling subscription... Please wait."
+          : `Are you sure you want to cancel the subscription for ${selectedUser?.name}? If you do, the user must subscribe again. You can't undo this action.`;
       case "delete":
         return `Are you sure you want to delete ${selectedUser?.name}? This action cannot be undone.`;
       default:
@@ -249,8 +258,11 @@ export default function UsersListTable({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogDescription className="flex items-center">
               {getActionMessage()}
+              {isActionLoading && actionType === "cancel" && (
+                <SmallLoader className="ml-2 text-gray-500" />
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

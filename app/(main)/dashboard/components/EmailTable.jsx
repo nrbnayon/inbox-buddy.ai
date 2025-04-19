@@ -188,7 +188,7 @@ export default function EmailTable({ emails, user, onEmailRead, onRefresh }) {
   }, [selectedEmail]);
 
   return (
-    <div className="hidden xl:block overflow-x-auto">
+    <div className="hidden xl:block overflow-x-auto z-0 relative">
       <Table className="w-full">
         <TableHeader className="bg-gray-100">
           <TableRow className="font-bold border-b border-gray-300">
