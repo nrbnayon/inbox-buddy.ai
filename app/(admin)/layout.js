@@ -25,7 +25,7 @@ export default async function RootLayout({ children }) {
   }
 
   return (
-    <section className="bg-gray-100 min-h-screen overflow-hidden">
+    <section className="bg-gray-100">
       {token?.value && user ? (
         <AdminSidebar children={children} accessToken={token?.value} />
       ) : (
