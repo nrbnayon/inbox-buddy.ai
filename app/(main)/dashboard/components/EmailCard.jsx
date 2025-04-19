@@ -1,3 +1,4 @@
+// app\(main)\dashboard\components\EmailCard.jsx
 "use client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
