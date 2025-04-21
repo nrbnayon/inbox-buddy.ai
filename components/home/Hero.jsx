@@ -4,7 +4,7 @@ import AllProviders from "./AllProviders";
 export default function Hero() {
   return (
     <section className="">
-      <div className="mx-auto max-w-screen-xl px-4 pt-2 md:pt-24 lg:flex flex-col gap-12 lg:items-center">
+      <div className="mx-auto max-w-screen-xl px-4 pt-2 md:mt-10 lg:flex flex-col gap-12 lg:items-center">
         <div className="mx-auto max-w-3xl text-center">
           {/* <div className="flex justify-center mb-1">
             <p className="bg-[#1010100D] w-fit px-5 md:px-10 py-1 md:py-3 rounded-full text-[#101010] font-medium text-sm md:text-lg">
@@ -14,8 +14,8 @@ export default function Hero() {
 
           {/* title */}
           <div className="relative">
-            <h1 className="lg:w-[800px] text-3xl md:text-6xl sm:leading-24 font-bold">
-              <span className="text-4xl md:text-[70px]">
+            <h1 className="lg:w-[800px] text-3xl sm:text-5xl lg:text-6xl sm:leading-24 font-bold">
+              <span className="text-4xl md:text-[50px] lg:text-[70px]">
                 Stop Drowning in Email <br />
               </span>{" "}
               Meet Your <span className="text-[#00ACDA]">New Assistant</span>{" "}
