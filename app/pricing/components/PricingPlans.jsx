@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Check, Loader2, AlertCircle } from "lucide-react";
+import { Check, Loader2, AlertCircle, ArrowLeft } from "lucide-react";
 import { createCheckoutSession } from "@/lib/api/subscription";
 import { getUserProfile } from "@/lib/api/user";
 import { toast } from "sonner";
@@ -62,7 +62,7 @@ export default function PricingPlans({ accessToken }) {
       price: "$5",
       description: "/mo",
       features: [
-        "Connect One inbox",
+        // "Connect One inbox",
         "15 queries per day",
         "Basic Summary Function",
         "Standard Support",
@@ -76,7 +76,7 @@ export default function PricingPlans({ accessToken }) {
       price: "$15",
       description: "/mo",
       features: [
-        "Connect three inboxes",
+        // "Connect three inboxes",
         "100 queries per day",
         "Unlimited AI Agent",
         "Advanced Summaries",
@@ -90,7 +90,7 @@ export default function PricingPlans({ accessToken }) {
       price: "$50",
       description: "/mo",
       features: [
-        "Connect 10 inboxes",
+        // "Connect 10 inboxes",
         "Unlimited queries",
         "Unlimited AI Agents",
         "Advanced Summaries",
@@ -99,8 +99,6 @@ export default function PricingPlans({ accessToken }) {
       highlighted: false,
     },
   ];
-
-  console.log(user);
 
   const isCurrentPlan = (planId) =>
     user?.subscription?.plan === planId &&

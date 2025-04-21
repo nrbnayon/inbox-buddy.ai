@@ -233,7 +233,7 @@ export default function SubscriptionDetails({ onUpgrade }) {
 
   return (
     <>
-      <Card className="w-full shadow-md">
+      <Card className="w-full shadow-md mt-8">
         <CardHeader className="pb-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div>
@@ -290,7 +290,7 @@ export default function SubscriptionDetails({ onUpgrade }) {
                 {endDate}
               </div>
             </div>
-            <div className="space-y-2 bg-gray-50 p-3 rounded-lg">
+            {/* <div className="space-y-2 bg-gray-50 p-3 rounded-lg">
               <div className="text-sm font-medium text-gray-500">
                 Max Inboxes
               </div>
@@ -303,7 +303,7 @@ export default function SubscriptionDetails({ onUpgrade }) {
               <div className="font-medium">
                 {user.inboxList?.length || 0} connected
               </div>
-            </div>
+            </div> */}
           </div>
           <div className="flex items-center justify-between pt-4 border-t mt-4">
             <div>
@@ -330,7 +330,7 @@ export default function SubscriptionDetails({ onUpgrade }) {
         <CardFooter className="flex flex-col sm:flex-row justify-between gap-3 pt-2 border-t">
           <Button
             variant="outline"
-            onClick={() => router.push("/pricing")}
+            onClick={onUpgrade}
             className="w-full sm:w-auto"
           >
             View Plans

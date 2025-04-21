@@ -12,7 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { getUserProfile } from "@/lib/api/user";
 
 export default function ChatHeader({ accessToken }) {
@@ -100,7 +100,7 @@ export default function ChatHeader({ accessToken }) {
           onClick={handleUpgradeClick}
           className=" w-full sm:w-auto text-center"
         >
-          Upgrade Plan
+          {isSubscribed() && !showPricing ? "My subscription" : "Choose a Plan"}
         </Button>
       </div>
 
@@ -109,12 +109,24 @@ export default function ChatHeader({ accessToken }) {
         <DialogContent className="sm:min-w-4xl">
           <DialogHeader>
             <DialogTitle>
-              {isSubscribed() && !showPricing
-                ? "Your Subscription Details"
-                : "Choose a Plan"}
+              <div className="flex gap-4 items-center w-full">
+                {showPricing && (
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowPricing(false)}
+                  >
+                    <ArrowLeft />
+                  </Button>
+                )}
+              </div>
             </DialogTitle>
           </DialogHeader>
           <div className="py-4">
+            <div className="text-center text-xl font-semibold">
+              {isSubscribed() && !showPricing
+                ? "Your Subscription Details"
+                : "Choose a Plan"}
+            </div>
             {isLoading ? (
               <div className="flex justify-center items-center p-10">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />

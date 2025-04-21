@@ -10,6 +10,12 @@ import logoImage from "@/public/Frame 2.svg";
 import { useChat } from "@/app/(main)/contexts/ChatContext";
 import { logoutAction } from "@/app/actions/authActions";
 import useGetUser from "@/hooks/useGetUser";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 // Components
 import DesktopSidebar from "./DesktopSidebar";
@@ -19,14 +25,26 @@ import MobileSidebarContent from "./MobileSidebar";
 import { publicRoutes } from "./SidebarConstants";
 import ProfileModal from "@/components/modals/ProfileModal";
 import { updateChatById } from "@/app/actions/chatActions";
+import SubscriptionDetails from "@/components/subscription/SubscriptionDetails";
+import PricingPlans from "@/app/pricing/components/PricingPlans";
+import { ArrowLeft } from "lucide-react";
 
 const Sidebar = ({ children, accessToken, previousChats }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [openDropdowns, setOpenDropdowns] = useState({});
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [showPricing, setShowPricing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
   const { user, setUser } = useGetUser(accessToken);
   const pathName = usePathname();
   const router = useRouter();
+
+  const isSubscribed = () =>
+    user?.subscription?.status === "active" &&
+    new Date(user?.subscription?.endDate) > new Date();
+
   const { chats, setChats } = useChat();
 
   useEffect(() => {
@@ -62,6 +80,10 @@ const Sidebar = ({ children, accessToken, previousChats }) => {
     console.log("Delete chat:", id);
   };
 
+  const handleUpgradeFromSubscription = () => {
+    setShowPricing(true); // Switch to PricingPlans view
+  };
+
   // Shared props for both desktop and mobile sidebars
   const sidebarProps = {
     user,
@@ -75,6 +97,10 @@ const Sidebar = ({ children, accessToken, previousChats }) => {
     handleDeleteChat,
     openProfileModal,
     handleLogout,
+    dialogOpen,
+    setDialogOpen,
+    isSubscribed,
+    showPricing,
   };
 
   if (publicRoutes.includes(pathName)) {
@@ -126,6 +152,41 @@ const Sidebar = ({ children, accessToken, previousChats }) => {
         accessToken={accessToken}
         setUser={setUser}
       />
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="sm:min-w-4xl">
+          <DialogHeader>
+            <DialogTitle>
+              <div className="flex gap-4 items-center w-full">
+                {showPricing && (
+                  <Button
+                    variant="outilne"
+                    onClick={() => setShowPricing(false)}
+                  >
+                    <ArrowLeft />
+                  </Button>
+                )}
+              </div>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="text-center text-xl font-semibold">
+              {isSubscribed() && !showPricing
+                ? "Your Subscription Details"
+                : "Choose a Plan"}
+            </div>
+            {isLoading ? (
+              <div className="flex justify-center items-center p-10">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : isSubscribed() && !showPricing ? (
+              <SubscriptionDetails onUpgrade={handleUpgradeFromSubscription} />
+            ) : (
+              <PricingPlans accessToken={accessToken} />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

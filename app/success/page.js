@@ -59,6 +59,7 @@ export default function SuccessPage() {
         </p>
         <div className="flex flex-col gap-3">
           <Button
+            variant="blueGradient"
             onClick={() => router.push("/dashboard")}
             className="w-full"
             disabled={loading}

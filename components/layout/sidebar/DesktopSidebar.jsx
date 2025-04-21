@@ -9,6 +9,7 @@ import { navLinks } from "./SidebarConstants";
 import SidebarChatItem from "./SidebarChatItem";
 import UserProfile from "./SidebarUserProfile";
 import { useChat } from "@/app/(main)/contexts/ChatContext";
+import { IoMdShareAlt } from "react-icons/io";
 
 const DesktopSidebar = ({
   user,
@@ -22,6 +23,9 @@ const DesktopSidebar = ({
   handleDeleteChat,
   openProfileModal,
   handleLogout,
+  setDialogOpen,
+  isSubscribed,
+  showPricing,
 }) => {
   const { setMessages } = useChat();
   return (
@@ -85,6 +89,16 @@ const DesktopSidebar = ({
           </nav>
         </div>
         <div className="space-y-4">
+          <Button
+            className="flex w-full justify-center items-center gap-2 text-sm cursor-pointer rounded text-black link-btn"
+            // variant="ghost"
+            onClick={() => setDialogOpen(true)}
+          >
+            {/* <IoMdShareAlt className="size-6" /> */}
+            {isSubscribed() && !showPricing
+              ? "My subscription"
+              : "Choose a Plan"}
+          </Button>
           <Button
             className="flex items-center gap-2 text-sm cursor-pointer"
             variant="ghost"
