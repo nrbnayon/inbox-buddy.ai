@@ -78,7 +78,7 @@ export default function FilterMails({
   return (
     <div className="grid grid-cols-2 sm:grid-cols-2 2xl:grid-cols-3 gap-2 pb-4">
       <div className="col-span-2 2xl:col-span-1">
-        <SearchBar placeHolder={"Search Users"} />
+        <SearchBar placeHolder={"Search Users"} onSearch={handleSearchChange} />
       </div>
       {/* <DatePicker
         onDateChange={handleDateChange}
