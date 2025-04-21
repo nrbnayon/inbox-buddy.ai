@@ -332,7 +332,11 @@ export default function EmailTable({ emails, user, onEmailRead, onRefresh }) {
                 placeholder="Write your reply..."
                 className="min-h-[100px]"
               />
-              <Button onClick={handleSendReply} disabled={loading}>
+              <Button
+                variant="blueGradient"
+                onClick={handleSendReply}
+                disabled={loading}
+              >
                 Send Reply
               </Button>
             </div>

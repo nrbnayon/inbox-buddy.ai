@@ -1,13 +1,8 @@
 // app\(main)\dashboard\page.js
-
-import { EmailPagination } from "./components/EmailPagination";
 import { FaCheckCircle } from "react-icons/fa";
 import Image from "next/image";
 import mail from "@/public/mail.png";
 import meeting from "@/public/meeting.png";
-import FilterMails from "./components/FilterMails";
-import Link from "next/link";
-import EmailTable from "./components/EmailTable";
 import { axiosInstance } from "@/lib/axios";
 import { cookies } from "next/headers";
 import { getUserData } from "@/lib/server-api";

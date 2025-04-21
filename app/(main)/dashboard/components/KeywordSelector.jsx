@@ -1,5 +1,4 @@
 "use client";
-import * as React from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -26,18 +25,19 @@ import {
   addUserKeyword,
   deleteUserKeyword,
 } from "@/lib/api/keyword";
+import { useEffect, useState } from "react";
 
 export function KeywordSelector({ onKeywordChange }) {
-  const [keywords, setKeywords] = React.useState([]);
-  const [newKeyword, setNewKeyword] = React.useState("");
-  const [openAdd, setOpenAdd] = React.useState(false);
-  const [openDelete, setOpenDelete] = React.useState(false);
-  const [keywordToDelete, setKeywordToDelete] = React.useState(null);
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [error, setError] = React.useState(null);
+  const [keywords, setKeywords] = useState([]);
+  const [newKeyword, setNewKeyword] = useState("");
+  const [openAdd, setOpenAdd] = useState(false);
+  const [openDelete, setOpenDelete] = useState(false);
+  const [keywordToDelete, setKeywordToDelete] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   // Fetch keywords on mount
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchKeywords = async () => {
       setIsLoading(true);
       try {
@@ -63,7 +63,7 @@ export function KeywordSelector({ onKeywordChange }) {
   }, []);
 
   // Notify parent of selected keywords
-  React.useEffect(() => {
+  useEffect(() => {
     const selectedKeywords = keywords
       .filter((keyword) => keyword.checked)
       .map((keyword) => keyword.text);

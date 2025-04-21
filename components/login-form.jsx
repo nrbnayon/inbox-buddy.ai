@@ -94,6 +94,7 @@ export function LoginForm({ className, ...props }) {
                   type="password"
                   name="password"
                   required
+                  placeholder="********"
                   disabled={loading}
                 />
               </div>
@@ -101,7 +102,12 @@ export function LoginForm({ className, ...props }) {
                 <div className="text-red-500 text-sm text-center">{error}</div>
               )}
               <div className="flex flex-col gap-3">
-                <Button type="submit" className="w-full" disabled={loading}>
+                <Button
+                  variant="blueGradient"
+                  type="submit"
+                  className="w-full"
+                  disabled={loading}
+                >
                   {loading ? "Logging in..." : "Login"}
                 </Button>
               </div>

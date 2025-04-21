@@ -76,17 +76,17 @@ export default function FilterMails({
   const maxDate = new Date();
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-2 2xl:grid-cols-4 gap-2 pb-4">
-      <div className="col-span-2 md:col-span-1">
+    <div className="grid grid-cols-2 sm:grid-cols-2 2xl:grid-cols-3 gap-2 pb-4">
+      <div className="col-span-2 2xl:col-span-1">
         <SearchBar placeHolder={"Search Users"} />
       </div>
-      <DatePicker
+      {/* <DatePicker
         onDateChange={handleDateChange}
         maxDate={maxDate}
         selected={selectedDate}
         isClearable={true}
         placeholderText="Select specific date"
-      />
+      /> */}
       <SelectComponent
         title="Select Time Period"
         label="Time Periods"

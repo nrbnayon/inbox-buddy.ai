@@ -98,15 +98,16 @@ export default function ChatHeader({ accessToken }) {
         <Button
           variant="blueGradient"
           onClick={handleUpgradeClick}
-          className=" w-full sm:w-auto text-center"
+          className="
+           sm:w-auto text-center"
         >
-          {isSubscribed() && !showPricing ? "My subscription" : "Choose a Plan"}
+          {isSubscribed() && !showPricing ? "My subscription" : "Upgrade Plan"}
         </Button>
       </div>
 
       {/* Dialog for Pricing or Subscription Details */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:min-w-4xl">
+        <DialogContent className="w-full max-w-[90vw] sm:max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               <div className="flex gap-4 items-center w-full">

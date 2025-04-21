@@ -154,13 +154,13 @@ const Sidebar = ({ children, accessToken, previousChats }) => {
       />
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="sm:min-w-4xl">
+        <DialogContent className="w-full max-w-[90vw] sm:max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               <div className="flex gap-4 items-center w-full">
                 {showPricing && (
                   <Button
-                    variant="outilne"
+                    variant="outline"
                     onClick={() => setShowPricing(false)}
                   >
                     <ArrowLeft />
