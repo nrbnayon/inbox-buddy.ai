@@ -1,9 +1,41 @@
-import { LockIcon, ShieldIcon, DocumentIcon } from "./components/SecurityIcons";
 import SecurityCard from "./components/SecurityCard";
 import Image from "next/image";
 import encryption from "@/public/encryption.png";
 import authentication from "@/public/authentication.png";
 import compliance from "@/public/compliance.png";
+
+export const metadata = {
+  title: "Inbox-Buddy Security: Prioritizing Your Data Protection",
+  description:
+    "Discover how Inbox-Buddy ensures your data's security with bank-grade encryption, secure authentication, and enterprise-grade compliance. Your privacy is our priority.",
+  keywords:
+    "Inbox-Buddy security, AI email assistant security, data protection, encryption, secure authentication, GDPR compliance, enterprise compliance",
+  robots:
+    process.env.NODE_ENV === "production"
+      ? "index, follow"
+      : "noindex, nofollow",
+  openGraph: {
+    title: "Inbox-Buddy Security: Robust Data Protection",
+    description:
+      "Learn about Inbox-Buddy's commitment to security with advanced encryption, secure authentication, and compliance with GDPR, SOC 2, and ISO 27001 standards.",
+    url: `${process.env.NEXT_PUBLIC_BASE_URL}/security`,
+    type: "website",
+    images: [
+      {
+        url: "https://i.postimg.cc/4xy8d9ZS/Frame-2.webp",
+        width: 1000,
+        height: 600,
+        alt: "Inbox-Buddy Security Features",
+      },
+      {
+        url: `${process.env.NEXT_PUBLIC_ASSET_API_BASE_URL}/uploads/images/logo.png`,
+        width: 1000,
+        height: 600,
+        alt: "Inbox-Buddy Logo",
+      },
+    ],
+  },
+};
 
 export default function page() {
   return (

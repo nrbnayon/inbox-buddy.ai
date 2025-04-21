@@ -27,7 +27,7 @@ export default function FilterMails({
     const timer = setTimeout(() => {
       setDebouncedSearchQuery(searchQuery);
       if (onSearch) onSearch(searchQuery);
-    }, 500);
+    }, 800);
     return () => clearTimeout(timer);
   }, [searchQuery, onSearch]);
 

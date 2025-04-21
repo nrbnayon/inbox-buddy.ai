@@ -562,7 +562,7 @@ export default function EmailsContainer({ user }) {
     }
   }, [selectedKeywords]);
 
-  console.log(emailResponse);
+  // console.log(emailResponse);
 
   return (
     <div className="mt-10">
