@@ -37,7 +37,7 @@ export default function AuthCallbackPage() {
       try {
         const result = await setCookiesAction({ accessToken, refreshToken });
         if (result.success) {
-          router.push(redirect);
+          router.push("/chat");
         } else {
           setError("Failed to set authentication cookies");
           toast.error("Failed to set authentication cookies");
