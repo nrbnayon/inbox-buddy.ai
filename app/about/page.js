@@ -11,7 +11,7 @@ export const metadata = {
   keywords:
     "Inbox-Buddy security, AI email assistant security, data protection, encryption, secure authentication, GDPR compliance, enterprise compliance",
   robots:
-    process.env.NODE_ENV === "production"
+    process.env.NEXT_PUBLIC_NODE_ENV === "production"
       ? "index, follow"
       : "noindex, nofollow",
   openGraph: {

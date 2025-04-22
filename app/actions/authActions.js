@@ -69,24 +69,27 @@ export const loginAction = async (userData) => {
     if (data.success) {
       cookieStore.set("accessToken", data.accessToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        secure: process.env.NEXT_PUBLIC_NODE_ENV === "production",
+        sameSite:
+          process.env.NEXT_PUBLIC_NODE_ENV === "production" ? "none" : "lax",
         maxAge: 86400,
         path: "/",
       });
 
       cookieStore.set("refreshToken", data.refreshToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        secure: process.env.NEXT_PUBLIC_NODE_ENV === "production",
+        sameSite:
+          process.env.NEXT_PUBLIC_NODE_ENV === "production" ? "none" : "lax",
         maxAge: 2592000,
         path: "/",
       });
 
       cookieStore.set("auth", "true", {
         httpOnly: false,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        secure: process.env.NEXT_PUBLIC_NODE_ENV === "production",
+        sameSite:
+          process.env.NEXT_PUBLIC_NODE_ENV === "production" ? "none" : "lax",
         maxAge: 86400,
         path: "/",
       });
@@ -108,26 +111,32 @@ export const setCookiesAction = async (tokens) => {
       return { success: false, message: "Invalid tokens provided" };
     }
 
-    await cookieStore.set("accessToken", tokens.accessToken, {
+    cookieStore.set("accessToken", tokens.accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: process.env.NEXT_PUBLIC_NODE_ENV === "production",
+      // secure: false,
+      sameSite:
+        process.env.NEXT_PUBLIC_NODE_ENV === "production" ? "none" : "strict",
       maxAge: 86400,
       path: "/",
     });
 
-    await cookieStore.set("refreshToken", tokens.refreshToken, {
+    cookieStore.set("refreshToken", tokens.refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: process.env.NEXT_PUBLIC_NODE_ENV === "production",
+      // secure: false,
+      sameSite:
+        process.env.NEXT_PUBLIC_NODE_ENV === "production" ? "none" : "strict",
       maxAge: 2592000,
       path: "/",
     });
 
-    await cookieStore.set("auth", "true", {
+    cookieStore.set("auth", "true", {
       httpOnly: false,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      secure: process.env.NEXT_PUBLIC_NODE_ENV === "production",
+      // secure: false,
+      sameSite:
+        process.env.NEXT_PUBLIC_NODE_ENV === "production" ? "none" : "strict",
       maxAge: 86400,
       path: "/",
     });
@@ -166,8 +175,9 @@ export const refreshTokenAction = async () => {
     if (data.success) {
       await cookieStore.set("accessToken", data.accessToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        secure: process.env.NEXT_PUBLIC_NODE_ENV === "production",
+        sameSite:
+          process.env.NEXT_PUBLIC_NODE_ENV === "production" ? "none" : "lax",
         maxAge: 86400,
         path: "/",
       });
@@ -175,8 +185,9 @@ export const refreshTokenAction = async () => {
       if (data.refreshToken) {
         await cookieStore.set("refreshToken", data.refreshToken, {
           httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+          secure: process.env.NEXT_PUBLIC_NODE_ENV === "production",
+          sameSite:
+            process.env.NEXT_PUBLIC_NODE_ENV === "production" ? "none" : "lax",
           maxAge: 2592000,
           path: "/",
         });

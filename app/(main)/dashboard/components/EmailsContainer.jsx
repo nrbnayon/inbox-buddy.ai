@@ -562,8 +562,6 @@ export default function EmailsContainer({ user }) {
     }
   }, [selectedKeywords]);
 
-  // console.log(emailResponse);
-
   return (
     <div className="mt-10">
       <div className="flex flex-col md:flex-row justify-between">

@@ -8,7 +8,7 @@ import { cookies } from "next/headers";
 import { getUserData } from "@/lib/server-api";
 import EmailsContainer from "./components/EmailsContainer";
 
-export default async function DashboardPage() {
+export default async function dashboardPage() {
   const cookieStore = await cookies();
   const token = cookieStore.get("accessToken");
 

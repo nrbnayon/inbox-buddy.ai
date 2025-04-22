@@ -8,24 +8,27 @@ export async function POST(request) {
 
   response.cookies.set("accessToken", accessToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    secure: process.env.NEXT_PUBLIC_NODE_ENV === "production",
+    sameSite:
+      process.env.NEXT_PUBLIC_NODE_ENV === "production" ? "none" : "lax",
     maxAge: 86400,
     path: "/",
   });
 
   response.cookies.set("refreshToken", refreshToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    secure: process.env.NEXT_PUBLIC_NODE_ENV === "production",
+    sameSite:
+      process.env.NEXT_PUBLIC_NODE_ENV === "production" ? "none" : "lax",
     maxAge: 2592000,
     path: "/",
   });
 
   response.cookies.set("auth", "true", {
     httpOnly: false,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    secure: process.env.NEXT_PUBLIC_NODE_ENV === "production",
+    sameSite:
+      process.env.NEXT_PUBLIC_NODE_ENV === "production" ? "none" : "lax",
     maxAge: 86400,
     path: "/",
   });

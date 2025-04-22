@@ -9,7 +9,7 @@ export const metadata = {
   keywords:
     "Inbox-Buddy pricing, AI email assistant pricing, email management plans, subscription plans, affordable AI tools",
   robots:
-    process.env.NODE_ENV === "production"
+    process.env.NEXT_PUBLIC_NODE_ENV === "production"
       ? "index, follow"
       : "noindex, nofollow",
   openGraph: {
