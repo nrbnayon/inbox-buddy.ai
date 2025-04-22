@@ -19,6 +19,7 @@ import {
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import gmail from "@/public/gmail.png";
+import outlook from "@/public/outlook.png";
 import { Reply, Trash2, FileText } from "lucide-react";
 import { marked } from "marked";
 import DOMPurify from "dompurify";
@@ -213,12 +214,17 @@ export default function EmailTable({ emails, user, onEmailRead, onRefresh }) {
               <TableCell className="py-4 pl-5 border-r border-gray-100">
                 <div className="flex items-center">
                   <Image
-                    src={gmail || "/placeholder.svg"}
+                    src={
+                      user?.authProvider === "google"
+                        ? gmail
+                        : outlook || "/placeholder.svg"
+                    }
                     width={24}
                     height={24}
                     alt="Gmail"
                     className="mr-2"
                   />
+                  {/* {console.log(user?.authProvider)} */}
                   {user?.authProvider || "Unknown"}
                 </div>
               </TableCell>
