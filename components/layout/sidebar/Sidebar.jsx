@@ -114,7 +114,7 @@ const Sidebar = ({ children, accessToken, previousChats }) => {
 
       {/* Mobile Sidebar */}
       <div className="flex-1 overflow-y-auto">
-        <header className="sticky top-0 z-10 border-b bg-white px-2 md:px-4 py-3 dark:border-gray-800 dark:bg-gray-900 lg:hidden">
+        <header className="sticky top-0 z-50 border-b bg-white px-2 md:px-4 py-3 dark:border-gray-800 dark:bg-gray-900 lg:hidden">
           <div className="flex items-center justify-between">
             <Link
               href="#"
@@ -140,7 +140,7 @@ const Sidebar = ({ children, accessToken, previousChats }) => {
             </Sheet>
           </div>
         </header>
-        <section className="w-full h-screen p-2 md:px-10">
+        <section className="w-full h-screen p-2 md:px-10 relative z-0">
           {/* {pathName === "/chat" && <ChatHeader />} */}
           {children}
         </section>

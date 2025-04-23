@@ -1,13 +1,10 @@
 // app/cancel/page.jsx
-"use client";
 
-import { useRouter } from "next/navigation";
+import { redirect, useRouter } from "next/navigation";
 import { XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function CancelPage() {
-  const router = useRouter();
-
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 px-4">
       <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-md text-center">
@@ -20,15 +17,15 @@ export default function CancelPage() {
           You can try again whenever you're ready.
         </p>
         <div className="flex flex-col gap-3">
-          <Button
+          {/* <Button
             variant="blueGradient"
-            onClick={() => router.push("/pricing")}
+            onClick={() => redirect("/pricing")}
             className="w-full"
           >
             Return to Pricing
-          </Button>
+          </Button> */}
           <Button
-            onClick={() => router.push("/dashboard")}
+            onClick={() => redirect("/dashboard")}
             variant="outline"
             className="w-full"
           >

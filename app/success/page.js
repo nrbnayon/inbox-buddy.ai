@@ -21,6 +21,8 @@ export default function SuccessPage() {
           // Delay to allow webhook processing
           await new Promise((resolve) => setTimeout(resolve, 2000));
           const userData = await getUserProfile();
+
+          console.log(userData);
           if (
             userData.data.subscription.status !== "active" ||
             !userData.data.subscription.stripeSubscriptionId

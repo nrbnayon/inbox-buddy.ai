@@ -101,7 +101,7 @@ export default function ChatHeader({ accessToken }) {
           className="
            sm:w-auto text-center"
         >
-          {isSubscribed() && !showPricing ? "My subscription" : "Upgrade Plan"}
+          {isSubscribed() && !showPricing ? "My subscription" : "Choose a Plan"}
         </Button>
       </div>
 
