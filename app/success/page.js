@@ -62,19 +62,19 @@ export default function SuccessPage() {
         <div className="flex flex-col gap-3">
           <Button
             variant="blueGradient"
-            onClick={() => router.push("/dashboard")}
+            onClick={() => router.push("/chat")}
             className="w-full"
             disabled={loading}
           >
-            Go to Dashboard
+            Chat Now
           </Button>
           <Button
-            onClick={() => router.push("/subscription-details")}
+            onClick={() => router.push("/dashboard")}
             variant="outline"
             className="w-full"
             disabled={loading}
           >
-            View Subscription Details
+            Go to Dashboard
           </Button>
         </div>
       </div>

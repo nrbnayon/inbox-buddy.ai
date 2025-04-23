@@ -9,9 +9,10 @@ import { RiSparkling2Line } from "react-icons/ri";
 import { EmailPagination } from "./EmailPagination";
 import gmail from "@/public/gmail.png";
 import { axiosInstance } from "@/lib/axios";
-import { Loader2 } from "lucide-react";
+import { BsInbox } from "react-icons/bs";
 import EmailTableSkeleton from "./EmailTableSkeleton";
 import LoadingPing from "@/components/LoadingPing";
+import { TiInfoOutline } from "react-icons/ti";
 
 export default function EmailsContainer({ user }) {
   const [emails, setEmails] = useState([]);
@@ -103,7 +104,7 @@ export default function EmailsContainer({ user }) {
           provider: user?.authProvider,
           q,
           timeFilter,
-          _t: Date.now(),
+          // _t: Date.now(),
         },
       });
 
@@ -579,8 +580,12 @@ export default function EmailsContainer({ user }) {
       {isLoading ? (
         <EmailTableSkeleton />
       ) : emails.length === 0 ? (
-        <div className="text-center py-4">
-          <p>No emails found matching your criteria.</p>
+        <div className="flex flex-col justify-center items-center h-[500px]">
+          <BsInbox size={80} />
+          <p className="text-xl flex items-center gap-2">
+            <TiInfoOutline color="#ffc800" />
+            No emails found matching your criteria.
+          </p>
         </div>
       ) : (
         <>
