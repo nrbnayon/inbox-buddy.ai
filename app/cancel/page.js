@@ -1,8 +1,7 @@
 // app/cancel/page.jsx
-
-import { redirect, useRouter } from "next/navigation";
 import { XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { redirect } from "next/navigation";
 
 export default function CancelPage() {
   return (
