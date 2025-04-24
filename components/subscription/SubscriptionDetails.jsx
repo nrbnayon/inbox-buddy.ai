@@ -1,7 +1,7 @@
 // components/subscription/SubscriptionDetails.jsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -38,10 +38,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-export default function SubscriptionDetails({ onUpgrade }) {
+export default function SubscriptionDetails({ onUpgrade, user, setUser }) {
   const router = useRouter();
-  const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  // const [user, setUser] = useState(null);
+  // const [isLoading, setIsLoading] = useState(true);
   const [isCancelling, setIsCancelling] = useState(false);
   const [isTogglingAutoRenew, setIsTogglingAutoRenew] = useState(false);
 
@@ -50,38 +50,16 @@ export default function SubscriptionDetails({ onUpgrade }) {
   const [autoRenewDialogOpen, setAutoRenewDialogOpen] = useState(false);
   const [confirmationAction, setConfirmationAction] = useState(null);
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        setIsLoading(true);
-        const userData = await getUserProfile();
-        setUser(userData.data);
-      } catch (error) {
-        console.error("Failed to fetch user:", error);
-        toast(
-          <>
-            <strong className="font-semibold text-red-600">Error</strong>
-            <div>Failed to load subscription details</div>
-          </>,
-          { style: { backgroundColor: "#fee2e2", color: "#b91c1c" } }
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchUser();
-  }, []);
-
-  if (isLoading) {
-    return (
-      <Card className="w-full shadow-md flex items-center justify-center p-10">
-        <div className="flex flex-col items-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="mt-4 text-gray-500">Loading subscription details...</p>
-        </div>
-      </Card>
-    );
-  }
+  // if (isLoading) {
+  //   return (
+  //     <Card className="w-full shadow-md flex items-center justify-center p-10">
+  //       <div className="flex flex-col items-center">
+  //         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+  //         <p className="mt-4 text-gray-500">Loading subscription details...</p>
+  //       </div>
+  //     </Card>
+  //   );
+  // }
 
   if (!user) return null;
 
@@ -130,13 +108,15 @@ export default function SubscriptionDetails({ onUpgrade }) {
   const executeToggleAutoRenew = async () => {
     setIsTogglingAutoRenew(true);
     try {
+      let res;
       // Call the appropriate API based on current state
       if (isAutoRenewOn) {
-        await cancelAutoRenew();
+        res = await cancelAutoRenew();
       } else {
-        await enableAutoRenew();
+        res = await enableAutoRenew();
       }
 
+      console.log(res);
       // Update user data
       const updatedUser = await getUserProfile();
       setUser(updatedUser.data);
@@ -264,8 +244,11 @@ export default function SubscriptionDetails({ onUpgrade }) {
                 Daily Usage
               </div>
               <div className="font-medium">
-                {console.log(subscription)}
-                {subscription?.remainingQueries || 0} /{" "}
+                {/* {console.log(subscription)} */}
+                {(subscription?.remainingQueries === null
+                  ? "∞"
+                  : subscription?.remainingQueries) || 0}{" "}
+                /{" "}
                 {currentPlan.dailyQueries === "Infinity"
                   ? "∞"
                   : currentPlan.dailyQueries}{" "}

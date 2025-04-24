@@ -28,32 +28,13 @@ const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 );
 
-export default function PricingPlans({ accessToken }) {
+export default function PricingPlans({ user }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [processingPlan, setProcessingPlan] = useState(null);
-  const [user, setUser] = useState(null);
   const [isUserLoading, setIsUserLoading] = useState(false);
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState(null);
-
-  useEffect(() => {
-    const fetchUserData = async () => {
-      setIsUserLoading(true);
-      try {
-        const userData = await getUserProfile(accessToken);
-        setUser(userData.data);
-      } catch (error) {
-        console.error("Failed to fetch user data:", error);
-        toast.error("Failed to load user data", {
-          description: "Please try refreshing the page.",
-        });
-      } finally {
-        setIsUserLoading(false);
-      }
-    };
-    if (accessToken) fetchUserData();
-  }, [accessToken]);
 
   const plans = [
     {

@@ -180,9 +180,13 @@ const Sidebar = ({ children, accessToken, previousChats }) => {
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
               </div>
             ) : isSubscribed() && !showPricing ? (
-              <SubscriptionDetails onUpgrade={handleUpgradeFromSubscription} />
+              <SubscriptionDetails
+                onUpgrade={handleUpgradeFromSubscription}
+                user={user}
+                setUser={setUser}
+              />
             ) : (
-              <PricingPlans accessToken={accessToken} />
+              <PricingPlans user={user} />
             )}
           </div>
         </DialogContent>

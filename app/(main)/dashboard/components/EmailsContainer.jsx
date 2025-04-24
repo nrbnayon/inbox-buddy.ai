@@ -100,6 +100,7 @@ export default function EmailsContainer({ user }) {
       });
 
       if (res?.data?.success) {
+        console.log(res?.data);
         const fetchedEmails = (res.data.emails || []).slice(0, EMAILS_PER_PAGE);
         setEmailResponse({ ...res.data, emails: fetchedEmails });
         setEmails(fetchedEmails);
