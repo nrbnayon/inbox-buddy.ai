@@ -98,10 +98,15 @@ export default function ChatSection({ accessToken, chatId, msgFromDb }) {
                   Your Email AI Assistant
                 </h3>
 
+                <p className="text-muted-foreground">Hi, {userData.name}</p>
+
                 <p className="text-muted-foreground">
+                  I&apos;m your inbox buddy. What can I help you out with today?
+                </p>
+
+                {/* <p className="text-muted-foreground">
                   I can help you manage your emails, answer questions, and
                   provide insights about your inbox.
-                  {/* {demoMode && " (Currently running in demo mode)"} */}
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
                   <div className="bg-muted/50 p-3 rounded-lg">
@@ -116,7 +121,7 @@ export default function ChatSection({ accessToken, chatId, msgFromDb }) {
                   <div className="bg-muted/50 p-3 rounded-lg">
                     "What's my email activity this week?"
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
           ) : (

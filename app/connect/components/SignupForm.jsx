@@ -37,6 +37,7 @@ export default function SignUpForm() {
   const [modalMessage, setModalMessage] = useState({
     title: "",
     description: "",
+    // status: "wait",
   });
 
   const handleChange = (e) => {
@@ -63,15 +64,16 @@ export default function SignUpForm() {
           description: "",
         }); // Reset the form
         setModalMessage({
-          title: "Request Submitted",
-          description: "You will be notified when your request is approved.",
+          title: "Thanks for signing up!",
+          description:
+            "We will confirm your email shortly and send you a designated link to log in. Enjoy your new inbox buddy!",
         });
         setShowModal(true); // Show the modal
       } else {
         setLoading(false);
         setModalMessage({
-          title: "Info",
-          description: res.message + " Wait for approval.",
+          title: "Approved!",
+          description: res.message,
         });
         setShowModal(true);
         // toast.info(res.message + " Wait for approval.");
@@ -144,7 +146,7 @@ export default function SignUpForm() {
           <Button
             disabled={loading}
             type="submit"
-            className="py-6 mt-6 px-24 w-[80%] rounded-full bg-gradient-to-r from-[#00ACDA] via-blue-400 to-[#43D4FB] hover:opacity-90 text-white"
+            className="py-6 mt-6 px-24 w-[80%] rounded-full bg-gradient-to-r from-[#00ACDA] via-blue-400 to-[#43D4FB] hover:opacity-90 text-white relative z-10"
           >
             {loading ? (
               <>
@@ -171,7 +173,9 @@ export default function SignUpForm() {
       <Dialog open={showModal} onOpenChange={setShowModal}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle className="text-xl">{modalMessage?.title}</DialogTitle>
+            <DialogTitle className={`text-xl `}>
+              {modalMessage?.title}
+            </DialogTitle>
           </DialogHeader>
           <DialogDescription className="text-md text-gray-600">
             {modalMessage?.description}

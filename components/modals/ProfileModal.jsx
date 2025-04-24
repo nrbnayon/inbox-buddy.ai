@@ -415,8 +415,7 @@ const ProfileModal = ({ isOpen, onClose, accessToken, setUser }) => {
                       </div>
                       <p className="mt-2 text-sm text-red-600 dark:text-red-400">
                         Once you delete your account, there is no going back.
-                        This will permanently delete your account and remove
-                        your data from our servers.
+                        This will permanently delete your account.
                       </p>
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
