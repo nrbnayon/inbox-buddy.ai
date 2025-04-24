@@ -198,7 +198,7 @@ export default function EmailsContainer({ user }) {
       // console.log("Sending timeFilter for important emails:", timeFilter);
       const res = await axiosInstance.get("/emails/important", {
         params: {
-          maxResults: 500,
+          maxResults: EMAILS_PER_PAGE,
           pageToken,
           keywords: selectedKeywords.join(","),
           timeFilter,
