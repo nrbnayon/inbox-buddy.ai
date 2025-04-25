@@ -95,9 +95,14 @@ export default function UsersListTable({
         toast.success(successMessage);
         // Trigger data refresh and wait for it to complete
         await onActionComplete();
+        setIsActionLoading(false);
+        setSelectedUser(null);
+        setActionType(null);
+        // setIsConfirmOpen(false); // Close the dialog after success
       } else {
         toast.error(res?.message || "Action failed");
         await onActionComplete();
+        setIsActionLoading(false);
       }
     } catch (err) {
       console.error(`Error performing ${actionType} action:`, err);
@@ -106,11 +111,7 @@ export default function UsersListTable({
           err?.message ||
           "Failed to perform action"
       );
-    } finally {
-      setIsActionLoading(false);
-      setIsConfirmOpen(false);
-      setSelectedUser(null);
-      setActionType(null);
+      setIsActionLoading(false); // Ensure the loading state is reset on failure
     }
   };
 

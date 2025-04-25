@@ -1,12 +1,13 @@
 "use client";
 
 import { FaUsers } from "react-icons/fa6";
-import SearchBar from "@/app/(main)/dashboard/components/SearchBar";
 import { Button } from "@/components/ui/button";
+import AdminSearchBar from "./AdminSearchBar";
 
 export default function UserPageHeader({ query, setQuery, onSearch, onClear }) {
   const handleQuery = (e) => {
     const newQuery = e.target.value;
+    console.log(newQuery);
     setQuery(newQuery);
     if (!newQuery) {
       onClear();
@@ -20,7 +21,7 @@ export default function UserPageHeader({ query, setQuery, onSearch, onClear }) {
         All Users Lists:
       </h2>
       <div className="flex gap-2">
-        <SearchBar
+        <AdminSearchBar
           placeHolder={"Search Users..."}
           query={query}
           setQuery={setQuery}

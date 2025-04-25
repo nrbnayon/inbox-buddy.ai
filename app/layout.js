@@ -25,7 +25,15 @@ export default async function RootLayout({ children }) {
         <BackgroundWrapper>
           {!accessToken?.value && <Navbar />}
           {children}
-          <Toaster richColors position="top-center" />
+          <Toaster
+            richColors
+            position="top-center"
+            toastOptions={{
+              style: {
+                "--z-index": 100,
+              },
+            }}
+          />
         </BackgroundWrapper>
       </body>
     </html>

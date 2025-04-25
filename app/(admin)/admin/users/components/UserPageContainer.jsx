@@ -28,7 +28,7 @@ export default function UserPageContainer({ accessToken }) {
       console.log({ data });
       const normalUsers =
         data?.users.filter((usr) => usr.role === "user") || [];
-      console.log(normalUsers);
+      console.log("Normar users: ", normalUsers);
       setUsers(normalUsers || []);
       setTotalPages(data?.totalPages || 1);
       setError(null);

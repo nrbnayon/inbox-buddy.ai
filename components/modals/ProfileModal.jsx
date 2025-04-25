@@ -142,10 +142,13 @@ const ProfileModal = ({ isOpen, onClose, accessToken, setUser }) => {
       console.log(res);
       if (res.success) {
         toast.success("Account deleted successfully");
-        await logoutAction();
+        const res = await logoutAction();
+
+        console.log("Logout response: ", res.data);
         setShowDeleteDialog(false);
         onClose();
-        router.push("/login");
+        router.refresh();
+        router.replace("/login");
       }
     } catch (error) {
       toast.error(error.message || "Failed to delete account");

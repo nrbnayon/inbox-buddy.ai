@@ -38,7 +38,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-export default function SubscriptionDetails({ onUpgrade, user, setUser }) {
+export default function SubscriptionDetails({
+  onUpgrade,
+  user,
+  setUser,
+  setDialogOpen,
+}) {
   const router = useRouter();
   // const [user, setUser] = useState(null);
   // const [isLoading, setIsLoading] = useState(true);
@@ -159,7 +164,9 @@ export default function SubscriptionDetails({ onUpgrade, user, setUser }) {
       setUser(updatedUser.data);
       toast(
         <>
-          <strong className="font-semibold">Subscription Cancelled</strong>
+          <strong className="font-semibold text-[#00ACDA]">
+            Subscription Cancelled
+          </strong>
           <div>Your subscription will end on {endDate} and will not renew.</div>
         </>
       );
@@ -176,6 +183,7 @@ export default function SubscriptionDetails({ onUpgrade, user, setUser }) {
     } finally {
       setIsCancelling(false);
       setCancelDialogOpen(false);
+      setDialogOpen(false);
     }
   };
 

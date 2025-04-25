@@ -2,41 +2,44 @@ import { getUserProfile } from "@/lib/api/user";
 import { useEffect, useState } from "react";
 
 export default function useGetUser(token) {
-  const [user, setUser] = useState(null); // Initialize as null to distinguish from undefined
-  const [isLoading, setIsLoading] = useState(true); // Track loading state
-  const [error, setError] = useState(null); // Track errors
+  const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    let mounted = true; // Flag to prevent state updates on unmounted components
+    let mounted = true;
 
     const fetchUser = async () => {
-      setIsLoading(true); // Set loading to true before fetching
-      setError(null); // Reset any previous errors
+      setIsLoading(true);
+      setError(null);
 
       try {
         const res = await getUserProfile(token);
         if (mounted) {
-          setUser(res?.data); // Update user only if component is still mounted
+          setUser(res?.data || null); // Fallback to null if res.data is undefined
         }
       } catch (err) {
         if (mounted) {
-          setError(err.message || "Failed to fetch user profile"); // Set error if something goes wrong
+          setError(err.message || "Failed to fetch user profile");
         }
       } finally {
         if (mounted) {
-          setIsLoading(false); // Set loading to false whether success or failure
+          setIsLoading(false);
         }
       }
     };
 
-    fetchUser();
+    if (token) {
+      fetchUser();
+    } else {
+      setError("Token is required");
+      setIsLoading(false);
+    }
 
-    // Cleanup function to avoid memory leaks
     return () => {
-      mounted = false; // Mark as unmounted
+      mounted = false;
     };
-  }, []); // Empty dependency array means this runs only once on mount
+  }, [token]); // Depend on token to refetch when it changes
 
-  // Return user data, loading state, and error
-  return { user, setUser, isLoading, error };
+  return { user, setUser, isLoading, error }; // Do not expose setUser
 }

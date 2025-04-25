@@ -28,7 +28,13 @@ const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
 );
 
-export default function PricingPlans({ user }) {
+export default function PricingPlans({
+  user,
+  setUser,
+  setDialogOpen,
+  token,
+  setShowPricing,
+}) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [processingPlan, setProcessingPlan] = useState(null);
@@ -124,16 +130,32 @@ export default function PricingPlans({ user }) {
   };
 
   const proceedWithSubscription = async (planId) => {
-    console.log("Subscribing to plan:", planId);
     setIsLoading(true);
     setProcessingPlan(planId);
 
     try {
-      const { sessionId } = await createCheckoutSession(planId);
-      const stripe = await stripePromise;
-      const { error } = await stripe.redirectToCheckout({ sessionId });
-      if (error) {
-        throw new Error(error.message);
+      const response = await createCheckoutSession(planId);
+      if (response.sessionId) {
+        // New subscription: redirect to Stripe checkout
+        const stripe = await stripePromise;
+        const { error } = await stripe.redirectToCheckout({
+          sessionId: response.sessionId,
+        });
+        if (error) {
+          console.log("Error during subscription: ", error);
+          throw new Error(error.message);
+        }
+      } else if (response.subscription) {
+        // Plan switch: subscription updated directly
+        toast.success("Subscription Updated", {
+          description: response.message || "Your subscription has been updated",
+        });
+        // Refresh user data to reflect the change
+        const updatedUser = { ...user, subscription: response.subscription };
+        setUser(updatedUser);
+
+        // Assuming there's a way to update the user state in the parent component
+        router.refresh(); // Or update user state via a callback prop
       }
     } catch (error) {
       toast.error("Subscription Error", {
@@ -142,6 +164,8 @@ export default function PricingPlans({ user }) {
     } finally {
       setIsLoading(false);
       setProcessingPlan(null);
+      setShowPricing(false);
+      setDialogOpen(false);
     }
   };
 

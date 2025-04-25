@@ -14,16 +14,19 @@ import {
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { getUserProfile } from "@/lib/api/user";
+import { toast } from "sonner";
+import useGetUser from "@/hooks/useGetUser";
 
 export default function ChatHeader({ accessToken }) {
   const { selectedModel, setSelectedModel, models, setModels } = useChat();
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showPricing, setShowPricing] = useState(false);
 
+  const { user, setUser } = useGetUser(accessToken);
+
   useEffect(() => {
-    const loadModelsAndUser = async () => {
+    const loadModels = async () => {
       try {
         // Load AI models
         const modelData = await getAvailableModels();
@@ -40,10 +43,6 @@ export default function ChatHeader({ accessToken }) {
           const defaultModel = formattedModels[1]; // Or your preferred default
           setSelectedModel(defaultModel);
         }
-
-        // Load user profile to check subscription
-        const userData = await getUserProfile(accessToken);
-        setUser(userData.data);
       } catch (error) {
         console.error("Failed to load data:", error);
       } finally {
@@ -51,7 +50,7 @@ export default function ChatHeader({ accessToken }) {
       }
     };
 
-    loadModelsAndUser();
+    loadModels();
   }, []);
 
   const handleModelChange = (e) => {
@@ -137,9 +136,16 @@ export default function ChatHeader({ accessToken }) {
                 onUpgrade={handleUpgradeFromSubscription}
                 user={user}
                 setUser={setUser}
+                setDialogOpen={setDialogOpen}
               />
             ) : (
-              <PricingPlans user={user} />
+              <PricingPlans
+                user={user}
+                setUser={setUser}
+                setDialogOpen={setDialogOpen}
+                token={accessToken}
+                setShowPricing={setShowPricing}
+              />
             )}
           </div>
         </DialogContent>

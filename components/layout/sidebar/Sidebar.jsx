@@ -184,9 +184,16 @@ const Sidebar = ({ children, accessToken, previousChats }) => {
                 onUpgrade={handleUpgradeFromSubscription}
                 user={user}
                 setUser={setUser}
+                setDialogOpen={setDialogOpen}
               />
             ) : (
-              <PricingPlans user={user} />
+              <PricingPlans
+                user={user}
+                setUser={setUser}
+                setDialogOpen={setDialogOpen}
+                token={accessToken}
+                setShowPricing={setShowPricing}
+              />
             )}
           </div>
         </DialogContent>
