@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { jwtDecode } from "jwt-decode"; // npm install jwt-decode
+import { getUserProfile } from "./lib/api/user";
 
 const publicRoutes = [
   "/",
@@ -16,6 +17,8 @@ const adminRoute = "/admin";
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
   const accessToken = request.cookies.get("accessToken")?.value;
+  const res = await getUserProfile(accessToken);
+  const user = res?.data;
 
   const isAdminRoute = pathname.startsWith(adminRoute);
   const isProtectedRoute = pathname === protectedRoute;
@@ -35,7 +38,7 @@ export async function middleware(request) {
   }
 
   // If token exists, decode it and check the role
-  if (accessToken) {
+  if (accessToken && user?._id) {
     try {
       const decodedToken = jwtDecode(accessToken);
       const userRole = decodedToken?.role;

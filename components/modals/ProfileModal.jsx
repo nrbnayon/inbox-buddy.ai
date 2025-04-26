@@ -139,12 +139,10 @@ const ProfileModal = ({ isOpen, onClose, accessToken, setUser }) => {
     setIsLoading(true);
     try {
       const res = await deleteUserAccount();
-      console.log(res);
       if (res.success) {
         toast.success("Account deleted successfully");
         const res = await logoutAction();
 
-        console.log("Logout response: ", res.data);
         setShowDeleteDialog(false);
         onClose();
         router.refresh();

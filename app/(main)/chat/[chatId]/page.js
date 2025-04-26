@@ -10,6 +10,12 @@ export default async function SingleChatPage({ params }) {
 
   const accessToken = cookieStore.get("accessToken")?.value;
 
+  const res = await getUserProfile(accessToken);
+
+  if (!res?.data?._id) {
+    return redirect("/login");
+  }
+
   let msgsFromDb;
   let chatNotFound = false;
 
@@ -82,6 +88,7 @@ export default async function SingleChatPage({ params }) {
       accessToken={accessToken}
       chatId={chatId}
       msgFromDb={msgsFromDb}
+      userData={res?.data}
     />
   );
 }

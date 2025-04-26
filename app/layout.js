@@ -4,6 +4,7 @@ import Navbar from "@/components/layout/Navbar";
 import BackgroundWrapper from "@/components/layout/BackgroundWrapper";
 import { cookies } from "next/headers";
 import { Toaster } from "@/components/ui/sooner";
+import { getUserProfile } from "@/lib/api/user";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -19,21 +20,17 @@ export const metadata = {
 export default async function RootLayout({ children }) {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get("accessToken");
+  const res = await getUserProfile(accessToken?.value);
+
+  const user = res?.data;
+
   return (
     <html lang="en">
       <body className={`${inter.className} antialiased`}>
         <BackgroundWrapper>
-          {!accessToken?.value && <Navbar />}
+          {!accessToken?.value || !user?._id ? <Navbar /> : ""}
           {children}
-          <Toaster
-            richColors
-            position="top-center"
-            toastOptions={{
-              style: {
-                "--z-index": 100,
-              },
-            }}
-          />
+          <Toaster richColors position="top-center" />
         </BackgroundWrapper>
       </body>
     </html>

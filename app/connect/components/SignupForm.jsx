@@ -66,7 +66,7 @@ export default function SignUpForm() {
         setModalMessage({
           title: "Thanks for signing up!",
           description:
-            "We will confirm your email shortly and send you a designated link to log in. Enjoy your new inbox buddy!",
+            "We will confirm your email shortly and send you a designated link to log in.",
         });
         setShowModal(true); // Show the modal
       } else {

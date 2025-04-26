@@ -10,25 +10,14 @@ import ChatHeader from "./ChatHeader";
 import logoImage from "@/public/bot.png";
 import Image from "next/image";
 
-export default function ChatSection({ accessToken, chatId, msgFromDb }) {
-  const [userData, setUserData] = useState(null);
-  const [loading, setLoading] = useState(true);
+export default function ChatSection({
+  accessToken,
+  chatId,
+  msgFromDb,
+  userData,
+}) {
+  // const [loading, setLoading] = useState(true);
   const { messages, setMessages, clearMessages, isTyping } = useChat();
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await getUserProfile(accessToken);
-        setUserData(res?.data);
-      } catch (error) {
-        console.error("Error fetching user profile:", error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProfile();
-  }, [accessToken]);
 
   useEffect(() => {
     if (msgFromDb) {
@@ -40,7 +29,7 @@ export default function ChatSection({ accessToken, chatId, msgFromDb }) {
     };
   }, [msgFromDb]);
 
-  if (loading) return <LoadingPing />;
+  // if (loading) return <LoadingPing />;
 
   return (
     <section className="w-full max-h-[100vh] h-full flex flex-col overflow-hidden">

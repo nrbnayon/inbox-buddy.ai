@@ -25,6 +25,8 @@ export default function Navbar() {
 
   const pathName = usePathname();
 
+  console.log(!publicRoutes.includes(pathName));
+
   if (!publicRoutes.includes(pathName)) {
     return;
   }

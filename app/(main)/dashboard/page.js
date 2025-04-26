@@ -7,20 +7,30 @@ import { axiosInstance } from "@/lib/axios";
 import { cookies } from "next/headers";
 import { getUserData } from "@/lib/server-api";
 import EmailsContainer from "./components/EmailsContainer";
+import { getUserProfile } from "@/lib/api/user";
+import { redirect } from "next/navigation";
 
 export default async function dashboardPage() {
   const cookieStore = await cookies();
   const token = cookieStore.get("accessToken");
+  const res = await getUserProfile(token?.value);
 
-  let user;
+  const user = res?.data;
   let unreadEmailsCount = 0;
   let meetingsCount = 0;
 
-  if (token?.value) {
+  if (!user?._id) {
+    return redirect("/login");
+  }
+
+  console.log(user);
+
+  console.log(token);
+
+  if (token?.value && user?._id) {
     try {
+      console.log("user found");
       // Fetch user data
-      const userResponse = await getUserData(token.value);
-      user = userResponse?.data;
 
       // Fetch unread emails count
       const unreadEmailsResponse = await axiosInstance.get(
