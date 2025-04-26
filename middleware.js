@@ -10,6 +10,7 @@ const publicRoutes = [
   "/team",
   "/login",
   "/admin/auth", // Still public for unauthenticated access
+  "/admin/forgot-pass", // Still public for unauthenticated access
 ];
 const protectedRoute = "/dashboard";
 const adminRoute = "/admin";

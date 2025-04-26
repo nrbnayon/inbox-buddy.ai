@@ -55,7 +55,10 @@ export function LoginForm({ className, ...props }) {
 
   return (
     <div
-      className={cn("flex flex-col items-center gap-6 mt-9", className)}
+      className={cn(
+        "flex h-screen flex-col justify-center items-center gap-6 mt-9",
+        className
+      )}
       {...props}
     >
       <Card className="w-md">
@@ -80,15 +83,15 @@ export function LoginForm({ className, ...props }) {
                 />
               </div>
               <div className="grid gap-3">
-                {/* <div className="flex items-center">
+                <div className="flex items-center">
                   <Label htmlFor="password">Password</Label>
                   <Link
-                    href="#"
+                    href="/admin/forgot-pass"
                     className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
                   >
                     Forgot your password?
                   </Link>
-                </div> */}
+                </div>
                 <Input
                   id="password"
                   type="password"

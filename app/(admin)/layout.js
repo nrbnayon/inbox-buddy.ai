@@ -27,8 +27,8 @@ export default async function RootLayout({ children }) {
   }
 
   return (
-    <section className="bg-gray-100">
-      {token?.value && user ? (
+    <section className="">
+      {token?.value && user?._id ? (
         <AdminSidebar children={children} accessToken={token?.value} />
       ) : (
         <section className="h-[90vh] flex items-center justify-center">
