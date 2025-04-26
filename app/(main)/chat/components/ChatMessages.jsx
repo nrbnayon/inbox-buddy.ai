@@ -54,16 +54,16 @@ export default function ChatMessages({ userData }) {
     // Check if the link is an attachment download link
     if (href.includes("/api/v1/emails/download/attachment")) {
       return (
-        <a href={href} onClick={(e) => handleAttachmentClick(e, href)}>
+        <Link href={href} onClick={(e) => handleAttachmentClick(e, href)}>
           {children}
-        </a>
+        </Link>
       );
     }
     // Render regular links as normal
     return (
-      <a href={href} target="_blank" rel="noopener noreferrer">
+      <Link href={href} target="_blank" rel="noopener noreferrer">
         {children}
-      </a>
+      </Link>
     );
   };
 
@@ -76,8 +76,6 @@ export default function ChatMessages({ userData }) {
       ?.replace(/(\*\*Summary:\*\*[^\n]*)(\n)/g, "$1  \n\n")
       ?.replace(/(\*\*Preview:\*\*[^\n]*)(\n+)/g, "$1  \n\n");
   };
-
-  console.log(formatEmailMessage(messages[messages.length - 1]?.message));
 
   return (
     <div className="flex flex-col justify-between h-full">

@@ -188,21 +188,26 @@ const ProfileModal = ({ isOpen, onClose, accessToken, setUser }) => {
           >
             <div className="px-6">
               <TabsList className="w-full">
-                <TabsTrigger value="overview" className="flex-1">
+                <TabsTrigger value="overview" className="flex-1 cursor-pointer">
                   Overview
                 </TabsTrigger>
-                <TabsTrigger value="edit" className="flex-1">
+                {/* <TabsTrigger value="edit" className="flex-1">
                   Edit Profile
-                </TabsTrigger>
+                </TabsTrigger> */}
                 {user?.role !== "super_admin" && (
-                  <TabsTrigger value="settings" className="flex-1">
+                  <TabsTrigger
+                    value="settings"
+                    className="flex-1 cursor-pointer"
+                  >
                     Settings
                   </TabsTrigger>
                 )}
               </TabsList>
             </div>
 
-            <ScrollArea className="h-[calc(90vh-180px)] px-6 py-4">
+            {/* <ScrollArea className="h-[calc(90vh-180px)] px-6 py-4"> */}
+            <ScrollArea className="h-[calc(50vh-180px)] px-6 py-4">
+              {/* user details */}
               <TabsContent value="overview" className="mt-0">
                 <div className="space-y-6">
                   <div className="flex flex-col items-center">
@@ -222,9 +227,10 @@ const ProfileModal = ({ isOpen, onClose, accessToken, setUser }) => {
                     <p className="text-gray-500">{user?.email}</p>
                   </div>
 
-                  <Separator />
+                  {/* <Separator /> */}
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4"> */}
+                  {/* <div className="">
                     <InfoField icon={Mail} label="Email" value={user?.email} />
                     <InfoField icon={Phone} label="Phone" value={user?.phone} />
                     <InfoField
@@ -251,9 +257,9 @@ const ProfileModal = ({ isOpen, onClose, accessToken, setUser }) => {
                           : null
                       }
                     />
-                  </div>
+                  </div> */}
 
-                  <div className="flex justify-end space-x-3 pt-4">
+                  {/* <div className="flex justify-end space-x-3 pt-4">
                     <Button
                       variant="outline"
                       onClick={handleEditClick}
@@ -261,10 +267,11 @@ const ProfileModal = ({ isOpen, onClose, accessToken, setUser }) => {
                     >
                       Edit Profile
                     </Button>
-                  </div>
+                  </div> */}
                 </div>
               </TabsContent>
 
+              {/* edit user details */}
               <TabsContent value="edit" className="mt-0">
                 <form onSubmit={handleSave} className="space-y-6">
                   <div className="flex flex-col items-center">
@@ -406,6 +413,7 @@ const ProfileModal = ({ isOpen, onClose, accessToken, setUser }) => {
                 </form>
               </TabsContent>
 
+              {/* user delete zone */}
               {user?.role !== "super_admin" && (
                 <TabsContent value="settings" className="mt-0">
                   <div className="space-y-6">
