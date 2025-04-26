@@ -15,6 +15,8 @@ import AdminHeader from "./AdminHeader";
 import navLinks from "@/utils/navlinks";
 import ProfileModal from "@/components/modals/ProfileModal";
 import useGetUser from "@/hooks/useGetUser";
+import SidebarProfileSkeleton from "@/components/SidebarProfileSkeleton";
+import UserProfile from "@/components/layout/sidebar/SidebarUserProfile";
 
 const publicRoutes = [
   "/",
@@ -29,7 +31,7 @@ export default function AdminSidebar({ children, accessToken }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
-  const { user, setUser } = useGetUser(accessToken);
+  const { user, setUser, isLoading } = useGetUser(accessToken);
 
   const openProfileModal = () => {
     setIsProfileModalOpen(true);
@@ -57,32 +59,36 @@ export default function AdminSidebar({ children, accessToken }) {
         <div className="flex h-full flex-col justify-between py-6 px-4 ">
           <div className="space-y-6">
             {/* sidebar header */}
-            <Link
-              href="#"
-              className="flex items-center gap-3 font-bold"
-              prefetch={false}
-            >
-              <Avatar>
-                <AvatarImage
-                  src={
-                    user?.profilePicture &&
-                    `${user?.profilePicture}?${Date.now()}`
-                  }
-                  alt={user?.name}
-                />
-                <AvatarFallback className="bg-gradient-to-r from-[#00ACDA] to-[#43D4FB] text-sm text-white">
-                  {user?.name?.substring(0, 2).toUpperCase() || "N/A"}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col gap-0.5">
-                <p className="font-semibold text-[20px]">
-                  {user?.name || "N/A"}
-                </p>
-                <span className="text-xs font-light text-[#101010]">
-                  {user?.email || "N/A"}
-                </span>
-              </div>
-            </Link>
+            {isLoading ? (
+              <SidebarProfileSkeleton />
+            ) : (
+              <Link
+                href="#"
+                className="flex items-center gap-3 font-bold"
+                prefetch={false}
+              >
+                <Avatar>
+                  <AvatarImage
+                    src={
+                      user?.profilePicture &&
+                      `${user?.profilePicture}?${Date.now()}`
+                    }
+                    alt={user?.name}
+                  />
+                  <AvatarFallback className="bg-gradient-to-r from-[#00ACDA] to-[#43D4FB] text-sm text-white">
+                    {user?.name?.substring(0, 2).toUpperCase() || "N/A"}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col gap-0.5">
+                  <p className="font-semibold text-[20px]">
+                    {user?.name || "N/A"}
+                  </p>
+                  <span className="text-xs font-light text-[#101010]">
+                    {user?.email || "N/A"}
+                  </span>
+                </div>
+              </Link>
+            )}
 
             {/* sidebar links */}
             <nav className="space-y-1">
@@ -172,6 +178,36 @@ export default function AdminSidebar({ children, accessToken }) {
               <SheetContent side="left" className="w-64">
                 <div className="flex h-full flex-col justify-between py-6 px-4 mt-4">
                   <div className="space-y-6">
+                    {isLoading ? (
+                      <SidebarProfileSkeleton />
+                    ) : (
+                      <Link
+                        href="#"
+                        className="flex items-center gap-3 font-bold"
+                        prefetch={false}
+                      >
+                        <Avatar>
+                          <AvatarImage
+                            src={
+                              user?.profilePicture &&
+                              `${user?.profilePicture}?${Date.now()}`
+                            }
+                            alt={user?.name}
+                          />
+                          <AvatarFallback className="bg-gradient-to-r from-[#00ACDA] to-[#43D4FB] text-sm text-white">
+                            {user?.name?.substring(0, 2).toUpperCase() || "N/A"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col gap-0.5">
+                          <p className="font-semibold text-[20px]">
+                            {user?.name || "N/A"}
+                          </p>
+                          <span className="text-xs font-light text-[#101010]">
+                            {user?.email || "N/A"}
+                          </span>
+                        </div>
+                      </Link>
+                    )}
                     <nav className="space-y-1">
                       {navLinks?.map((link) => (
                         <Link

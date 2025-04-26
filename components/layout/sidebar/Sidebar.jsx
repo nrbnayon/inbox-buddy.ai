@@ -27,7 +27,7 @@ import ProfileModal from "@/components/modals/ProfileModal";
 import { updateChatById } from "@/app/actions/chatActions";
 import SubscriptionDetails from "@/components/subscription/SubscriptionDetails";
 import PricingPlans from "@/app/pricing/components/PricingPlans";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 
 const Sidebar = ({ children, accessToken, previousChats }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -35,9 +35,9 @@ const Sidebar = ({ children, accessToken, previousChats }) => {
   const [openDropdowns, setOpenDropdowns] = useState({});
   const [dialogOpen, setDialogOpen] = useState(false);
   const [showPricing, setShowPricing] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  // const [isLoading, setIsLoading] = useState(false);
 
-  const { user, setUser } = useGetUser(accessToken);
+  const { user, setUser, isLoading } = useGetUser(accessToken);
   const pathName = usePathname();
   const router = useRouter();
 
@@ -101,6 +101,7 @@ const Sidebar = ({ children, accessToken, previousChats }) => {
     setDialogOpen,
     isSubscribed,
     showPricing,
+    isLoading,
   };
 
   if (publicRoutes.includes(pathName)) {

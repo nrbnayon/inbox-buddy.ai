@@ -8,6 +8,7 @@ import { Plus } from "lucide-react";
 import { navLinks } from "./SidebarConstants";
 import SidebarChatItem from "./SidebarChatItem";
 import UserProfile from "./SidebarUserProfile";
+import SidebarProfileSkeleton from "@/components/SidebarProfileSkeleton";
 
 const MobileSidebar = ({
   user,
@@ -22,16 +23,20 @@ const MobileSidebar = ({
   openProfileModal,
   handleLogout,
   setIsOpen,
+  isLoading,
 }) => {
   return (
     <div className="flex h-full flex-col justify-between py-6 px-4 mt-4">
       <div className="space-y-6">
-        <UserProfile
-          user={user}
-          imageSrc={imageSrc}
-          openProfileModal={openProfileModal}
-          className="mb-4"
-        />
+        {isLoading ? (
+          <SidebarProfileSkeleton />
+        ) : (
+          <UserProfile
+            user={user}
+            imageSrc={imageSrc}
+            openProfileModal={openProfileModal}
+          />
+        )}
 
         <nav className="space-y-1">
           {navLinks.map((link) => (
