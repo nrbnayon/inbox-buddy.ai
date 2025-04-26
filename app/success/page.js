@@ -1,51 +1,55 @@
-// app/success/page.jsx
-"use client";
-
-import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getUserProfile } from "@/lib/api/user";
 import { toast } from "sonner";
+import Link from "next/link";
+import { redirect } from "next/navigation";
 
-export default function SuccessPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [loading, setLoading] = useState(true);
+async function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
-  useEffect(() => {
-    const sessionId = searchParams.get("session_id");
-    if (sessionId) {
-      const fetchData = async () => {
-        try {
-          // Delay to allow webhook processing
-          await new Promise((resolve) => setTimeout(resolve, 2000));
-          const userData = await getUserProfile();
+export default async function SuccessPage({ searchParams }) {
+  const { sessionId } = await searchParams;
+  const res = await getUserProfile();
+  let loading = true;
+  let error = null;
+  const userData = res.data;
 
-          console.log(userData);
-          if (
-            userData.data.subscription.status !== "active" ||
-            !userData.data.subscription.stripeSubscriptionId
-          ) {
-            toast.warning("Subscription Processing", {
-              description:
-                "Your payment was successful, but the subscription is still being processed. Please check back in a few moments.",
-            });
-          }
-          setLoading(false);
-        } catch (error) {
-          console.error("Error refreshing user data:", error);
-          toast.error("Error", {
-            description: "Failed to verify subscription. Please try again.",
-          });
-          setLoading(false);
-        }
-      };
-      fetchData();
-    } else {
-      setLoading(false);
+  if (!sessionId) {
+    return redirect("/login");
+  }
+
+  if (!userData._id || userData.role !== "user") {
+    return redirect("/login");
+  }
+
+  if (sessionId) {
+    try {
+      // Delay to allow webhook processing
+      await delay(1000);
+
+      if (
+        userData.data.subscription.status !== "active" ||
+        !userData.data.subscription.stripeSubscriptionId
+      ) {
+        toast.warning("Subscription Processing", {
+          description:
+            "Your payment was successful, but the subscription is still being processed. Please check back in a few moments.",
+        });
+      }
+      loading = false;
+    } catch (err) {
+      console.error("Error refreshing user data:", err);
+      toast.error("Error", {
+        description: "Failed to verify subscription. Please try again.",
+      });
+      error = "Failed to verify subscription. Please try again.";
+      loading = false;
     }
-  }, [searchParams]);
+  } else {
+    loading = false;
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 px-4">
@@ -57,24 +61,26 @@ export default function SuccessPage() {
         <p className="text-gray-600 mb-6">
           {loading
             ? "Verifying your subscription..."
+            : error
+            ? error
             : "Thank you for your subscription. Your account has been upgraded and your new features are now available."}
         </p>
         <div className="flex flex-col gap-3">
           <Button
             variant="blueGradient"
-            onClick={() => router.push("/chat")}
+            asChild
             className="w-full"
             disabled={loading}
           >
-            Chat Now
+            <Link href="/chat">Chat Now</Link>
           </Button>
           <Button
-            onClick={() => router.push("/dashboard")}
             variant="outline"
+            asChild
             className="w-full"
             disabled={loading}
           >
-            Go to Dashboard
+            <Link href="/dashboard">Go to Dashboard</Link>
           </Button>
         </div>
       </div>

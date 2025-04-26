@@ -25,14 +25,14 @@ export default function GlobalError({ error, reset }) {
             <div className="flex gap-3 justify-center my-4">
               <Link
                 href="/"
-                className="bg-teal-500 px-3 py-2 rounded text-white flex gap-2 items-center"
+                className="bg-teal-500 px-3 py-2 rounded text-white flex gap-2 items-center cursor-pointer"
               >
                 <IoMdArrowBack />
                 To Home
               </Link>
               <button
                 onClick={handleReset}
-                className="bg-blue-500 px-3 py-2 rounded text-white flex gap-2 items-center"
+                className="bg-blue-500 px-3 py-2 rounded text-white flex gap-2 items-center cursor-pointer"
               >
                 <GrPowerReset />
                 Try Again

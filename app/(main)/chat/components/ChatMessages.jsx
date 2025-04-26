@@ -7,6 +7,7 @@ import { useEffect, useRef } from "react";
 import TypewriterEffect from "./TypewriterEffect";
 import ReactMarkdown from "react-markdown";
 import { axiosInstance } from "@/lib/axios"; // Import axios instance with token handling
+import Link from "next/link";
 
 export default function ChatMessages({ userData }) {
   const { messages, isTyping } = useChat();
@@ -66,6 +67,18 @@ export default function ChatMessages({ userData }) {
     );
   };
 
+  const formatEmailMessage = (text) => {
+    // Add line breaks only after specific email fields (Subject, Date, Summary)
+    return text
+      ?.replace(/(\*\*From:\*\*.*?)()/g, "$1  $2")
+      ?.replace(/(\*\*Subject:\*\*.*?)()/g, "$1  $2")
+      ?.replace(/(\*\*Date:\*\*.*?)()/g, "$1  $2")
+      ?.replace(/(\*\*Summary:\*\*[^\n]*)(\n)/g, "$1  \n\n")
+      ?.replace(/(\*\*Preview:\*\*[^\n]*)(\n+)/g, "$1  \n\n");
+  };
+
+  console.log(formatEmailMessage(messages[messages.length - 1]?.message));
+
   return (
     <div className="flex flex-col justify-between h-full">
       <div className="space-y-6 overflow-y-scroll messages scroll-smooth flex flex-col">
@@ -85,13 +98,15 @@ export default function ChatMessages({ userData }) {
             date={message.date}
             message={
               message.userRole !== "user" ? (
-                <ReactMarkdown
-                  components={{
-                    a: CustomLink, // Use custom link component
-                  }}
-                >
-                  {message.message}
-                </ReactMarkdown>
+                <div className="markdown-content">
+                  <ReactMarkdown
+                    components={{
+                      a: CustomLink,
+                    }}
+                  >
+                    {formatEmailMessage(message?.message)}
+                  </ReactMarkdown>
+                </div>
               ) : (
                 message.message
               )
