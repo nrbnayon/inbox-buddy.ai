@@ -9,9 +9,17 @@ const publicRoutes = [
   "/security",
   "/team",
   "/login",
-  "/admin/auth", // Still public for unauthenticated access
-  "/admin/forgot-pass", // Still public for unauthenticated access
+  // "/admin/auth", // Still public for unauthenticated access
+  // "/admin/forgot-pass", // Still public for unauthenticated access
 ];
+
+const adminPublicRoutes = [
+  "/admin/auth",
+  "/admin/forgot-pass",
+  "/admin/verify-email",
+  "/admin/reset-pass",
+];
+
 const protectedRoute = "/dashboard";
 const adminRoute = "/admin";
 
@@ -31,7 +39,7 @@ export async function middleware(request) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
     // Block access to admin routes (except /admin/auth) and redirect to admin auth
-    if (isAdminRoute && pathname !== "/admin/auth") {
+    if (isAdminRoute && !adminPublicRoutes.includes(pathname)) {
       return NextResponse.redirect(new URL("/admin/auth", request.url));
     }
     // Allow public routes to proceed
@@ -47,11 +55,14 @@ export async function middleware(request) {
       // Admin and super_admin routing
       if (["admin", "super_admin"].includes(userRole)) {
         // Redirect away from /admin/auth if authenticated
-        if (pathname === "/admin/auth") {
+        if (adminPublicRoutes.includes(pathname)) {
           return NextResponse.redirect(new URL(adminRoute, request.url));
         }
         // Redirect from public routes to admin
-        if (publicRoutes.includes(pathname) && pathname !== "/admin/auth") {
+        if (
+          publicRoutes.includes(pathname) &&
+          !adminPublicRoutes.includes(pathname)
+        ) {
           return NextResponse.redirect(new URL(adminRoute, request.url));
         }
         // Block access to protected route (/dashboard) and redirect to admin

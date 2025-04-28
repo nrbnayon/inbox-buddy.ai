@@ -36,7 +36,6 @@ export function LoginForm({ className, ...props }) {
     try {
       // Make API call with form data
       const res = await loginAction(userData);
-      console.log(res);
       if (res.success) {
         router.push("/admin");
       }
@@ -56,12 +55,12 @@ export function LoginForm({ className, ...props }) {
   return (
     <div
       className={cn(
-        "flex h-screen flex-col justify-center items-center gap-6 mt-9",
+        "flex h-screen flex-col justify-center items-center gap-6 mt-9 px-4",
         className
       )}
       {...props}
     >
-      <Card className="w-md">
+      <Card className="w-fit sm:w-md">
         <CardHeader>
           <CardTitle>Login to your account</CardTitle>
           <CardDescription>
@@ -87,7 +86,7 @@ export function LoginForm({ className, ...props }) {
                   <Label htmlFor="password">Password</Label>
                   <Link
                     href="/admin/forgot-pass"
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+                    className="ml-auto inline-block text-[12px] sm:text-sm underline-offset-4 hover:underline"
                   >
                     Forgot your password?
                   </Link>
