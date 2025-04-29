@@ -11,8 +11,7 @@ import { sendChatMessage, clearChatContext } from "@/lib/api/chat";
 import { usePathname, useRouter } from "next/navigation";
 import { axiosInstance } from "@/lib/axios";
 
-export default function ChatInputField({ chatId }) {
-  const [message, setMessage] = useState("");
+export default function ChatInputField({ chatId, message, setMessage }) {
   const [attachments, setAttachments] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
   const [isSending, setIsSending] = useState(false);

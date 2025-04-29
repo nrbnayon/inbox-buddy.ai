@@ -10,6 +10,13 @@ import ChatHeader from "./ChatHeader";
 import logoImage from "@/public/bot.png";
 import Image from "next/image";
 
+const prompts = [
+  "Summarize my unread emails",
+  "Draft a response to the latest email from John",
+  "Find all emails about the marketing campaign",
+  "What's my email activity this week?",
+];
+
 export default function ChatSection({
   accessToken,
   chatId,
@@ -17,6 +24,7 @@ export default function ChatSection({
   userData,
 }) {
   // const [loading, setLoading] = useState(true);
+  const [inputMessage, setInputMessage] = useState("");
   const { messages, setMessages, clearMessages, isTyping } = useChat();
 
   useEffect(() => {
@@ -96,21 +104,18 @@ export default function ChatSection({
                 {/* <p className="text-muted-foreground">
                   I can help you manage your emails, answer questions, and
                   provide insights about your inbox.
-                </p>
+                </p> */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                  <div className="bg-muted/50 p-3 rounded-lg">
-                    "Summarize my unread emails"
-                  </div>
-                  <div className="bg-muted/50 p-3 rounded-lg">
-                    "Draft a response to the latest email from John"
-                  </div>
-                  <div className="bg-muted/50 p-3 rounded-lg">
-                    "Find all emails about the marketing campaign"
-                  </div>
-                  <div className="bg-muted/50 p-3 rounded-lg">
-                    "What's my email activity this week?"
-                  </div>
-                </div> */}
+                  {prompts.map((prompt, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setInputMessage(prompt)}
+                      className="bg-muted/50 p-3 rounded-lg cursor-pointer"
+                    >
+                      {prompt}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           ) : (
@@ -120,7 +125,11 @@ export default function ChatSection({
 
         {/* Chat Input Field - Fixed at the bottom */}
         <div className="mt-auto p-4 mb-6 bg-white">
-          <ChatInputField chatId={chatId} />
+          <ChatInputField
+            chatId={chatId}
+            message={inputMessage}
+            setMessage={setInputMessage}
+          />
           {/* {messages?.length > 0 && (
             <div className="flex justify-end mb-2 absolute top-50 -right-10 rotate-90">
               <Button

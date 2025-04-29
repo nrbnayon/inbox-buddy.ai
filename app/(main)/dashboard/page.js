@@ -23,15 +23,8 @@ export default async function dashboardPage() {
     return redirect("/login");
   }
 
-  console.log(user);
-
-  console.log(token);
-
   if (token?.value && user?._id) {
     try {
-      console.log("user found");
-      // Fetch user data
-
       // Fetch unread emails count
       const unreadEmailsResponse = await axiosInstance.get(
         "/emails?filter=unread"
@@ -86,7 +79,7 @@ export default async function dashboardPage() {
       </div>
 
       {/* mails */}
-      <EmailsContainer user={user} />
+      {/* <EmailsContainer user={user} /> */}
     </section>
   );
 }
