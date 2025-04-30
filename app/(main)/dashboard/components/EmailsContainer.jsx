@@ -100,7 +100,7 @@ export default function EmailsContainer({ user }) {
       });
 
       if (res?.data?.success) {
-        console.log(res?.data);
+        // console.log(res?.data);
         const fetchedEmails = (res.data.emails || []).slice(0, EMAILS_PER_PAGE);
         setEmailResponse({ ...res.data, emails: fetchedEmails });
         setEmails(fetchedEmails);
@@ -335,14 +335,14 @@ export default function EmailsContainer({ user }) {
     <div className="mt-10">
       <div className="flex flex-col md:flex-row justify-between">
         <h2 className="text-[#2D3748] text-2xl font-semibold mb-5">
-          Your Top Recipients
+          Here is your last {EMAILS_PER_PAGE} emails:
         </h2>
-        <FilterMails
+        {/* <FilterMails
           onSearch={handleSearch}
           onKeywordChange={handleKeywordChange}
           onTimePeriodChange={handleTimePeriodChange}
           onDateChange={handleDateChange}
-        />
+        /> */}
       </div>
 
       {isLoading ? (
@@ -423,14 +423,14 @@ export default function EmailsContainer({ user }) {
               <span>Ask AI For Help</span>
             </Link>
 
-            <EmailPagination
+            {/* <EmailPagination
               totalEmails={emailResponse?.totalEmails || 0}
               currentPage={currentPage}
               onPageChange={handlePageChange}
               emailsPerPage={EMAILS_PER_PAGE}
               hasNextPage={!!nextPageToken}
               hasPrevPage={currentPage > 1}
-            />
+            /> */}
           </div>
         </>
       )}

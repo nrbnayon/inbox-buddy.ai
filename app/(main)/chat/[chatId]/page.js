@@ -84,7 +84,7 @@ export default async function SingleChatPage({ params }) {
     );
   }
 
-  console.log(msgsFromDb);
+  // console.log(msgsFromDb);
 
   return (
     <ChatSection

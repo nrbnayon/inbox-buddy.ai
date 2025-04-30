@@ -6,7 +6,7 @@ import meeting from "@/public/meeting.png";
 import { axiosInstance } from "@/lib/axios";
 import { cookies } from "next/headers";
 // import { getUserData } from "@/lib/server-api";
-// import EmailsContainer from "./components/EmailsContainer";
+import EmailsContainer from "./components/EmailsContainer";
 import { getUserProfile } from "@/lib/api/user";
 import { redirect } from "next/navigation";
 
@@ -29,6 +29,9 @@ export default async function dashboardPage() {
       const unreadEmailsResponse = await axiosInstance.get(
         "/emails?filter=unread"
       );
+
+      // const tempres = await axiosInstance.get("/emails?filter=important");
+      // console.log(tempres?.data?.emails?.length);
       unreadEmailsCount = unreadEmailsResponse.data?.emails?.length || 0;
 
       // Fetch meetings count
@@ -79,7 +82,7 @@ export default async function dashboardPage() {
       </div>
 
       {/* mails */}
-      {/* <EmailsContainer user={user} /> */}
+      <EmailsContainer user={user} />
     </section>
   );
 }
