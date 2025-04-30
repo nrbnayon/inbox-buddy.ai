@@ -5,8 +5,8 @@ import mail from "@/public/mail.png";
 import meeting from "@/public/meeting.png";
 import { axiosInstance } from "@/lib/axios";
 import { cookies } from "next/headers";
-import { getUserData } from "@/lib/server-api";
-import EmailsContainer from "./components/EmailsContainer";
+// import { getUserData } from "@/lib/server-api";
+// import EmailsContainer from "./components/EmailsContainer";
 import { getUserProfile } from "@/lib/api/user";
 import { redirect } from "next/navigation";
 
@@ -45,7 +45,7 @@ export default async function dashboardPage() {
     <section className="flex flex-col w-full p-2 pb-6">
       <div className="sticky top-0 bg-white pb-5 z-50">
         {/* welcome messages */}
-        <h1 className="text-3xl font-bold mb-3">Hi John,</h1>
+        <h1 className="text-3xl font-bold mb-3">Hi {user?.name || "N/A"},</h1>
         <p className="inline-flex items-center gap-2">
           <FaCheckCircle color="#68D391" />
           Here&apos;s the latest. Let me know how I can help!

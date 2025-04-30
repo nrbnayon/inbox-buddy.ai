@@ -44,47 +44,47 @@ export default function PricingPlans({
 
   const plans = [
     {
-      id: "basic",
-      name: "Basic",
-      price: "$5",
+      id: "free",
+      name: "Free Tier",
+      price: "$0",
       description: "/mo",
       features: [
         // "Connect One inbox",
-        "15 queries per day",
-        "Basic Summary Function",
+        "5 queries per day",
+        "Basic Email Summary",
         "Standard Support",
-        "Limited Third Party Integration",
+        "No Third Party Integration",
       ],
       highlighted: false,
     },
     {
       id: "premium",
-      name: "Premium",
-      price: "$15",
-      description: "/mo",
+      name: "Premium Tier",
+      price: "$7",
+      description: "/month",
       features: [
         // "Connect three inboxes",
-        "100 queries per day",
-        "Unlimited AI Agent",
+        "Unlimited Queries",
+        "Premium Support",
         "Advanced Summaries",
-        "Advanced Third Party Integration",
+        "Third Party Integration (pending)",
       ],
       highlighted: true,
     },
-    {
-      id: "enterprise",
-      name: "Enterprise",
-      price: "$50",
-      description: "/mo",
-      features: [
-        // "Connect 10 inboxes",
-        "Unlimited queries",
-        "Unlimited AI Agents",
-        "Advanced Summaries",
-        "Unlimited Third Party Integration",
-      ],
-      highlighted: false,
-    },
+    // {
+    //   id: "enterprise",
+    //   name: "Enterprise",
+    //   price: "$50",
+    //   description: "/mo",
+    //   features: [
+    //     // "Connect 10 inboxes",
+    //     "Unlimited queries",
+    //     "Unlimited AI Agents",
+    //     "Advanced Summaries",
+    //     "Unlimited Third Party Integration",
+    //   ],
+    //   highlighted: false,
+    // },
   ];
 
   const isCurrentPlan = (planId) =>
@@ -92,7 +92,9 @@ export default function PricingPlans({
     user?.subscription?.status === "active" &&
     new Date(user?.subscription?.endDate) > new Date();
 
-  // console.log(isCurrentPlan);
+  console.log(user?.subscription?.plan);
+
+  console.log(isCurrentPlan("free"));
 
   const handleSubscribe = async (planId) => {
     if (isUserLoading) {
@@ -172,11 +174,11 @@ export default function PricingPlans({
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="flex flex-col items-center justify-center">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl">
+        <div className="grid grid-cols-1 md:grid-cols-2 justify-items-center w-full max-w-6xl">
           {plans.map((plan) => (
             <Card
               key={plan.id}
-              className={`flex flex-col h-full shadow-none border border-[#D9D9D9] rounded-md ${
+              className={`flex flex-col h-full max-w-[368px] w-full shadow-none border border-[#D9D9D9] rounded-md ${
                 plan.highlighted
                   ? "bg-gradient-to-br from-[#00ACDA] to-[#43D4FB] text-white"
                   : ""

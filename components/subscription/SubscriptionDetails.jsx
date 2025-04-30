@@ -81,11 +81,11 @@ export default function SubscriptionDetails({
   const isAutoRenewOn = subscription?.autoRenew;
 
   const planDetails = {
-    basic: {
-      name: "Basic",
+    free: {
+      name: "Free",
       color: "bg-blue-100 text-blue-800",
       maxInboxes: 1,
-      dailyQueries: 15,
+      dailyQueries: 5,
     },
     premium: {
       name: "Premium",
@@ -93,15 +93,15 @@ export default function SubscriptionDetails({
       maxInboxes: 3,
       dailyQueries: 100,
     },
-    enterprise: {
-      name: "Enterprise",
-      color: "bg-indigo-100 text-indigo-800",
-      maxInboxes: 10,
-      dailyQueries: "Infinity",
-    },
+    // enterprise: {
+    //   name: "Enterprise",
+    //   color: "bg-indigo-100 text-indigo-800",
+    //   maxInboxes: 10,
+    //   dailyQueries: "Infinity",
+    // },
   };
 
-  const currentPlan = planDetails[subscription?.plan || "basic"];
+  const currentPlan = planDetails[subscription?.plan || "free"];
 
   const handleToggleAutoRenew = () => {
     setConfirmationAction(
@@ -272,15 +272,17 @@ export default function SubscriptionDetails({
                 {startDate}
               </div>
             </div>
-            <div className="space-y-2 bg-gray-50 p-3 rounded-lg">
-              <div className="text-sm font-medium text-gray-500">
-                {isAutoRenewOn ? "Renewal Date" : "Expiry Date"}
+            {user?.subscription?.plan !== "free" && (
+              <div className="space-y-2 bg-gray-50 p-3 rounded-lg">
+                <div className="text-sm font-medium text-gray-500">
+                  {isAutoRenewOn ? "Renewal Date" : "Expiry Date"}
+                </div>
+                <div className="flex items-center font-medium">
+                  <RefreshCw className="h-4 w-4 mr-2 text-gray-500" />
+                  {endDate}
+                </div>
               </div>
-              <div className="flex items-center font-medium">
-                <RefreshCw className="h-4 w-4 mr-2 text-gray-500" />
-                {endDate}
-              </div>
-            </div>
+            )}
             {/* <div className="space-y-2 bg-gray-50 p-3 rounded-lg">
               <div className="text-sm font-medium text-gray-500">
                 Max Inboxes

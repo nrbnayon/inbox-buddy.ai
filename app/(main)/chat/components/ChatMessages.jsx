@@ -68,6 +68,16 @@ export default function ChatMessages({ userData }) {
   };
 
   const formatEmailMessage = (text) => {
+    const isTable =
+      text.match(/^\s*\|.*\|\s*$/m) && text.match(/^\s*\|[-:\s|]+\|\s*$/m);
+
+    if (isTable) {
+      // For tables, preserve the markdown syntax and only ensure proper spacing
+      return text
+        .trim() // Remove leading/trailing whitespace
+        .replace(/\n\s*\n/g, "\n\n") // Ensure consistent double newlines for markdown paragraphs
+        .replace(/(\|.*\|)\s*$/gm, "$1\n"); // Ensure each table row ends with a newline
+    }
     // Add line breaks only after specific email fields (Subject, Date, Summary)
     return text
       ?.replace(/(\*\*From:\*\*.*?)()/g, "$1  $2")
@@ -100,9 +110,17 @@ export default function ChatMessages({ userData }) {
                   <ReactMarkdown
                     components={{
                       a: CustomLink,
+                      strong: ({ node, ...props }) => (
+                        <strong className="email-field" {...props} />
+                      ),
+                      table: ({ node, ...props }) => (
+                        <div className="table-container">
+                          <table {...props} />
+                        </div>
+                      ),
                     }}
                   >
-                    {formatEmailMessage(message?.message)}
+                    {formatEmailMessage(message.message)}
                   </ReactMarkdown>
                 </div>
               ) : (

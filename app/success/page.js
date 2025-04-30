@@ -27,7 +27,7 @@ export default async function SuccessPage({ searchParams }) {
   if (sessionId) {
     try {
       // Delay to allow webhook processing
-      await delay(1000);
+      await delay(2000);
 
       if (
         userData.data.subscription.status !== "active" ||

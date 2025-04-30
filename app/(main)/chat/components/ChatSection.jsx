@@ -12,9 +12,9 @@ import Image from "next/image";
 
 const prompts = [
   "Summarize my unread emails",
-  "Draft a response to the latest email from John",
-  "Find all emails about the marketing campaign",
-  "What's my email activity this week?",
+  "Draft a response to the latest email I have",
+  "Find all emails from google",
+  "Is there any meeting upcomming?",
 ];
 
 export default function ChatSection({

@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { getChatById } from "@/app/actions/chatActions";
 import Link from "next/link";
 import ChatSection from "../components/ChatSection";
+import { getUserProfile } from "@/lib/api/user";
 
 export default async function SingleChatPage({ params }) {
   const cookieStore = await cookies();
@@ -82,6 +83,8 @@ export default async function SingleChatPage({ params }) {
       </div>
     );
   }
+
+  console.log(msgsFromDb);
 
   return (
     <ChatSection
