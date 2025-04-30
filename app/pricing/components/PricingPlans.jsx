@@ -92,11 +92,12 @@ export default function PricingPlans({
     user?.subscription?.status === "active" &&
     new Date(user?.subscription?.endDate) > new Date();
 
-  console.log(user?.subscription?.plan);
+  // console.log(user?.subscription?.plan);
 
-  console.log(isCurrentPlan("free"));
+  // console.log(isCurrentPlan("free"));
 
   const handleSubscribe = async (planId) => {
+    // console.log(planId);
     if (isUserLoading) {
       toast.info("Please wait", {
         description: "Verifying your account status...",
