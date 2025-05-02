@@ -91,7 +91,7 @@ export default function SubscriptionDetails({
       name: "Premium",
       color: "bg-purple-100 text-purple-800",
       maxInboxes: 3,
-      dailyQueries: "∞",
+      dailyQueries: "Unlimited",
     },
     // enterprise: {
     //   name: "Enterprise",
