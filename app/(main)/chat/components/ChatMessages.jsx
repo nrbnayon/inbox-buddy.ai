@@ -103,7 +103,7 @@ export default function ChatMessages({ userData }) {
                 ? "user"
                 : message?.model || message.userRole
             }
-            avatarUrl={ userData?.profilePicture || defaultUserImage}
+            avatarUrl={userData?.profilePicture || defaultUserImage}
             date={message?.date}
             message={
               message.userRole !== "user" ? (
