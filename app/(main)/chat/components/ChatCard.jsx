@@ -11,13 +11,13 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import chatAvatar from "@/public/bot.png";
 import { formatDate } from "@/utils/timeutils";
-import defaultUser from "@/public/defaultUser.jpg";
+import defaultUserImage from "@/public/defaultUser.jpg";
 import { useState } from "react"; // Import useState for copy feedback
 
 export default function ChatCard({
   userName = "User",
   userRole = "user",
-  avatarUrl = defaultUser,
+  avatarUrl = defaultUserImage,
   date = "July 22, 2024 - 03:00pm",
   message = "Hi Inbox-Buddy! Can you summarize this doc for me and provide context to the discussion?",
   attachments = [],

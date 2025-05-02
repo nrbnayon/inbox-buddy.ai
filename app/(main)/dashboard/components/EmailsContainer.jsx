@@ -335,7 +335,7 @@ export default function EmailsContainer({ user }) {
     <div className="mt-10">
       <div className="flex flex-col md:flex-row justify-between">
         <h2 className="text-[#2D3748] text-2xl font-semibold mb-5">
-          Here is your last {EMAILS_PER_PAGE} emails:
+          Here is your last few emails:
         </h2>
         <FilterMails
           onSearch={handleSearch}

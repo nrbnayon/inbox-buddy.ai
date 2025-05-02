@@ -87,7 +87,7 @@ const Sidebar = ({ children, accessToken, previousChats }) => {
   // Shared props for both desktop and mobile sidebars
   const sidebarProps = {
     user,
-    imageSrc: user?.profilePicture && `${user?.profilePicture}?${Date.now()}`,
+    imageSrc: user?.profilePicture || user?.profilePicture && `${user?.profilePicture}?${Date.now()}`,
     pathName,
     chats,
     openDropdowns,

@@ -21,6 +21,14 @@ const nextConfig = {
       },
       {
         protocol: "http",
+        hostname: "46.202.159.90",
+      },
+      {
+        protocol: "https",
+        hostname: "server.inbox-buddy.ai",
+      },
+      {
+        protocol: "http",
         hostname: "localhost",
         port: "4000",
         pathname: "/uploads/images/**",
