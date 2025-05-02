@@ -254,11 +254,11 @@ export default function SubscriptionDetails({
               <div className="font-medium">
                 {/* {console.log(subscription)} */}
                 {(subscription?.remainingQueries === null
-                  ? "∞"
+                  ? "Unlimited"
                   : subscription?.remainingQueries) || 0}{" "}
                 /{" "}
                 {currentPlan.dailyQueries === "Infinity"
-                  ? "∞"
+                  ? "Unlimited"
                   : currentPlan.dailyQueries}{" "}
                 {/* queries remaining */}
               </div>
