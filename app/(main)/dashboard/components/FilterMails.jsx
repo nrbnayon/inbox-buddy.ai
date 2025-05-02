@@ -76,7 +76,7 @@ export default function FilterMails({
   const maxDate = new Date();
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-2 2xl:grid-cols-3 gap-2 pb-4">
+    <div className="grid grid-cols-2 sm:grid-cols-2 2xl:grid-cols-2 gap-2 pb-4">
       <div className="col-span-2 2xl:col-span-1">
         <SearchBar placeHolder={"Search Users"} onSearch={handleSearchChange} />
       </div>
@@ -97,7 +97,7 @@ export default function FilterMails({
         defaultValue="all"
         value={timePeriod}
       />
-      <KeywordSelector onKeywordChange={handleKeywordChange} />
+      {/* <KeywordSelector onKeywordChange={handleKeywordChange} /> */}
     </div>
   );
 }
