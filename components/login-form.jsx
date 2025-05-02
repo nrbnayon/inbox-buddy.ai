@@ -41,12 +41,15 @@ export function LoginForm({ className, ...props }) {
       }
     } catch (err) {
       console.error("Login failed:", err);
-      toast.error(err.message || "Login Failed!");
-      setError(
-        err.response?.data?.message ||
-          err.message ||
-          "An error occurred during login"
-      );
+
+      // Display a user-friendly error message
+      const errorMessage =
+        err.message === "Invalid credentials"
+          ? "Invalid credentials"
+          : err.message || "An error occurred during login";
+
+      toast.error(errorMessage);
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -114,12 +117,6 @@ export function LoginForm({ className, ...props }) {
                 </Button>
               </div>
             </div>
-            {/* <div className="mt-4 text-center text-sm">
-              Don&apos;t have an account?{" "}
-              <Link href="#" className="underline underline-offset-4">
-                Sign up
-              </Link>
-            </div> */}
           </form>
         </CardContent>
       </Card>

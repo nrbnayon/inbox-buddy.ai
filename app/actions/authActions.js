@@ -52,8 +52,6 @@ export const loginAction = async (userData) => {
     process.env.NEXT_PUBLIC_API_BASE_URL ||
     "https://server.inbox-buddy.ai/api/v1";
 
-  // console.log("api base url:::", apiBaseUrl);
-
   try {
     const res = await fetch(`${apiBaseUrl}/auth/login`, {
       method: "POST",
@@ -96,9 +94,18 @@ export const loginAction = async (userData) => {
 
       return data;
     }
+
+    // For non-successful responses, extract the error message
     throw new Error(data.message || "Login failed");
   } catch (error) {
     console.error("Login failed:", error);
+
+    // If this is a Server Component error in production
+    if (error.message && error.message.includes("Server Components render")) {
+      // Return a simplified custom error that will be easier to handle
+      throw new Error("Invalid credentials");
+    }
+
     throw error;
   }
 };
