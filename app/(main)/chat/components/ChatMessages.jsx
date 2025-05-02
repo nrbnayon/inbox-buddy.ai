@@ -8,6 +8,7 @@ import TypewriterEffect from "./TypewriterEffect";
 import ReactMarkdown from "react-markdown";
 import { axiosInstance } from "@/lib/axios"; // Import axios instance with token handling
 import Link from "next/link";
+import defaultUser from "@/public/defaultUser.webp";
 
 export default function ChatMessages({ userData }) {
   const { messages, isTyping } = useChat();
@@ -94,7 +95,7 @@ export default function ChatMessages({ userData }) {
           <ChatCard
             key={index}
             userName={
-              message.userName ||
+              userData.userName ||
               (message.userRole === "user" ? "You" : "Inbox Buddy")
             }
             userRole={
@@ -102,7 +103,14 @@ export default function ChatMessages({ userData }) {
                 ? "user"
                 : message?.model || message.userRole
             }
-            avatarUrl={userData.profilePicture}
+            avatarUrl={
+              userData?.profilePicture &&
+              /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/.test(
+                userData.profilePicture
+              )
+                ? userData.profilePicture
+                : defaultUser
+            }
             date={message.date}
             message={
               message.userRole !== "user" ? (

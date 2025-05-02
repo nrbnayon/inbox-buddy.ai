@@ -7,17 +7,18 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { FaCheckCircle } from "react-icons/fa";
 import { IoDocumentOutline } from "react-icons/io5";
-import { cn } from "@/lib/utils"; // Utility for combining class names
+import { cn } from "@/lib/utils";
 import Image from "next/image";
 import chatAvatar from "@/public/bot.png";
 import { formatDate } from "@/utils/timeutils";
+import defaultUser from "@/public/defaultUser.jpg";
 
 export default function ChatCard({
-  userName = "Hamid R Mousazade",
-  userRole = "User",
-  avatarUrl = "https://images.pexels.com/photos/2834009/pexels-photo-2834009.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+  userName = "User",
+  userRole = "user",
+  avatarUrl = defaultUser,
   date = "July 22, 2024 - 03:00pm",
-  message = "Hi Inbox-Buddy! Can you summarise this doc for me and provide context to the discussion?",
+  message = "Hi Inbox-Buddy! Can you summarize this doc for me and provide context to the discussion?",
   attachments = [],
   senderUser = false,
   className,
@@ -40,7 +41,7 @@ export default function ChatCard({
               </Avatar> */}
               <Image
                 src={senderUser ? avatarUrl : chatAvatar}
-                alt="profile pic"
+                alt={userName.slice(0, 1)}
                 width={100}
                 height={100}
                 className="size-9 rounded-full"
