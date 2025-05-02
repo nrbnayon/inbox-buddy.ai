@@ -337,12 +337,12 @@ export default function EmailsContainer({ user }) {
         <h2 className="text-[#2D3748] text-2xl font-semibold mb-5">
           Here is your last {EMAILS_PER_PAGE} emails:
         </h2>
-        {/* <FilterMails
+        <FilterMails
           onSearch={handleSearch}
           onKeywordChange={handleKeywordChange}
           onTimePeriodChange={handleTimePeriodChange}
           onDateChange={handleDateChange}
-        /> */}
+        />
       </div>
 
       {isLoading ? (
@@ -374,7 +374,7 @@ export default function EmailsContainer({ user }) {
             />
 
             <div className="block xl:hidden p-2">
-              <div className="max-h-[40vh] overflow-y-auto space-y-4 messages">
+              <div className="max-h-[70vh] md:max-h-[40vh] overflow-y-auto space-y-4 messages">
                 {emails.map((email) => (
                   <div
                     key={email.id}

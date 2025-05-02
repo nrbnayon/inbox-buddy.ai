@@ -248,7 +248,7 @@ export default function EmailTable({ emails, user, onEmailRead, onRefresh }) {
       </Table>
 
       <div className="block xl:hidden p-2">
-        <div className="max-h-[40vh] overflow-y-auto space-y-4 messages">
+        <div className="max-h-[40vh] overflow-y-auto space-y-4 messages ">
           {emails.map((email) => (
             <div
               key={email.id}

@@ -1,4 +1,3 @@
-// app/(main)/chat/components/ChatCard.jsx
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -7,11 +6,13 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { FaCheckCircle } from "react-icons/fa";
 import { IoDocumentOutline } from "react-icons/io5";
+import { IoCopyOutline } from "react-icons/io5"; // Added copy icon
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import chatAvatar from "@/public/bot.png";
 import { formatDate } from "@/utils/timeutils";
 import defaultUser from "@/public/defaultUser.jpg";
+import { useState } from "react"; // Import useState for copy feedback
 
 export default function ChatCard({
   userName = "User",
@@ -24,6 +25,22 @@ export default function ChatCard({
   className,
 }) {
   const formattedDate = formatDate(date);
+  const [copyText, setCopyText] = useState("Copy"); // State for copy button text
+
+  // Function to handle copying the message
+  const handleCopyMessage = () => {
+    navigator.clipboard
+      .writeText(message)
+      .then(() => {
+        setCopyText("Copied!");
+        setTimeout(() => setCopyText("Copy"), 2000); // Reset after 2 seconds
+      })
+      .catch((err) => {
+        console.error("Failed to copy message: ", err);
+        setCopyText("Failed to copy");
+        setTimeout(() => setCopyText("Copy"), 2000);
+      });
+  };
 
   return (
     <Card className={cn("w-full gap-2 py-5 shadow-none", className)}>
@@ -32,13 +49,6 @@ export default function ChatCard({
           {/* Header with user info and date */}
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
-              {/* <Avatar className="h-10 w-10 border">
-                <AvatarImage
-                  src={senderUser ? avatarUrl : chatAvatar}
-                  alt={userName}
-                />
-                <AvatarFallback>{userName.slice(0, 2)}</AvatarFallback>
-              </Avatar> */}
               <Image
                 src={senderUser ? avatarUrl : chatAvatar}
                 alt={userName.slice(0, 1)}
@@ -61,9 +71,16 @@ export default function ChatCard({
             </span>
           </div>
 
-          {/* Message content */}
-          <div className="py-2">
+          {/* Message content with copy button */}
+          <div className="py-2 relative group">
             <div className="text-sm sm:text-base block">{message}</div>
+            <button
+              onClick={handleCopyMessage}
+              className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 text-xs text-muted-foreground hover:text-primary px-2 py-1 rounded"
+            >
+              <IoCopyOutline className="h-4 w-4" />
+              <span>{copyText}</span>
+            </button>
           </div>
         </div>
       </CardContent>
