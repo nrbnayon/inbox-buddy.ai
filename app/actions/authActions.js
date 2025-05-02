@@ -64,6 +64,8 @@ export const loginAction = async (userData) => {
 
     const data = await res.json();
 
+    // Return the response data regardless of success or failure
+    // This way we avoid throwing errors in the server component
     if (data.success) {
       cookieStore.set("accessToken", data.accessToken, {
         httpOnly: true,
@@ -91,22 +93,23 @@ export const loginAction = async (userData) => {
         maxAge: 86400,
         path: "/",
       });
-
-      return data;
     }
 
-    // For non-successful responses, extract the error message
-    throw new Error(data.message || "Login failed");
+    // Don't throw errors here - just return the response
+    return {
+      success: data.success || false,
+      message: data.message || "Unknown error occurred",
+      ...data,
+    };
   } catch (error) {
-    console.error("Login failed:", error);
+    console.error("Login API call failed:", error);
 
-    // If this is a Server Component error in production
-    if (error.message && error.message.includes("Server Components render")) {
-      // Return a simplified custom error that will be easier to handle
-      throw new Error("Invalid credentials");
-    }
-
-    throw error;
+    // Return error as data instead of throwing
+    return {
+      success: false,
+      message: "Invalid credentials", 
+      error: true,
+    };
   }
 };
 

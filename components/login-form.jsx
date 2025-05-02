@@ -36,20 +36,20 @@ export function LoginForm({ className, ...props }) {
     try {
       // Make API call with form data
       const res = await loginAction(userData);
+
       if (res.success) {
         router.push("/admin");
+      } else {
+        // Handle login failure - We now have a proper error message from the server
+        const errorMessage = res.message || "Invalid credentials";
+        toast.error(errorMessage);
+        setError(errorMessage);
       }
     } catch (err) {
-      console.error("Login failed:", err);
-
-      // Display a user-friendly error message
-      const errorMessage =
-        err.message === "Invalid credentials"
-          ? "Invalid credentials"
-          : err.message || "An error occurred during login";
-
-      toast.error(errorMessage);
-      setError(errorMessage);
+      // This will only run if the server action itself fails (not the login)
+      console.error("Server action failed:", err);
+      toast.error("Invalid credentials");
+      setError("Invalid credentials");
     } finally {
       setLoading(false);
     }
