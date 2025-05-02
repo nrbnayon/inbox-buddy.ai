@@ -18,7 +18,7 @@ export const logoutAction = async () => {
   try {
     const apiBaseUrl =
       process.env.NEXT_PUBLIC_API_BASE_URL ||
-      "https://ai-chat-bot-assistant-server.vercel.app/api/v1";
+      "https://server.inbox-buddy.ai/api/v1";
 
     const res = await fetch(`${apiBaseUrl}/auth/logout`, {
       method: "GET",
@@ -50,7 +50,7 @@ export const loginAction = async (userData) => {
   const cookieStore = await cookies();
   const apiBaseUrl =
     process.env.NEXT_PUBLIC_API_BASE_URL ||
-    "https://ai-chat-bot-assistant-server.vercel.app/api/v1";
+    "https://server.inbox-buddy.ai/api/v1";
 
   // console.log("api base url:::", apiBaseUrl);
 
@@ -159,7 +159,7 @@ export const refreshTokenAction = async () => {
   try {
     const apiBaseUrl =
       process.env.NEXT_PUBLIC_API_BASE_URL ||
-      "https://ai-chat-bot-assistant-server.vercel.app/api/v1";
+      "https://server.inbox-buddy.ai/api/v1";
 
     const res = await fetch(`${apiBaseUrl}/auth/refresh`, {
       method: "POST",
