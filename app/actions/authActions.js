@@ -158,15 +158,33 @@ export const setCookiesAction = async (tokens) => {
   }
 };
 
-export const refreshTokenAction = async () => {
-  const cookieStore = await cookies();
-  const refreshToken = cookieStore.get("refreshToken")?.value;
-
-  if (!refreshToken) {
-    return { success: false, message: "No refresh token available" };
-  }
-
+export const getTokensFromCookies = async () => {
   try {
+    const cookieStore = await cookies();
+
+    const accessToken = cookieStore.get("accessToken")?.value;
+    const refreshToken = cookieStore.get("refreshToken")?.value;
+
+    return {
+      accessToken: accessToken || null,
+      refreshToken: refreshToken || null,
+      isAuthenticated: !!accessToken,
+    };
+  } catch (error) {
+    console.error("Error retrieving tokens from cookies:", error);
+    return { accessToken: null, refreshToken: null, isAuthenticated: false };
+  }
+};
+
+export const refreshTokenAction = async () => {
+  try {
+    const cookieStore = await cookies();
+    const refreshToken = cookieStore.get("refreshToken")?.value;
+
+    if (!refreshToken) {
+      return { success: false, message: "No refresh token available" };
+    }
+
     const apiBaseUrl =
       process.env.NEXT_PUBLIC_API_BASE_URL ||
       "https://server.inbox-buddy.ai/api/v1";
@@ -175,15 +193,24 @@ export const refreshTokenAction = async () => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "X-Refresh-Token": refreshToken // Include refresh token in header
       },
       body: JSON.stringify({ refreshToken }),
       credentials: "include",
     });
 
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      return { 
+        success: false, 
+        message: errorData.message || `Server error: ${res.status}` 
+      };
+    }
+
     const data = await res.json();
 
     if (data.success) {
-      await cookieStore.set("accessToken", data.accessToken, {
+      cookieStore.set("accessToken", data.accessToken, {
         httpOnly: true,
         secure: process.env.NEXT_PUBLIC_NODE_ENV === "production",
         sameSite:
@@ -193,7 +220,7 @@ export const refreshTokenAction = async () => {
       });
 
       if (data.refreshToken) {
-        await cookieStore.set("refreshToken", data.refreshToken, {
+        cookieStore.set("refreshToken", data.refreshToken, {
           httpOnly: true,
           secure: process.env.NEXT_PUBLIC_NODE_ENV === "production",
           sameSite:
@@ -203,21 +230,86 @@ export const refreshTokenAction = async () => {
         });
       }
 
-      return { success: true, accessToken: data.accessToken };
+      return { 
+        success: true, 
+        accessToken: data.accessToken,
+        message: "Token refreshed successfully" 
+      };
     }
 
-    return { success: false, message: data.message || "Token refresh failed" };
+    return { 
+      success: false, 
+      message: data.message || "Token refresh failed" 
+    };
   } catch (error) {
     console.error("Token refresh failed:", error);
-    return { success: false, message: error.message };
+    return { 
+      success: false, 
+      message: error.message || "Unknown error during token refresh" 
+    };
   }
 };
 
-export const getTokensFromCookies = async () => {
-  const cookieStore = await cookies();
+// export const refreshTokenAction = async () => {
+//   const cookieStore = await cookies();
+//   const refreshToken = cookieStore.get("refreshToken")?.value;
 
-  const accessToken = cookieStore.get("accessToken")?.value;
-  const refreshToken = cookieStore.get("refreshToken")?.value;
+//   if (!refreshToken) {
+//     return { success: false, message: "No refresh token available" };
+//   }
 
-  return { accessToken, refreshToken };
-};
+//   try {
+//     const apiBaseUrl =
+//       process.env.NEXT_PUBLIC_API_BASE_URL ||
+//       "https://server.inbox-buddy.ai/api/v1";
+
+//     const res = await fetch(`${apiBaseUrl}/auth/refresh`, {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//       body: JSON.stringify({ refreshToken }),
+//       credentials: "include",
+//     });
+
+//     const data = await res.json();
+
+//     if (data.success) {
+//       await cookieStore.set("accessToken", data.accessToken, {
+//         httpOnly: true,
+//         secure: process.env.NEXT_PUBLIC_NODE_ENV === "production",
+//         sameSite:
+//           process.env.NEXT_PUBLIC_NODE_ENV === "production" ? "none" : "lax",
+//         maxAge: 86400,
+//         path: "/",
+//       });
+
+//       if (data.refreshToken) {
+//         await cookieStore.set("refreshToken", data.refreshToken, {
+//           httpOnly: true,
+//           secure: process.env.NEXT_PUBLIC_NODE_ENV === "production",
+//           sameSite:
+//             process.env.NEXT_PUBLIC_NODE_ENV === "production" ? "none" : "lax",
+//           maxAge: 2592000,
+//           path: "/",
+//         });
+//       }
+
+//       return { success: true, accessToken: data.accessToken };
+//     }
+
+//     return { success: false, message: data.message || "Token refresh failed" };
+//   } catch (error) {
+//     console.error("Token refresh failed:", error);
+//     return { success: false, message: error.message };
+//   }
+// };
+
+// export const getTokensFromCookies = async () => {
+//   const cookieStore = await cookies();
+
+//   const accessToken = cookieStore.get("accessToken")?.value;
+//   const refreshToken = cookieStore.get("refreshToken")?.value;
+
+//   return { accessToken, refreshToken };
+// };

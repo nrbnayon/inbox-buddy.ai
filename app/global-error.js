@@ -30,13 +30,13 @@ export default function GlobalError({ error, reset }) {
                 <IoMdArrowBack />
                 To Home
               </Link>
-              <button
+              {/* <button
                 onClick={handleReset}
                 className="bg-blue-500 px-3 py-2 rounded text-white flex gap-2 items-center cursor-pointer"
               >
                 <GrPowerReset />
                 Try Again
-              </button>
+              </button> */}
             </div>
           </div>
         </div>

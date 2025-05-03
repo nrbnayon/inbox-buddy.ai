@@ -21,6 +21,7 @@ import UserProfile from "@/components/layout/sidebar/SidebarUserProfile";
 const publicRoutes = [
   "/",
   "/about",
+  "/privacy",
   "/connect",
   "/security",
   "/team",

@@ -1,3 +1,5 @@
+// hooks\useGetUser.js
+
 import { getUserProfile } from "@/lib/api/user";
 import { useEffect, useState } from "react";
 

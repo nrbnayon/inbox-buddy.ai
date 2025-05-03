@@ -23,6 +23,7 @@ export const navLinks = [
 export const publicRoutes = [
   "/",
   "/about",
+  "/privacy",
   "/connect",
   "/pricing",
   "/team",

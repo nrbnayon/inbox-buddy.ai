@@ -76,7 +76,7 @@ export default function FilterMails({
   const maxDate = new Date();
 
   return (
-    <div className="grid grid-cols-2 gap-1">
+    <div className="grid grid-cols-2 gap-1 mb-2 md:mb-0">
       <div className="col-span-2 2xl:col-span-1">
         <SearchBar placeHolder={"Search Users"} onSearch={handleSearchChange} />
       </div>

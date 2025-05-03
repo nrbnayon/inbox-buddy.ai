@@ -1,3 +1,4 @@
+// app\actions\cookieActions.js
 "use server";
 
 const { cookies } = require("next/headers");

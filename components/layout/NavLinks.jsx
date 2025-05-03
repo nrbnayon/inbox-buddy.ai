@@ -12,6 +12,7 @@ export default function NavLinks({ setIsOpen }) {
       {[
         { title: "Pricing Plans", path: "/pricing" },
         { title: "About Us", path: "/about" },
+        { title: "Privacy Policy", path: "/privacy" },
         // { title: "Security", path: "/security" },
         // { title: "Team", path: "/team" },
         { title: "Connect Today", path: "/connect" },

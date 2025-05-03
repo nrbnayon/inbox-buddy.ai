@@ -1,16 +1,15 @@
+// middleware.js - Improved implementation
 import { NextResponse } from "next/server";
-import { jwtDecode } from "jwt-decode"; // npm install jwt-decode
-import { getUserProfile } from "./lib/api/user";
+import { jwtDecode } from "jwt-decode";
 
 const publicRoutes = [
   "/",
   "/about",
+  "/privacy",
   "/connect",
   "/security",
   "/team",
   "/login",
-  // "/admin/auth", // Still public for unauthenticated access
-  // "/admin/forgot-pass", // Still public for unauthenticated access
 ];
 
 const adminPublicRoutes = [
@@ -23,85 +22,115 @@ const adminPublicRoutes = [
 const protectedRoute = "/dashboard";
 const adminRoute = "/admin";
 
+// Helper function to validate JWT token
+function isTokenValid(token) {
+  try {
+    const decoded = jwtDecode(token);
+    // Check if token is expired
+    const currentTime = Date.now() / 1000;
+    return decoded.exp > currentTime;
+  } catch (error) {
+    return false;
+  }
+}
+
 export async function middleware(request) {
   const { pathname } = request.nextUrl;
   const accessToken = request.cookies.get("accessToken")?.value;
-  const res = await getUserProfile(accessToken);
-  const user = res?.data;
+  const refreshToken = request.cookies.get("refreshToken")?.value;
 
+  // Flag variables for route classification
   const isAdminRoute = pathname.startsWith(adminRoute);
-  const isProtectedRoute = pathname === protectedRoute;
+  const isAdminPublicRoute = adminPublicRoutes.includes(pathname);
+  const isProtectedRoute = pathname.startsWith(protectedRoute);
+  const isPublicRoute = publicRoutes.includes(pathname);
 
-  // If no access token exists
-  if (!accessToken) {
-    // Block access to protected route and redirect to login
+  // If no access token exists or token is invalid
+  if (!accessToken || !isTokenValid(accessToken)) {
+    // For protected routes, redirect to login
     if (isProtectedRoute) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
-    // Block access to admin routes (except /admin/auth) and redirect to admin auth
-    if (isAdminRoute && !adminPublicRoutes.includes(pathname)) {
+
+    // For admin routes (except public admin routes), redirect to admin auth
+    if (isAdminRoute && !isAdminPublicRoute) {
       return NextResponse.redirect(new URL("/admin/auth", request.url));
     }
-    // Allow public routes to proceed
+
+    // Allow access to public routes
     return NextResponse.next();
   }
 
-  // If token exists, decode it and check the role
-  if (accessToken && user?._id) {
-    try {
-      const decodedToken = jwtDecode(accessToken);
-      const userRole = decodedToken?.role;
+  // If token exists and is valid, decode token directly instead of making API call
+  try {
+    const decodedToken = jwtDecode(accessToken);
+    const userRole = decodedToken?.role;
 
-      // Admin and super_admin routing
-      if (["admin", "super_admin"].includes(userRole)) {
-        // Redirect away from /admin/auth if authenticated
-        if (adminPublicRoutes.includes(pathname)) {
-          return NextResponse.redirect(new URL(adminRoute, request.url));
-        }
-        // Redirect from public routes to admin
-        if (
-          publicRoutes.includes(pathname) &&
-          !adminPublicRoutes.includes(pathname)
-        ) {
-          return NextResponse.redirect(new URL(adminRoute, request.url));
-        }
-        // Block access to protected route (/dashboard) and redirect to admin
-        if (isProtectedRoute) {
-          return NextResponse.redirect(new URL(adminRoute, request.url));
-        }
-        // Allow access to admin routes
-        if (isAdminRoute) {
-          return NextResponse.next();
-        }
+    // Handle admin and super_admin users
+    if (["admin", "super_admin"].includes(userRole)) {
+      // Redirect away from admin public routes if already authenticated
+      if (isAdminPublicRoute) {
+        return NextResponse.redirect(new URL(adminRoute, request.url));
       }
 
-      // Regular user routing
-      if (userRole === "user") {
-        if (publicRoutes.includes(pathname)) {
-          return NextResponse.redirect(new URL(protectedRoute, request.url));
-        }
-        if (isAdminRoute) {
-          return NextResponse.redirect(new URL(protectedRoute, request.url));
-        }
+      // Redirect from public routes to admin dashboard
+      if (isPublicRoute) {
+        return NextResponse.redirect(new URL(adminRoute, request.url));
       }
 
-      // If role is invalid or undefined
-      if (!userRole || !["admin", "super_admin", "user"].includes(userRole)) {
-        if (isAdminRoute && pathname !== "/admin/auth") {
-          return NextResponse.redirect(new URL("/admin/auth", request.url));
-        }
-        return NextResponse.redirect(new URL("/connect", request.url));
+      // Redirect from protected user routes to admin dashboard
+      if (isProtectedRoute) {
+        return NextResponse.redirect(new URL(adminRoute, request.url));
       }
-    } catch (error) {
-      console.error("Token decoding error:", error);
-      if (isAdminRoute && pathname !== "/admin/auth") {
-        return NextResponse.redirect(new URL("/admin/auth", request.url));
+
+      // Allow access to admin routes
+      if (isAdminRoute) {
+        return NextResponse.next();
       }
-      return NextResponse.redirect(new URL("/connect", request.url));
     }
+
+    // Handle regular users
+    if (userRole === "user") {
+      // Redirect from public routes to user dashboard
+      if (isPublicRoute) {
+        return NextResponse.redirect(new URL(protectedRoute, request.url));
+      }
+
+      // Redirect from admin routes to user dashboard
+      if (isAdminRoute) {
+        return NextResponse.redirect(new URL(protectedRoute, request.url));
+      }
+
+      // Allow access to protected routes
+      if (isProtectedRoute) {
+        return NextResponse.next();
+      }
+    }
+
+    // Handle invalid or undefined roles
+    if (!userRole || !["admin", "super_admin", "user"].includes(userRole)) {
+      // Clear cookies and redirect to appropriate auth page
+      const response = NextResponse.redirect(
+        new URL(isAdminRoute ? "/admin/auth" : "/connect", request.url)
+      );
+      response.cookies.delete("accessToken");
+      response.cookies.delete("refreshToken");
+      response.cookies.delete("auth");
+      return response;
+    }
+  } catch (error) {
+    console.error("Token validation error:", error);
+    // Clear cookies and redirect to appropriate auth page
+    const response = NextResponse.redirect(
+      new URL(isAdminRoute ? "/admin/auth" : "/connect", request.url)
+    );
+    response.cookies.delete("accessToken");
+    response.cookies.delete("refreshToken");
+    response.cookies.delete("auth");
+    return response;
   }
 
-  // Allow the request to proceed if no redirects are triggered
+  // Default: allow the request to proceed
   return NextResponse.next();
 }
 
