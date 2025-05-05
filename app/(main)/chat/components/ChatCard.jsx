@@ -72,16 +72,16 @@ export default function ChatCard({
           </div>
 
           {/* Message content with copy button */}
-          {/* <div className="py-2 relative group">
+          <div className="py-2 relative group">
             <div className="text-sm sm:text-base block">{message}</div>
-            <button
+            {/* <button
               onClick={handleCopyMessage}
               className="absolute right-0 top-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 text-xs text-muted-foreground hover:text-primary px-2 py-1 rounded"
             >
               <IoCopyOutline className="h-4 w-4" />
               <span>{copyText}</span>
-            </button>
-          </div> */}
+            </button> */}
+          </div>
         </div>
       </CardContent>
       {/* Attachments (for user messages only) */}
