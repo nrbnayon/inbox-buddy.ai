@@ -29,11 +29,8 @@ export default function ChatCard({
 
   // Function to handle copying the message
   const handleCopyMessage = () => {
-    // Ensure message is a string before copying
-    const textToCopy = typeof message === "string" ? message : String(message);
-
     navigator.clipboard
-      .writeText(textToCopy)
+      .writeText(message)
       .then(() => {
         setCopyText("Copied!");
         setTimeout(() => setCopyText("Copy"), 2000); // Reset after 2 seconds
@@ -75,7 +72,7 @@ export default function ChatCard({
           </div>
 
           {/* Message content with copy button */}
-          <div className="py-2 relative group">
+          {/* <div className="py-2 relative group">
             <div className="text-sm sm:text-base block">{message}</div>
             <button
               onClick={handleCopyMessage}
@@ -84,7 +81,7 @@ export default function ChatCard({
               <IoCopyOutline className="h-4 w-4" />
               <span>{copyText}</span>
             </button>
-          </div>
+          </div> */}
         </div>
       </CardContent>
       {/* Attachments (for user messages only) */}
