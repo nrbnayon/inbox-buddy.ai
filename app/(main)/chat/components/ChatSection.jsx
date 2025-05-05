@@ -14,7 +14,7 @@ const prompts = [
   "Summarize my unread emails",
   "Draft a response to the latest email I have",
   "Find all emails from google",
-  "Is there any meeting upcomming?",
+  "Is there any meeting related email?",
 ];
 
 export default function ChatSection({

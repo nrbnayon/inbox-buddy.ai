@@ -29,8 +29,11 @@ export default function ChatCard({
 
   // Function to handle copying the message
   const handleCopyMessage = () => {
+    // Ensure message is a string before copying
+    const textToCopy = typeof message === "string" ? message : String(message);
+
     navigator.clipboard
-      .writeText(message)
+      .writeText(textToCopy)
       .then(() => {
         setCopyText("Copied!");
         setTimeout(() => setCopyText("Copy"), 2000); // Reset after 2 seconds
