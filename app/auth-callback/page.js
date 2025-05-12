@@ -16,7 +16,7 @@ export default function AuthCallbackPage() {
     const handleAuth = async () => {
       const accessToken = searchParams.get("accessToken");
       const refreshToken = searchParams.get("refreshToken");
-      const redirect = searchParams.get("redirect") || "/dashboard";
+      const redirect = searchParams.get("redirect") || "/chat";
       const errorMsg = searchParams.get("error");
 
       if (errorMsg) {
@@ -37,7 +37,7 @@ export default function AuthCallbackPage() {
       try {
         const result = await setCookiesAction({ accessToken, refreshToken });
         if (result.success) {
-          router.push("/dashboard");
+          router.push("/chat");
         } else {
           setError("Failed to set authentication cookies");
           toast.error("Failed to set authentication cookies");
