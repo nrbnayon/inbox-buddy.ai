@@ -159,7 +159,7 @@ export default function SuccessPage() {
             <Link href="/chat">Chat Now</Link>
           </Button>
           <Button variant="outline" asChild className="w-full">
-            <Link href="/dashboard">Go to Dashboard</Link>
+            <Link href="/chat">Go to Dashboard</Link>
           </Button>
         </div>
       </div>

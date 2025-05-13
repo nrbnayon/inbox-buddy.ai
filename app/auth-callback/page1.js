@@ -16,7 +16,7 @@ export default function AuthCallbackPage() {
     const handleAuth = async () => {
       const accessToken = searchParams.get("accessToken");
       const refreshToken = searchParams.get("refreshToken");
-      const redirect = searchParams.get("redirect") || "/dashboard";
+      const redirect = searchParams.get("redirect") || "/chat";
       const errorMsg = searchParams.get("error");
 
       if (errorMsg) {

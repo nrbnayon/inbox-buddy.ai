@@ -24,7 +24,7 @@ export default function CancelPage() {
             Return to Pricing
           </Button> */}
           <Button
-            onClick={() => redirect("/dashboard")}
+            onClick={() => redirect("/chat")}
             variant="outline"
             className="w-full"
           >

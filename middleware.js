@@ -19,7 +19,7 @@ const adminPublicRoutes = [
   "/admin/reset-pass",
 ];
 
-const protectedRoute = "/dashboard";
+const protectedRoute = "/chat";
 const adminRoute = "/admin";
 
 // Helper function to validate JWT token
