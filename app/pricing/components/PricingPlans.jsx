@@ -24,9 +24,19 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
-);
+// const stripePromise = loadStripe(
+//   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+// );
+
+let stripePromise;
+
+const getStripe = () => {
+  if (!stripePromise) {
+    stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
+  }
+  return stripePromise;
+};
+
 
 export default function PricingPlans({
   user,
@@ -140,7 +150,8 @@ export default function PricingPlans({
       const response = await createCheckoutSession(planId);
       if (response.sessionId) {
         // New subscription: redirect to Stripe checkout
-        const stripe = await stripePromise;
+        // const stripe = await stripePromise;
+        const stripe = await getStripe();
         const { error } = await stripe.redirectToCheckout({
           sessionId: response.sessionId,
         });
